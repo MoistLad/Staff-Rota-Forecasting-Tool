@@ -341,16 +341,11 @@ async function navigateToSchedulingPage() {
     return;
   }
   
-  // Method 1: Look for the SCHEDULING tab in the top navigation
-  const schedulingTab = Array.from(document.querySelectorAll('a, div, span, button'))
-    .find(el => {
-      const text = el.textContent && el.textContent.trim();
-      return text === 'SCHEDULING' && (el.tagName === 'A' || el.onclick || el.role === 'button' || 
-             el.className && (el.className.includes('tab') || el.className.includes('nav') || el.className.includes('menu')));
-    });
+  // Method 1: Use the exact selector provided by the user
+  const schedulingTab = document.querySelector('#menu-item-schedule-hotels > a');
   
   if (schedulingTab) {
-    console.log('Found SCHEDULING tab, clicking it');
+    console.log('Found SCHEDULING tab using exact selector, clicking it');
     schedulingTab.click();
     
     // Wait for the page to load
@@ -377,7 +372,43 @@ async function navigateToSchedulingPage() {
     return;
   }
   
-  // Method 2: Look for any element containing "scheduling" text that might be clickable
+  // Method 2: Look for the SCHEDULING tab in the top navigation
+  const schedulingTabGeneric = Array.from(document.querySelectorAll('a, div, span, button'))
+    .find(el => {
+      const text = el.textContent && el.textContent.trim();
+      return text === 'SCHEDULING' && (el.tagName === 'A' || el.onclick || el.role === 'button' || 
+             el.className && (el.className.includes('tab') || el.className.includes('nav') || el.className.includes('menu')));
+    });
+  
+  if (schedulingTabGeneric) {
+    console.log('Found SCHEDULING tab using generic selector, clicking it');
+    schedulingTabGeneric.click();
+    
+    // Wait for the page to load
+    await new Promise((resolve, reject) => {
+      let attempts = 0;
+      const maxAttempts = 10;
+      
+      const interval = setInterval(() => {
+        attempts++;
+        
+        if (isSchedulingPage()) {
+          clearInterval(interval);
+          console.log('Successfully navigated to scheduling page');
+          resolve();
+        } else if (attempts >= maxAttempts) {
+          clearInterval(interval);
+          console.warn(`Made ${maxAttempts} attempts but couldn't confirm we're on scheduling page`);
+          // Don't reject, just continue with best effort
+          resolve();
+        }
+      }, 1000);
+    });
+    
+    return;
+  }
+  
+  // Method 3: Look for any element containing "scheduling" text that might be clickable
   const schedulingLinks = Array.from(document.querySelectorAll('a, button, div[onclick], span[onclick]'))
     .filter(el => {
       const text = el.textContent && el.textContent.toLowerCase();
@@ -402,7 +433,7 @@ async function navigateToSchedulingPage() {
     }
   }
   
-  // Method 3: Look for navigation menu items
+  // Method 4: Look for navigation menu items
   const menuItems = Array.from(document.querySelectorAll('li, div[role="menuitem"], a[role="menuitem"]'));
   const potentialSchedulingItems = menuItems.filter(item => {
     const text = item.textContent && item.textContent.toLowerCase();
@@ -438,8 +469,60 @@ async function navigateToSchedulingPage() {
 function findEmployeeRow(employeeName) {
   console.log(`Looking for employee row with name: ${employeeName}`);
   
-  // Method 1: Look for rows with the employee name
-  // Based on the screenshot, employee names are displayed in the leftmost column
+  // Method 1: Use the exact selector provided by the user
+  // First, get all employee rows using the selector
+  const employeeRowsContainer = document.querySelector("#root > div > div.lphf_layout-container > div.lphf_weekly-schedule > div.lphf_weekly-sidebar.lphf_weekly-sidebar--expanded > div.lphf_weekly-sidebar-schedule-section > div:nth-child(2) > div.lphf_as-one-employees-group > div.lphf_weekly-schedule-sidebar-employee-row-wrapper");
+  
+  if (employeeRowsContainer) {
+    console.log('Found employee rows container using exact selector');
+    
+    // Look for the employee name within this container
+    const employeeNameElements = Array.from(employeeRowsContainer.querySelectorAll('.lphf_full-name span, .lphf_details-container .lphf_flex span'));
+    
+    // First try exact match
+    let matchingNameElement = employeeNameElements.find(el => el.textContent.trim() === employeeName);
+    
+    // If no exact match, try includes match
+    if (!matchingNameElement) {
+      matchingNameElement = employeeNameElements.find(el => el.textContent.trim().includes(employeeName));
+    }
+    
+    // If still no match, try case-insensitive match
+    if (!matchingNameElement) {
+      matchingNameElement = employeeNameElements.find(el => 
+        el.textContent.trim().toLowerCase().includes(employeeName.toLowerCase())
+      );
+    }
+    
+    if (matchingNameElement) {
+      console.log(`Found name element for employee: ${employeeName}`);
+      
+      // Find the parent row element
+      let parent = matchingNameElement;
+      while (parent && !parent.id?.includes('employee-row-')) {
+        parent = parent.parentElement;
+      }
+      
+      if (parent) {
+        console.log(`Found employee row with ID: ${parent.id}`);
+        return parent;
+      }
+    }
+  }
+  
+  // Method 2: Look for employee rows by ID pattern
+  const employeeRows = Array.from(document.querySelectorAll('[id^="employee-row-"]'));
+  console.log(`Found ${employeeRows.length} employee rows by ID pattern`);
+  
+  // Check each row for the employee name
+  for (const row of employeeRows) {
+    if (row.textContent.includes(employeeName)) {
+      console.log(`Found employee row for ${employeeName} with ID: ${row.id}`);
+      return row;
+    }
+  }
+  
+  // Method 3: Look for rows with the employee name (generic approach)
   const allRows = Array.from(document.querySelectorAll('tr, div[role="row"], .row, [class*="row"]'));
   
   // First try exact match
@@ -464,27 +547,7 @@ function findEmployeeRow(employeeName) {
     return matchingRow;
   }
   
-  // Method 2: Look for employee name elements specifically
-  // From the screenshot, we can see employee names with initials in circles
-  const employeeElements = Array.from(document.querySelectorAll('[class*="employee"], [id*="employee"], [class*="name"], [id*="name"]'));
-  
-  // Check each element and its parent row
-  for (const element of employeeElements) {
-    if (element.textContent.includes(employeeName)) {
-      // Find the parent row
-      let parent = element;
-      while (parent && !parent.matches('tr, div[role="row"], .row, [class*="row"]')) {
-        parent = parent.parentElement;
-      }
-      
-      if (parent) {
-        console.log(`Found employee element with parent row: ${employeeName}`);
-        return parent;
-      }
-    }
-  }
-  
-  // Method 3: Look for elements with initials that match the employee's initials
+  // Method 4: Look for elements with initials that match the employee's initials
   const nameParts = employeeName.split(' ');
   if (nameParts.length >= 2) {
     const initials = nameParts[0][0] + nameParts[nameParts.length - 1][0];
@@ -517,62 +580,37 @@ function findEmployeeRow(employeeName) {
  * @returns {Promise} Promise that resolves when the click is complete
  */
 async function clickDayCell(employeeRow, day) {
-  console.log(`Looking for ${day} cell in employee row`);
+  console.log(`Looking for ${day} cell in employee row with ID: ${employeeRow.id}`);
   
-  // From the screenshots, we can see the day headers are in the format "Mon, 10 Mar"
-  // First, find all day headers to determine column indices
-  const dayHeaders = Array.from(document.querySelectorAll('th, td, div'))
-    .filter(el => {
-      const text = el.textContent && el.textContent.trim();
-      return text && (
-        text.includes('Mon,') || 
-        text.includes('Tue,') || 
-        text.includes('Wed,') || 
-        text.includes('Thu,') || 
-        text.includes('Fri,') || 
-        text.includes('Sat,') || 
-        text.includes('Sun,')
-      );
-    });
+  // Method 1: Use the exact selector pattern provided by the user
+  // The example was: document.querySelector("#employee-row-583012 > div.lphf_flex.lphf_flex--direction-column.lphf_weekly-schedule-employee-row-day.lphf_drop-zone.lphf_weekly-schedule-employee-row-day-selected > div > div")
   
-  console.log(`Found ${dayHeaders.length} day headers`);
-  
-  // Map day names to their short forms
-  const dayShortForms = {
-    'Monday': 'Mon,',
-    'Tuesday': 'Tue,',
-    'Wednesday': 'Wed,',
-    'Thursday': 'Thu,',
-    'Friday': 'Fri,',
-    'Saturday': 'Sat,',
-    'Sunday': 'Sun,'
+  // Map day names to their indices (0-based)
+  const dayIndices = {
+    'Monday': 0,
+    'Tuesday': 1,
+    'Wednesday': 2,
+    'Thursday': 3,
+    'Friday': 4,
+    'Saturday': 5,
+    'Sunday': 6
   };
   
-  // Find the index of the day we're looking for
-  const dayShortForm = dayShortForms[day];
-  let dayHeaderIndex = -1;
-  
-  for (let i = 0; i < dayHeaders.length; i++) {
-    if (dayHeaders[i].textContent.includes(dayShortForm)) {
-      dayHeaderIndex = i;
-      break;
-    }
+  const dayIndex = dayIndices[day];
+  if (dayIndex === undefined) {
+    console.error(`Invalid day name: ${day}`);
+    throw new Error(`Invalid day name: ${day}`);
   }
   
-  if (dayHeaderIndex === -1) {
-    console.error(`Could not find header for day: ${day}`);
-    throw new Error(`Could not find header for day: ${day}`);
-  }
+  // Find all day cells in the employee row
+  const dayCells = Array.from(employeeRow.querySelectorAll('.lphf_weekly-schedule-employee-row-day, .lphf_flex--direction-column'));
   
-  console.log(`Found header for ${day} at index ${dayHeaderIndex}`);
+  console.log(`Found ${dayCells.length} day cells in the employee row`);
   
-  // Method 1: Try to find cells directly in the employee row
-  const cells = Array.from(employeeRow.querySelectorAll('td, div[role="cell"], .cell, [class*="cell"]'));
-  
-  // If we have cells and the day index is within range
-  if (cells.length > 0 && dayHeaderIndex < cells.length) {
-    console.log(`Found ${cells.length} cells in the row, clicking cell at index ${dayHeaderIndex}`);
-    cells[dayHeaderIndex].click();
+  // If we have enough day cells and the day index is within range
+  if (dayCells.length > dayIndex) {
+    console.log(`Clicking day cell at index ${dayIndex} for ${day}`);
+    dayCells[dayIndex].click();
     
     // Wait for the shift form to appear
     try {
@@ -583,16 +621,58 @@ async function clickDayCell(employeeRow, day) {
     } catch (error) {
       console.warn('Could not detect shift form after clicking cell, trying alternative methods');
     }
+  } else {
+    console.warn(`Not enough day cells found (${dayCells.length}), trying alternative methods`);
   }
   
-  // Method 2: Try to find the cell based on its position relative to the employee row
+  // Method 2: Try to find day cells by class name pattern
+  const allDayCells = Array.from(document.querySelectorAll('.lphf_weekly-schedule-employee-row-day'));
+  
+  // Group day cells by employee row
+  const dayCellsByRow = {};
+  allDayCells.forEach(cell => {
+    // Find the parent employee row
+    let parent = cell;
+    let employeeRowId = null;
+    
+    while (parent && !employeeRowId) {
+      if (parent.id && parent.id.startsWith('employee-row-')) {
+        employeeRowId = parent.id;
+      }
+      parent = parent.parentElement;
+    }
+    
+    if (employeeRowId) {
+      if (!dayCellsByRow[employeeRowId]) {
+        dayCellsByRow[employeeRowId] = [];
+      }
+      dayCellsByRow[employeeRowId].push(cell);
+    }
+  });
+  
+  // If we found day cells for this employee row
+  if (dayCellsByRow[employeeRow.id] && dayCellsByRow[employeeRow.id].length > dayIndex) {
+    console.log(`Found day cells for employee row ${employeeRow.id}, clicking cell at index ${dayIndex}`);
+    dayCellsByRow[employeeRow.id][dayIndex].click();
+    
+    // Wait for the shift form to appear
+    try {
+      await waitForElement('input, [class*="shift"], [id*="shift"], [class*="form"], [id*="form"]');
+      console.log('Shift form appeared after clicking cell');
+      return;
+    } catch (error) {
+      console.warn('Could not detect shift form after clicking cell with class-based method');
+    }
+  }
+  
+  // Method 3: Try to find the cell based on its position relative to the employee row
   // This handles cases where the cells might be in a different container than the employee name
   const rowRect = employeeRow.getBoundingClientRect();
   const rowTop = rowRect.top;
   const rowBottom = rowRect.bottom;
   
   // Find all elements that could be cells and are vertically aligned with the employee row
-  const allPossibleCells = Array.from(document.querySelectorAll('td, div, span'))
+  const allPossibleCells = Array.from(document.querySelectorAll('div, td, span'))
     .filter(el => {
       const rect = el.getBoundingClientRect();
       return rect.top >= rowTop && rect.bottom <= rowBottom && rect.width > 20 && rect.height > 20;
@@ -616,9 +696,13 @@ async function clickDayCell(employeeRow, day) {
   // Sort columns by x position
   const sortedColumns = Object.keys(cellsByColumn).sort((a, b) => a - b);
   
-  // If we have enough columns and the day index is within range
-  if (sortedColumns.length > dayHeaderIndex) {
-    const columnKey = sortedColumns[dayHeaderIndex];
+  // Skip the first column (employee name) and get the day column
+  // We need to add 1 to dayIndex because the first column is the employee name
+  const targetColumnIndex = dayIndex + 1;
+  
+  // If we have enough columns and the target column index is within range
+  if (sortedColumns.length > targetColumnIndex) {
+    const columnKey = sortedColumns[targetColumnIndex];
     const cellsInColumn = cellsByColumn[columnKey];
     
     // Find the cell that's vertically aligned with our row
@@ -646,7 +730,7 @@ async function clickDayCell(employeeRow, day) {
   // If we still haven't found the cell, try a more aggressive approach
   console.warn(`Could not find cell for ${day} using standard methods, trying fallback approach`);
   
-  // Method 3: Look for any clickable element in the general area where the day cell should be
+  // Method 4: Look for any clickable element in the general area where the day cell should be
   const allElements = Array.from(document.querySelectorAll('*'));
   
   // Filter elements that are likely to be cells based on their appearance and position
@@ -673,10 +757,14 @@ async function clickDayCell(employeeRow, day) {
     return rectA.left - rectB.left;
   });
   
-  // If we have enough potential cells and the day index is within range
-  if (potentialCells.length > dayHeaderIndex) {
-    console.log(`Found ${potentialCells.length} potential cells, clicking cell at index ${dayHeaderIndex}`);
-    potentialCells[dayHeaderIndex].click();
+  // Skip the first column (employee name) and get the day column
+  // We need to add 1 to dayIndex because the first column is the employee name
+  const targetIndex = dayIndex + 1;
+  
+  // If we have enough potential cells and the target index is within range
+  if (potentialCells.length > targetIndex) {
+    console.log(`Found ${potentialCells.length} potential cells, clicking cell at index ${targetIndex}`);
+    potentialCells[targetIndex].click();
     
     // Wait for the shift form to appear
     try {
