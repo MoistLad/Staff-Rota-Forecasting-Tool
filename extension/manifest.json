@@ -3,13 +3,25 @@
   "name": "Staff Rota Automation",
   "version": "1.0",
   "description": "Automates data entry into the forecasting system",
-  "permissions": ["tabs", "activeTab", "storage"],
-  "host_permissions": ["*://fourthospitality.com/*", "*://www.fourthhospitality.com/*", "https://www.fourthhospitality.com/portal/menus/frameset.asp", "*://moistlad.github.io/*", "https://moistlad.github.io/Staff-Rota-Forecasting-Tool/*"],
+  "permissions": ["tabs", "activeTab", "storage", "scripting"],
+  "host_permissions": [
+    "*://fourthospitality.com/*", 
+    "*://www.fourthhospitality.com/*", 
+    "https://www.fourthhospitality.com/portal/menus/frameset.asp", 
+    "*://moistlad.github.io/*", 
+    "https://moistlad.github.io/Staff-Rota-Forecasting-Tool/*"
+  ],
   "background": {
     "service_worker": "background.js"
   },
   "content_scripts": [{
-    "matches": ["*://fourthospitality.com/*", "*://www.fourthhospitality.com/*", "https://www.fourthhospitality.com/portal/menus/frameset.asp", "*://moistlad.github.io/*", "https://moistlad.github.io/Staff-Rota-Forecasting-Tool/*"],
+    "matches": [
+      "*://fourthospitality.com/*", 
+      "*://www.fourthhospitality.com/*", 
+      "https://www.fourthhospitality.com/portal/menus/frameset.asp", 
+      "*://moistlad.github.io/*", 
+      "https://moistlad.github.io/Staff-Rota-Forecasting-Tool/*"
+    ],
     "js": ["content-scripts/forecasting-automation.js"]
   }],
   "action": {

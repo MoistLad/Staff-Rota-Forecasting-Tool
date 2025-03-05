@@ -91,6 +91,16 @@ The extension will handle the automated data entry process, communicating with t
 4. Progress updates are sent back to the web application
 5. You can monitor the process in both the web application and the extension popup
 
+## Fourth Hospitality System Compatibility
+
+The Chrome extension has been specifically optimized to work with the Fourth Hospitality forecasting system. Key features include:
+
+1. **Frameset Support**: The extension can detect and interact with the Fourth Hospitality system's frameset structure
+2. **Navigation Assistance**: Automatically navigates to the scheduling page within the Fourth Hospitality interface
+3. **Element Detection**: Identifies employee rows and day cells within the Fourth Hospitality DOM structure
+4. **Iframe Interaction**: Properly injects markers and detects extension presence within iframes
+5. **Fallback Mechanisms**: Multiple detection and interaction methods ensure reliability even when primary methods fail
+
 ## Hosting
 
 This tool is designed to be hosted on GitHub Pages or any static web hosting service. No server-side processing is required.
@@ -113,11 +123,12 @@ Once deployed, the tool will be available at `https://<your-username>.github.io/
 ## Requirements
 
 - Chrome browser
-- Access to the forecasting system
+- Access to the Fourth Hospitality forecasting system
 - Excel files (.xlsx or .xls) with the appropriate structure
 
 ## Version History
 
+- v2.1.0: Added Fourth Hospitality system compatibility
 - v2.0.0: Implemented Chrome extension for automated data entry
 - v1.0.0: Initial release
 

@@ -282,45 +282,33 @@ function waitForLogin() {
  * @returns {boolean} True if we're on the scheduling page
  */
 function isSchedulingPage() {
-  // Based on the screenshots, check for multiple indicators that we're on the scheduling page
+  // Based on fourth.html structure, check for multiple indicators that we're on the scheduling page
   
-  // Check 1: Look for the SCHEDULING heading in the top navigation
-  const schedulingHeading = Array.from(document.querySelectorAll('div, span, a, h1, h2, h3, h4, h5, h6'))
-    .find(el => el.textContent === 'SCHEDULING' && el.textContent.trim() === el.textContent);
-  
-  if (schedulingHeading) {
-    console.log('Found SCHEDULING heading');
+  // Check 1: Look for the "Scheduling" text in the header module
+  const schedulingHeading = document.getElementById('UIXL_headermodule');
+  if (schedulingHeading && schedulingHeading.textContent === 'Scheduling') {
+    console.log('Found Scheduling heading in header module');
     return true;
   }
   
-  // Check 2: Look for "Plan & Manage Your Team" text which appears under SCHEDULING
-  const planManageText = Array.from(document.querySelectorAll('div, span, a, p'))
-    .find(el => el.textContent && el.textContent.includes('Plan & Manage Your Team'));
-  
-  if (planManageText) {
-    console.log('Found "Plan & Manage Your Team" text');
+  // Check 2: Look for the frameset structure that's unique to fourth.html
+  const framesetElement = document.querySelector('.main-frameset');
+  if (framesetElement) {
+    console.log('Found main-frameset class');
     return true;
   }
   
-  // Check 3: Look for the employee grid structure
-  const employeesList = document.querySelector('[id*="employee"], [class*="employee"], [id*="Employees"], [class*="Employees"]');
-  const weekDayHeaders = Array.from(document.querySelectorAll('th, td, div'))
-    .filter(el => {
-      const text = el.textContent && el.textContent.trim();
-      return text && (text.includes('Mon,') || text.includes('Tue,') || text.includes('Wed,'));
-    });
-  
-  if (employeesList && weekDayHeaders.length > 0) {
-    console.log('Found employee grid with day headers');
+  // Check 3: Look for the specific header structure in fourth.html
+  const headerHolder = document.getElementById('headerHolder');
+  if (headerHolder) {
+    console.log('Found headerHolder element');
     return true;
   }
   
-  // Check 4: Look for specific UI elements from the screenshots
-  const publishButton = Array.from(document.querySelectorAll('button, a, div'))
-    .find(el => el.textContent === 'Publish');
-  
-  if (publishButton) {
-    console.log('Found Publish button');
+  // Check 4: Look for the main iframe which contains the scheduling content
+  const mainIframe = document.getElementById('main');
+  if (mainIframe) {
+    console.log('Found main iframe');
     return true;
   }
   
@@ -341,15 +329,16 @@ async function navigateToSchedulingPage() {
     return;
   }
   
-  // Method 1: Use the exact selector provided by the user
-  const schedulingTab = document.querySelector('#menu-item-schedule-hotels > a');
+  // Method 1: Use the menu structure from fourth.html
+  const schedulingMenuItems = Array.from(document.querySelectorAll('.UIXL_menu_level_1'))
+    .find(el => el.textContent.trim() === 'Scheduling');
   
-  if (schedulingTab) {
-    console.log('Found SCHEDULING tab using exact selector, clicking it');
-    schedulingTab.click();
+  if (schedulingMenuItems) {
+    console.log('Found Scheduling menu item, clicking it');
+    schedulingMenuItems.click();
     
     // Wait for the page to load
-    await new Promise((resolve, reject) => {
+    await new Promise((resolve) => {
       let attempts = 0;
       const maxAttempts = 10;
       
@@ -372,59 +361,40 @@ async function navigateToSchedulingPage() {
     return;
   }
   
-  // Method 2: Look for the SCHEDULING tab in the top navigation
-  const schedulingTabGeneric = Array.from(document.querySelectorAll('a, div, span, button'))
-    .find(el => {
-      const text = el.textContent && el.textContent.trim();
-      return text === 'SCHEDULING' && (el.tagName === 'A' || el.onclick || el.role === 'button' || 
-             el.className && (el.className.includes('tab') || el.className.includes('nav') || el.className.includes('menu')));
-    });
-  
-  if (schedulingTabGeneric) {
-    console.log('Found SCHEDULING tab using generic selector, clicking it');
-    schedulingTabGeneric.click();
+  // Method 2: Try to find the Scheduling module in the header
+  const headerModule = document.getElementById('UIXL_headermodule');
+  if (headerModule) {
+    console.log('Found header module, checking if we can click it');
+    headerModule.click();
     
-    // Wait for the page to load
-    await new Promise((resolve, reject) => {
-      let attempts = 0;
-      const maxAttempts = 10;
-      
-      const interval = setInterval(() => {
-        attempts++;
-        
-        if (isSchedulingPage()) {
-          clearInterval(interval);
-          console.log('Successfully navigated to scheduling page');
-          resolve();
-        } else if (attempts >= maxAttempts) {
-          clearInterval(interval);
-          console.warn(`Made ${maxAttempts} attempts but couldn't confirm we're on scheduling page`);
-          // Don't reject, just continue with best effort
-          resolve();
-        }
-      }, 1000);
-    });
+    // Wait to see if clicking the header module navigates us
+    await sleep(2000);
     
-    return;
+    if (isSchedulingPage()) {
+      console.log('Successfully navigated to scheduling page');
+      return;
+    }
   }
   
-  // Method 3: Look for any element containing "scheduling" text that might be clickable
-  const schedulingLinks = Array.from(document.querySelectorAll('a, button, div[onclick], span[onclick]'))
-    .filter(el => {
-      const text = el.textContent && el.textContent.toLowerCase();
-      return text && (text.includes('schedul') || text.includes('rota') || text.includes('shift'));
-    });
-  
-  if (schedulingLinks.length > 0) {
-    console.log(`Found ${schedulingLinks.length} potential scheduling links`);
+  // Method 3: Look for the burger menu and try to open it to find Scheduling
+  const burgerMenu = document.querySelector('.UIXL_burger_icon');
+  if (burgerMenu) {
+    console.log('Found burger menu, clicking it');
+    burgerMenu.click();
     
-    // Try clicking each link until we get to the scheduling page
-    for (const link of schedulingLinks) {
-      console.log(`Trying to click element with text: ${link.textContent}`);
-      link.click();
+    // Wait for the menu to open
+    await sleep(1000);
+    
+    // Now look for Scheduling in the opened menu
+    const schedulingInMenu = Array.from(document.querySelectorAll('.UIXL_menu_level_1, .UIXL_menu_level_2'))
+      .find(el => el.textContent.trim() === 'Scheduling' || el.textContent.trim() === 'Scheduling Homepage');
+    
+    if (schedulingInMenu) {
+      console.log('Found Scheduling in menu, clicking it');
+      schedulingInMenu.click();
       
-      // Wait a bit to see if we navigate to the scheduling page
-      await new Promise(resolve => setTimeout(resolve, 2000));
+      // Wait to see if this navigates us
+      await sleep(2000);
       
       if (isSchedulingPage()) {
         console.log('Successfully navigated to scheduling page');
@@ -433,26 +403,23 @@ async function navigateToSchedulingPage() {
     }
   }
   
-  // Method 4: Look for navigation menu items
-  const menuItems = Array.from(document.querySelectorAll('li, div[role="menuitem"], a[role="menuitem"]'));
-  const potentialSchedulingItems = menuItems.filter(item => {
-    const text = item.textContent && item.textContent.toLowerCase();
-    return text && (text.includes('schedul') || text.includes('rota') || text.includes('shift') || text.includes('plan'));
-  });
-  
-  if (potentialSchedulingItems.length > 0) {
-    console.log(`Found ${potentialSchedulingItems.length} potential menu items`);
-    
-    for (const item of potentialSchedulingItems) {
-      console.log(`Trying to click menu item with text: ${item.textContent}`);
-      item.click();
+  // Method 4: Try to use the main iframe directly
+  const mainIframe = document.getElementById('main');
+  if (mainIframe) {
+    try {
+      console.log('Trying to navigate using the main iframe');
+      // Try to navigate the iframe to the scheduling page
+      mainIframe.src = '../modules/labourproductivity/homepage.asp';
       
-      await new Promise(resolve => setTimeout(resolve, 2000));
+      // Wait for the iframe to load
+      await sleep(3000);
       
       if (isSchedulingPage()) {
         console.log('Successfully navigated to scheduling page');
         return;
       }
+    } catch (error) {
+      console.warn('Error navigating iframe:', error);
     }
   }
   
@@ -469,104 +436,81 @@ async function navigateToSchedulingPage() {
 function findEmployeeRow(employeeName) {
   console.log(`Looking for employee row with name: ${employeeName}`);
   
-  // Method 1: Use the exact selector provided by the user
-  // First, get all employee rows using the selector
-  const employeeRowsContainer = document.querySelector("#root > div > div.lphf_layout-container > div.lphf_weekly-schedule > div.lphf_weekly-sidebar.lphf_weekly-sidebar--expanded > div.lphf_weekly-sidebar-schedule-section > div:nth-child(2) > div.lphf_as-one-employees-group > div.lphf_weekly-schedule-sidebar-employee-row-wrapper");
-  
-  if (employeeRowsContainer) {
-    console.log('Found employee rows container using exact selector');
+  // Method 1: Look for employee rows in the main iframe
+  const mainIframe = document.getElementById('main');
+  if (mainIframe && mainIframe.contentDocument) {
+    const iframeDoc = mainIframe.contentDocument;
     
-    // Look for the employee name within this container
-    const employeeNameElements = Array.from(employeeRowsContainer.querySelectorAll('.lphf_full-name span, .lphf_details-container .lphf_flex span'));
-    
-    // First try exact match
-    let matchingNameElement = employeeNameElements.find(el => el.textContent.trim() === employeeName);
-    
-    // If no exact match, try includes match
-    if (!matchingNameElement) {
-      matchingNameElement = employeeNameElements.find(el => el.textContent.trim().includes(employeeName));
-    }
-    
-    // If still no match, try case-insensitive match
-    if (!matchingNameElement) {
-      matchingNameElement = employeeNameElements.find(el => 
-        el.textContent.trim().toLowerCase().includes(employeeName.toLowerCase())
-      );
-    }
-    
-    if (matchingNameElement) {
-      console.log(`Found name element for employee: ${employeeName}`);
+    // Look for employee rows in tables
+    const tables = iframeDoc.querySelectorAll('table');
+    for (const table of tables) {
+      const rows = table.querySelectorAll('tr');
       
-      // Find the parent row element
-      let parent = matchingNameElement;
-      while (parent && !parent.id?.includes('employee-row-')) {
-        parent = parent.parentElement;
+      for (const row of rows) {
+        if (row.textContent.includes(employeeName)) {
+          console.log(`Found employee row for ${employeeName} in iframe table`);
+          return row;
+        }
       }
+    }
+    
+    // Look for employee names in any element
+    const employeeElements = Array.from(iframeDoc.querySelectorAll('td, div, span'))
+      .filter(el => el.textContent.includes(employeeName));
+    
+    if (employeeElements.length > 0) {
+      console.log(`Found ${employeeElements.length} elements containing employee name`);
       
-      if (parent) {
-        console.log(`Found employee row with ID: ${parent.id}`);
-        return parent;
+      // Find the closest row element
+      for (const element of employeeElements) {
+        let parent = element;
+        while (parent && parent.tagName !== 'TR') {
+          parent = parent.parentElement;
+          if (!parent) break;
+        }
+        
+        if (parent && parent.tagName === 'TR') {
+          console.log(`Found parent row for employee: ${employeeName}`);
+          return parent;
+        }
       }
     }
   }
   
-  // Method 2: Look for employee rows by ID pattern
-  const employeeRows = Array.from(document.querySelectorAll('[id^="employee-row-"]'));
-  console.log(`Found ${employeeRows.length} employee rows by ID pattern`);
-  
-  // Check each row for the employee name
-  for (const row of employeeRows) {
+  // Method 2: Look for employee rows in the sidebar
+  const sidebarEmployeeRows = document.querySelectorAll('.UIXL_menu_employee .UIXL_menu_level_3');
+  for (const row of sidebarEmployeeRows) {
     if (row.textContent.includes(employeeName)) {
-      console.log(`Found employee row for ${employeeName} with ID: ${row.id}`);
+      console.log(`Found employee in sidebar menu: ${employeeName}`);
       return row;
     }
   }
   
-  // Method 3: Look for rows with the employee name (generic approach)
-  const allRows = Array.from(document.querySelectorAll('tr, div[role="row"], .row, [class*="row"]'));
+  // Method 3: Generic approach - look for any element containing the employee name
+  const allElements = Array.from(document.querySelectorAll('*'));
+  const employeeElements = allElements.filter(el => 
+    el.textContent && el.textContent.includes(employeeName)
+  );
   
-  // First try exact match
-  let matchingRow = allRows.find(row => {
-    const rowText = row.textContent.trim();
-    return rowText.includes(employeeName);
-  });
-  
-  if (matchingRow) {
-    console.log(`Found exact match for employee: ${employeeName}`);
-    return matchingRow;
-  }
-  
-  // If no exact match, try case-insensitive match
-  matchingRow = allRows.find(row => {
-    const rowText = row.textContent.trim().toLowerCase();
-    return rowText.includes(employeeName.toLowerCase());
-  });
-  
-  if (matchingRow) {
-    console.log(`Found case-insensitive match for employee: ${employeeName}`);
-    return matchingRow;
-  }
-  
-  // Method 4: Look for elements with initials that match the employee's initials
-  const nameParts = employeeName.split(' ');
-  if (nameParts.length >= 2) {
-    const initials = nameParts[0][0] + nameParts[nameParts.length - 1][0];
+  if (employeeElements.length > 0) {
+    console.log(`Found ${employeeElements.length} elements containing employee name`);
     
-    const initialElements = Array.from(document.querySelectorAll('div, span'))
-      .filter(el => el.textContent.trim().toUpperCase() === initials.toUpperCase());
+    // Find the element that looks most like a row
+    const rowLikeElement = employeeElements.find(el => 
+      el.tagName === 'TR' || 
+      el.className.includes('row') || 
+      el.id.includes('row') ||
+      el.getAttribute('role') === 'row'
+    );
     
-    for (const element of initialElements) {
-      // Find the parent row
-      let parent = element;
-      while (parent && !parent.matches('tr, div[role="row"], .row, [class*="row"]')) {
-        parent = parent.parentElement;
-      }
-      
-      if (parent) {
-        console.log(`Found element with matching initials (${initials}) for: ${employeeName}`);
-        return parent;
-      }
+    if (rowLikeElement) {
+      console.log(`Found row-like element for employee: ${employeeName}`);
+      return rowLikeElement;
     }
+    
+    // If no row-like element, return the first element that contains the name
+    console.log(`Returning first element containing employee name: ${employeeName}`);
+    return employeeElements[0];
   }
   
   console.warn(`Could not find employee row for: ${employeeName}`);

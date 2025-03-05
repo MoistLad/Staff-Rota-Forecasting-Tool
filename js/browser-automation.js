@@ -354,7 +354,34 @@ const BrowserAutomation = {
                 return;
             }
             
-            // Method 3: Use custom events with a longer timeout
+            // Method 3: Check for the marker element in iframes (for Fourth Hospitality system)
+            const iframes = document.querySelectorAll('iframe');
+            for (const iframe of iframes) {
+                try {
+                    const iframeDoc = iframe.contentDocument || iframe.contentWindow.document;
+                    if (iframeDoc) {
+                        // Check for marker in iframe
+                        const iframeMarker = iframeDoc.getElementById('staff-rota-extension-marker');
+                        if (iframeMarker) {
+                            console.log('Extension detected via DOM marker element in iframe');
+                            resolve(true);
+                            return;
+                        }
+                        
+                        // Check for data attribute in iframe body
+                        if (iframeDoc.body && iframeDoc.body.getAttribute('data-staff-rota-extension-installed') === 'true') {
+                            console.log('Extension detected via body data attribute in iframe');
+                            resolve(true);
+                            return;
+                        }
+                    }
+                } catch (e) {
+                    // Ignore cross-origin iframe errors
+                    console.warn('Could not access iframe content:', e.message);
+                }
+            }
+            
+            // Method 4: Use custom events with a longer timeout
             const timeout = setTimeout(() => {
                 console.log('Extension detection timeout reached');
                 // Remove the event listener to avoid memory leaks
@@ -365,6 +392,23 @@ const BrowserAutomation = {
                     console.log('Extension detected via DOM marker (delayed)');
                     resolve(true);
                     return;
+                }
+                
+                // Check iframes again
+                for (const iframe of iframes) {
+                    try {
+                        const iframeDoc = iframe.contentDocument || iframe.contentWindow.document;
+                        if (iframeDoc) {
+                            const iframeMarker = iframeDoc.getElementById('staff-rota-extension-marker');
+                            if (iframeMarker) {
+                                console.log('Extension detected via DOM marker element in iframe (delayed)');
+                                resolve(true);
+                                return;
+                            }
+                        }
+                    } catch (e) {
+                        // Ignore cross-origin iframe errors
+                    }
                 }
                 
                 // Try the traditional method as a fallback
@@ -388,7 +432,7 @@ const BrowserAutomation = {
                     console.warn('Chrome runtime API not available');
                     resolve(false);
                 }
-            }, 5000); // 5 second timeout (increased from 2 seconds)
+            }, 5000); // 5 second timeout
             
             // Handler for the custom event
             const extensionDetectedHandler = () => {
@@ -404,6 +448,18 @@ const BrowserAutomation = {
             console.log('Dispatching checkStaffRotaExtension event...');
             document.dispatchEvent(new CustomEvent('checkStaffRotaExtension'));
             
+            // Also dispatch the event in all iframes
+            for (const iframe of iframes) {
+                try {
+                    const iframeDoc = iframe.contentDocument || iframe.contentWindow.document;
+                    if (iframeDoc) {
+                        iframeDoc.dispatchEvent(new CustomEvent('checkStaffRotaExtension'));
+                    }
+                } catch (e) {
+                    // Ignore cross-origin iframe errors
+                }
+            }
+            
             // Try multiple times with a delay
             setTimeout(() => {
                 console.log('Retrying extension detection...');
@@ -417,6 +473,18 @@ const BrowserAutomation = {
                 
                 // Dispatch the event again
                 document.dispatchEvent(new CustomEvent('checkStaffRotaExtension'));
+                
+                // Also dispatch in iframes again
+                for (const iframe of iframes) {
+                    try {
+                        const iframeDoc = iframe.contentDocument || iframe.contentWindow.document;
+                        if (iframeDoc) {
+                            iframeDoc.dispatchEvent(new CustomEvent('checkStaffRotaExtension'));
+                        }
+                    } catch (e) {
+                        // Ignore cross-origin iframe errors
+                    }
+                }
             }, 1000);
         });
     }

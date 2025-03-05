@@ -85,20 +85,24 @@ async function findOrCreateForecastingTab() {
   const forecastingTabs = allTabs.filter(tab => {
     const url = tab.url || '';
     return url.includes('fourthospitality.com') || 
-           url.includes('fourthhospitality.com');
+           url.includes('fourthhospitality.com') ||
+           url.includes('frameset.asp');
   });
   
   // Check for tabs with the GitHub Pages URL
   const githubPagesTabs = allTabs.filter(tab => {
     const url = tab.url || '';
-    return url.includes('moistlad.github.io/Staff-Rota-Forecasting-Tool');
+    return url.includes('moistlad.github.io/Staff-Rota-Forecasting-Tool') ||
+           url.includes('Staff-Rota-Forecasting-Tool');
   });
   
   // Use the active tab if it's a forecasting tab or GitHub Pages tab
   if (activeTab && (
       activeTab.url.includes('fourthospitality.com') || 
       activeTab.url.includes('fourthhospitality.com') ||
-      activeTab.url.includes('moistlad.github.io/Staff-Rota-Forecasting-Tool')
+      activeTab.url.includes('frameset.asp') ||
+      activeTab.url.includes('moistlad.github.io/Staff-Rota-Forecasting-Tool') ||
+      activeTab.url.includes('Staff-Rota-Forecasting-Tool')
     )) {
     console.log('Using current active tab:', activeTab.url);
     return activeTab;
@@ -183,7 +187,35 @@ function sendMessageToContentScript(tabId, message) {
             chrome.tabs.sendMessage(tabId, message, response => {
               if (chrome.runtime.lastError) {
                 console.error('Failed to send message to content script:', chrome.runtime.lastError);
-                reject(new Error(chrome.runtime.lastError.message));
+                
+                // Try to inject the content script as a fallback
+                chrome.tabs.get(tabId, tab => {
+                  console.log('Attempting to inject content script as fallback...');
+                  
+                  // Try to inject the content script
+                  chrome.scripting.executeScript({
+                    target: { tabId: tabId },
+                    files: ['content-scripts/forecasting-automation.js']
+                  }).then(() => {
+                    console.log('Content script injected successfully, retrying message...');
+                    
+                    // Wait a moment for the script to initialize
+                    setTimeout(() => {
+                      chrome.tabs.sendMessage(tabId, message, response => {
+                        if (chrome.runtime.lastError) {
+                          console.error('Still failed to send message after injection:', chrome.runtime.lastError);
+                          reject(new Error(chrome.runtime.lastError.message));
+                        } else {
+                          console.log('Message sent successfully after injection');
+                          resolve(response);
+                        }
+                      });
+                    }, 500);
+                  }).catch(error => {
+                    console.error('Failed to inject content script:', error);
+                    reject(new Error('Failed to inject content script: ' + error.message));
+                  });
+                });
               } else {
                 console.log('Received response from content script:', response);
                 resolve(response);

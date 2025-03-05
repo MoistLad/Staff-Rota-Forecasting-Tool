@@ -33,14 +33,45 @@ This Chrome extension automates data entry into the forecasting system for staff
 - Handles both single and double shifts
 - Provides real-time progress updates
 - Works in the background while you continue using your browser
+- Optimized for the Fourth Hospitality forecasting system
 
 ## Requirements
 
 - Chrome browser
-- Access to the forecasting system
+- Access to the Fourth Hospitality forecasting system
 - Staff Rota Forecasting Tool web application
 
+## Fourth Hospitality System Compatibility
+
+This extension has been specifically optimized to work with the Fourth Hospitality forecasting system:
+
+1. **Frameset Structure Support**: The extension can detect and interact with the complex frameset structure used by Fourth Hospitality.
+
+2. **Intelligent Navigation**: Automatically navigates to the scheduling page within the Fourth Hospitality interface using multiple detection methods.
+
+3. **Iframe Interaction**: Properly injects markers and detects extension presence within iframes, which is crucial for the Fourth Hospitality system.
+
+4. **Element Detection**: Uses specialized selectors to identify employee rows and day cells within the Fourth Hospitality DOM structure.
+
+5. **Fallback Mechanisms**: Implements multiple detection and interaction methods to ensure reliability even when primary methods fail.
+
+6. **Dynamic Content Script Injection**: Can dynamically inject the content script into the Fourth Hospitality system when needed.
+
 ## Troubleshooting
+
+### Fourth Hospitality System Issues
+
+If you're experiencing issues specifically with the Fourth Hospitality system:
+
+1. **Login First**: Make sure you're logged into the Fourth Hospitality system before starting the automation.
+
+2. **Correct Module**: Ensure you're in the "Scheduling" module of the Fourth Hospitality system.
+
+3. **Iframe Access**: The extension needs to access iframes within the Fourth Hospitality system. If you see errors about iframe access, try reloading the page.
+
+4. **Menu Navigation**: If the extension can't find the scheduling page, try navigating to it manually before starting the automation.
+
+5. **Element Structure**: If the Fourth Hospitality system has been updated, some selectors might not work. Check for console errors about element not found.
 
 ### Extension Not Detected
 
