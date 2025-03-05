@@ -73,51 +73,66 @@ const BrowserAutomation = {
             
             updateStatus('Sending data to Chrome extension...');
             
-            // Send data to the Chrome extension
+            // Send data to the Chrome extension using postMessage
             try {
-                const response = await new Promise((resolve, reject) => {
-                    chrome.runtime.sendMessage({
-                        action: 'startAutomation',
-                        data: { employees }
-                    }, response => {
-                        if (chrome.runtime.lastError) {
-                            reject(new Error(chrome.runtime.lastError.message));
-                        } else if (response && response.success) {
-                            resolve(response);
+                // Set up a listener for responses from the extension
+                const messageListener = (event) => {
+                    // Only accept messages from the same window
+                    if (event.source !== window) return;
+                    
+                    // Only accept messages with the correct format
+                    if (!event.data || !event.data.type) return;
+                    
+                    // Handle response from the extension
+                    if (event.data.type === 'STAFF_ROTA_AUTOMATION_RESPONSE' && event.data.action === 'startAutomation') {
+                        // Remove the listener to avoid memory leaks
+                        window.removeEventListener('message', messageListener);
+                        
+                        if (event.data.success) {
+                            updateStatus('Chrome extension is processing data. Please check the forecasting system tab.');
                         } else {
-                            reject(new Error(response?.error || 'Failed to start automated data entry'));
+                            const errorMsg = `Error communicating with Chrome extension: ${event.data.error}`;
+                            updateStatus(errorMsg);
+                            console.error(errorMsg);
+                            // We can't throw from inside an event listener, so we'll just log the error
                         }
-                    });
-                });
-                
-                updateStatus('Chrome extension is processing data. Please check the forecasting system tab.');
-                
-                // Set up a listener for status updates from the extension
-                chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
-                    if (message.action === 'automationUpdate') {
+                    }
+                    
+                    // Handle updates from the extension
+                    if (event.data.type === 'STAFF_ROTA_AUTOMATION_UPDATE') {
                         // Update progress
-                        if (message.progress && message.total) {
-                            const progress = Math.min(message.progress, message.total);
+                        if (event.data.progress && event.data.total) {
+                            const progress = Math.min(event.data.progress, event.data.total);
                             updateProgress(progress);
                         }
                         
                         // Update status
-                        if (message.status === 'processing_employee' && message.data) {
-                            updateStatus(`Processing employee ${message.data.index}/${message.data.total}: ${message.data.employee}`);
-                        } else if (message.status === 'processing_shift' && message.data) {
-                            updateStatus(`Processing ${message.data.day} shift for ${message.data.employee}`);
-                        } else if (message.status === 'login_required') {
+                        if (event.data.status === 'processing_employee' && event.data.data) {
+                            updateStatus(`Processing employee ${event.data.data.index}/${event.data.data.total}: ${event.data.data.employee}`);
+                        } else if (event.data.status === 'processing_shift' && event.data.data) {
+                            updateStatus(`Processing ${event.data.data.day} shift for ${event.data.data.employee}`);
+                        } else if (event.data.status === 'login_required') {
                             updateStatus('Please log in to the forecasting system to continue');
-                        } else if (message.status === 'complete') {
+                        } else if (event.data.status === 'complete') {
                             updateStatus('Automated data entry completed successfully!');
                             updateProgress(totalSteps);
                             Utils.showSuccess('Automated data entry process completed successfully');
-                        } else if (message.status === 'error') {
-                            updateStatus(`Error during automated data entry: ${message.data?.error || 'Unknown error'}`);
-                            Utils.showError(`Failed to complete automated data entry: ${message.data?.error || 'Unknown error'}`);
+                        } else if (event.data.status === 'error') {
+                            updateStatus(`Error during automated data entry: ${event.data.data?.error || 'Unknown error'}`);
+                            Utils.showError(`Failed to complete automated data entry: ${event.data.data?.error || 'Unknown error'}`);
                         }
                     }
-                });
+                };
+                
+                // Add the message listener
+                window.addEventListener('message', messageListener);
+                
+                // Send the message to the extension
+                window.postMessage({
+                    type: 'STAFF_ROTA_AUTOMATION',
+                    action: 'startAutomation',
+                    data: { employees }
+                }, '*');
                 
             } catch (error) {
                 updateStatus(`Error communicating with Chrome extension: ${error.message}`);

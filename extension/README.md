@@ -85,7 +85,12 @@ If you're seeing the error "Chrome extension not detected" even though the exten
    - The extension uses DOM-based detection methods that are compatible with CSP restrictions
    - These errors don't affect the functionality of the extension
 
-10. **Common issues**
+10. **Communication issues**
+    - The extension now uses window.postMessage for communication instead of direct Chrome API access
+    - This is more compatible with web page security restrictions
+    - If you see errors about "Cannot read properties of undefined (reading 'sendMessage')", this fix addresses that issue
+
+11. **Common issues**
     - If the extension doesn't detect employees, make sure the names match exactly with the forecasting system
     - If the extension can't find day cells, make sure you're on the correct week in the forecasting system
     - If the extension can't fill in shift details, make sure the forecasting system hasn't changed its interface

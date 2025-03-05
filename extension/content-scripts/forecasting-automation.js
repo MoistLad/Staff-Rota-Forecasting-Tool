@@ -36,9 +36,58 @@ document.addEventListener('checkStaffRotaExtension', () => {
   document.body.setAttribute('data-staff-rota-extension-installed', 'true');
 });
 
+// Listen for messages from the web page
+window.addEventListener('message', async (event) => {
+  // Only accept messages from the same window
+  if (event.source !== window) return;
+  
+  // Only accept messages with the correct format
+  if (!event.data || !event.data.type || !event.data.action) return;
+  
+  // Only accept messages from our application
+  if (event.data.type !== 'STAFF_ROTA_AUTOMATION') return;
+  
+  console.log('Content script received message from web page:', event.data);
+  
+  // Handle different actions
+  if (event.data.action === 'startAutomation') {
+    try {
+      // Relay the message to the background script
+      const response = await new Promise((resolve, reject) => {
+        chrome.runtime.sendMessage({
+          action: 'startAutomation',
+          data: event.data.data
+        }, response => {
+          if (chrome.runtime.lastError) {
+            reject(new Error(chrome.runtime.lastError.message));
+          } else {
+            resolve(response);
+          }
+        });
+      });
+      
+      // Send the response back to the web page
+      window.postMessage({
+        type: 'STAFF_ROTA_AUTOMATION_RESPONSE',
+        action: 'startAutomation',
+        success: true,
+        result: response
+      }, '*');
+    } catch (error) {
+      // Send the error back to the web page
+      window.postMessage({
+        type: 'STAFF_ROTA_AUTOMATION_RESPONSE',
+        action: 'startAutomation',
+        success: false,
+        error: error.message
+      }, '*');
+    }
+  }
+});
+
 // Listen for messages from the background script
 chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
-  console.log('Content script received message:', message);
+  console.log('Content script received message from background:', message);
   
   if (message.action === 'startAutomation') {
     // Start the automation process
@@ -48,6 +97,18 @@ chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
     
     // Return true to indicate that the response will be sent asynchronously
     return true;
+  }
+  
+  // Relay automation updates to the web page
+  if (message.action === 'automationUpdate') {
+    window.postMessage({
+      type: 'STAFF_ROTA_AUTOMATION_UPDATE',
+      action: 'automationUpdate',
+      status: message.status,
+      progress: message.progress,
+      total: message.total,
+      data: message.data
+    }, '*');
   }
 });
 

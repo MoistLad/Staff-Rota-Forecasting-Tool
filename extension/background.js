@@ -163,7 +163,8 @@ chrome.runtime.onMessage.addListener((message, sender) => {
         action: 'automationUpdate',
         status: automationStatus,
         progress: automationProgress,
-        total: automationTotal
+        total: automationTotal,
+        data: message.data
       }).catch(() => {
         // Ignore errors from tabs that don't have a listener
       });
