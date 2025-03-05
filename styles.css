@@ -1,0 +1,89 @@
+/* Custom styles for the application */
+
+body {
+    background-color: #f8f9fa;
+}
+
+.card {
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+}
+
+.card-header {
+    background-color: #f1f8ff;
+}
+
+.time-input {
+    font-family: monospace;
+}
+
+#templateSelect {
+    min-height: 150px;
+}
+
+.name-mapping-row {
+    margin-bottom: 10px;
+    padding: 10px;
+    border-radius: 5px;
+    background-color: #f8f9fa;
+}
+
+.shift-row {
+    margin-bottom: 15px;
+    padding: 10px;
+    border-radius: 5px;
+    background-color: #f8f9fa;
+}
+
+.shift-day {
+    margin-bottom: 10px;
+    padding: 8px;
+    border-radius: 4px;
+    background-color: #e9ecef;
+}
+
+.error-item {
+    padding: 10px;
+    margin-bottom: 8px;
+    border-radius: 4px;
+    background-color: #f8d7da;
+    border-left: 4px solid #dc3545;
+}
+
+.warning-item {
+    padding: 10px;
+    margin-bottom: 8px;
+    border-radius: 4px;
+    background-color: #fff3cd;
+    border-left: 4px solid #ffc107;
+}
+
+.success-item {
+    padding: 10px;
+    margin-bottom: 8px;
+    border-radius: 4px;
+    background-color: #d1e7dd;
+    border-left: 4px solid #198754;
+}
+
+#entryProgress {
+    display: none;
+}
+
+.highlighted {
+    background-color: #e2f0ff;
+    transition: background-color 0.3s;
+}
+
+.matched {
+    color: #198754;
+    font-weight: bold;
+}
+
+.unmatched {
+    color: #dc3545;
+    font-weight: bold;
+}
+
+.manual-match {
+    background-color: #fff3cd;
+}
