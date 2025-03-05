@@ -324,16 +324,17 @@ const BrowserAutomation = {
         return new Promise((resolve) => {
             console.log('Starting extension detection process...');
             
-            // Method 1: Check for the global variable
-            if (window.staffRotaExtensionInstalled) {
-                console.log('Extension detected via global variable');
+            // Method 1: Check for the marker element
+            const markerElement = document.getElementById('staff-rota-extension-marker');
+            if (markerElement) {
+                console.log('Extension detected via DOM marker element');
                 resolve(true);
                 return;
             }
             
-            // Method 2: Check for the marker element
-            if (document.getElementById('staff-rota-extension-marker')) {
-                console.log('Extension detected via DOM marker');
+            // Method 2: Check for the data attribute on body
+            if (document.body.getAttribute('data-staff-rota-extension-installed') === 'true') {
+                console.log('Extension detected via body data attribute');
                 resolve(true);
                 return;
             }

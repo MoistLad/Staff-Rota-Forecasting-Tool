@@ -11,22 +11,12 @@ document.dispatchEvent(new CustomEvent('staffRotaExtensionInstalled'));
 // Method 2: Add a hidden element to the DOM that the page can check for
 const extensionMarker = document.createElement('div');
 extensionMarker.id = 'staff-rota-extension-marker';
+extensionMarker.setAttribute('data-extension-installed', 'true');
 extensionMarker.style.display = 'none';
 document.body.appendChild(extensionMarker);
 
-// Method 3: Try to set a global variable that the page can check for
-try {
-  // This requires the "scripting" permission in manifest.json
-  const script = document.createElement('script');
-  script.textContent = `
-    console.log('Injecting global variable for Staff Rota extension detection');
-    window.staffRotaExtensionInstalled = true;
-  `;
-  document.head.appendChild(script);
-  document.head.removeChild(script);
-} catch (error) {
-  console.error('Error injecting script:', error);
-}
+// Add a data attribute to the document body as another detection method
+document.body.setAttribute('data-staff-rota-extension-installed', 'true');
 
 // Listen for the check event from the web page
 document.addEventListener('checkStaffRotaExtension', () => {
@@ -37,9 +27,13 @@ document.addEventListener('checkStaffRotaExtension', () => {
   if (!document.getElementById('staff-rota-extension-marker')) {
     const extensionMarker = document.createElement('div');
     extensionMarker.id = 'staff-rota-extension-marker';
+    extensionMarker.setAttribute('data-extension-installed', 'true');
     extensionMarker.style.display = 'none';
     document.body.appendChild(extensionMarker);
   }
+  
+  // Re-add the data attribute to the body
+  document.body.setAttribute('data-staff-rota-extension-installed', 'true');
 });
 
 // Listen for messages from the background script

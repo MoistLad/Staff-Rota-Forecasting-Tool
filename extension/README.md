@@ -42,6 +42,8 @@ This Chrome extension automates data entry into the forecasting system for staff
 
 ## Troubleshooting
 
+### Extension Not Detected
+
 If you're seeing the error "Chrome extension not detected" even though the extension is installed, try these steps:
 
 1. **Ensure the extension is enabled**
@@ -78,10 +80,15 @@ If you're seeing the error "Chrome extension not detected" even though the exten
    - Load it again using the "Load unpacked" button
    - Make sure you're using the latest version of the extension
 
-9. **Common issues**
-   - If the extension doesn't detect employees, make sure the names match exactly with the forecasting system
-   - If the extension can't find day cells, make sure you're on the correct week in the forecasting system
-   - If the extension can't fill in shift details, make sure the forecasting system hasn't changed its interface
+9. **Content Security Policy (CSP) issues**
+   - If you see errors in the console about "Content Security Policy", this is normal
+   - The extension uses DOM-based detection methods that are compatible with CSP restrictions
+   - These errors don't affect the functionality of the extension
+
+10. **Common issues**
+    - If the extension doesn't detect employees, make sure the names match exactly with the forecasting system
+    - If the extension can't find day cells, make sure you're on the correct week in the forecasting system
+    - If the extension can't fill in shift details, make sure the forecasting system hasn't changed its interface
 
 ## Privacy
 
