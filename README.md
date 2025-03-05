@@ -8,7 +8,7 @@ A web-based tool that allows you to input staff rota data from an Excel sheet in
 - Select specific tabs/sheets from the Excel file
 - Create and manage templates for default break durations and finish times
 - Match employee names between Excel and the forecasting system
-- Step-by-step guidance for entering shift data into the forecasting system
+- Automated data entry into the forecasting system via Chrome extension
 - Error handling and progress tracking
 
 ## How to Use
@@ -50,16 +50,46 @@ Before processing your Excel file, you can create templates with default setting
 ### 6. Enter Data into Forecasting System
 
 - Make sure you're logged into the forecasting system and have selected the correct week
-- Follow the step-by-step instructions to enter the shift data
-- The tool will guide you through each employee and shift
+- Click "Start Automated Data Entry" to begin the process
+- The Chrome extension will automatically enter all shift data into the forecasting system
+- Monitor progress through the progress bar and status updates
 
 ## Technical Details
 
 - Built with HTML, CSS, and JavaScript
 - Uses SheetJS (xlsx) library for Excel file processing
+- Uses Chrome extension for browser automation
 - Stores templates and name mappings in localStorage
-- Runs entirely in the browser (no server-side processing)
-- Compatible with modern browsers (Chrome, Firefox, Edge, Safari)
+- Compatible with Chrome browser
+
+## Installation
+
+### Web Application
+
+1. Clone or download this repository
+2. Open the `index.html` file directly in your browser
+
+### Chrome Extension
+
+1. Navigate to the `extension` directory in the project
+2. Open Chrome and go to `chrome://extensions/`
+3. Enable "Developer mode" (toggle in the top-right corner)
+4. Click "Load unpacked" and select the `extension` directory
+5. The Staff Rota Automation extension should now appear in your extensions list
+
+The extension will handle the automated data entry process, communicating with the web application to receive data and provide status updates.
+
+## How the Automation Works
+
+1. When you click "Start Automated Data Entry" in the web application, it sends the extracted data to the Chrome extension
+2. The extension opens the forecasting system in a new tab (or uses an existing tab)
+3. The extension automatically:
+   - Finds employee rows in the forecasting system
+   - Clicks on the appropriate day cells
+   - Fills in shift details (start time, end time, break duration)
+   - Saves each shift
+4. Progress updates are sent back to the web application
+5. You can monitor the process in both the web application and the extension popup
 
 ## Hosting
 
@@ -82,12 +112,13 @@ Once deployed, the tool will be available at `https://<your-username>.github.io/
 
 ## Requirements
 
-- Modern web browser with JavaScript enabled
+- Chrome browser
 - Access to the forecasting system
 - Excel files (.xlsx or .xls) with the appropriate structure
 
 ## Version History
 
+- v2.0.0: Implemented Chrome extension for automated data entry
 - v1.0.0: Initial release
 
 ## License
