@@ -72,34 +72,57 @@ async function startAutomation(data) {
  * @returns {Promise<chrome.tabs.Tab>} Promise that resolves with the tab
  */
 async function findOrCreateForecastingTab() {
-  // Check if there's already a tab with the forecasting system
-  // Use a more comprehensive query to find existing tabs
-  const fourthHospitalityTabs = await chrome.tabs.query({ url: '*://fourthospitality.com/*' });
-  const wwwFourthHospitalityTabs = await chrome.tabs.query({ url: '*://www.fourthospitality.com/*' });
-  
-  // Combine the results
-  const existingTabs = [...fourthHospitalityTabs, ...wwwFourthHospitalityTabs];
-  
-  // Get all tabs and check their URLs manually for more flexibility
+  // Get all tabs
   const allTabs = await chrome.tabs.query({});
+  
+  // First, check if the user has specified a tab to use
+  const activeTab = allTabs.find(tab => tab.active);
+  if (activeTab) {
+    console.log('Current active tab:', activeTab.url);
+  }
+  
+  // Check for tabs with the forecasting system URL
   const forecastingTabs = allTabs.filter(tab => {
     const url = tab.url || '';
     return url.includes('fourthospitality.com') || 
            url.includes('fourthhospitality.com');
   });
   
-  // Use any existing tab we found
+  // Check for tabs with the GitHub Pages URL
+  const githubPagesTabs = allTabs.filter(tab => {
+    const url = tab.url || '';
+    return url.includes('moistlad.github.io/Staff-Rota-Forecasting-Tool');
+  });
+  
+  // Use the active tab if it's a forecasting tab or GitHub Pages tab
+  if (activeTab && (
+      activeTab.url.includes('fourthospitality.com') || 
+      activeTab.url.includes('fourthhospitality.com') ||
+      activeTab.url.includes('moistlad.github.io/Staff-Rota-Forecasting-Tool')
+    )) {
+    console.log('Using current active tab:', activeTab.url);
+    return activeTab;
+  }
+  
+  // Use any existing forecasting tab
   if (forecastingTabs.length > 0) {
     console.log('Using existing forecasting tab:', forecastingTabs[0].url);
     await chrome.tabs.update(forecastingTabs[0].id, { active: true });
+    
+    // Wait for the tab to be fully loaded
+    await new Promise(resolve => {
+      setTimeout(resolve, 500);
+    });
+    
     return forecastingTabs[0];
-  } else if (existingTabs.length > 0) {
-    console.log('Using existing tab from query:', existingTabs[0].url);
-    await chrome.tabs.update(existingTabs[0].id, { active: true });
-    return existingTabs[0];
-  } else {
+  }
+  
+  // If no forecasting tab exists, check if we should use the GitHub Pages tab
+  if (githubPagesTabs.length > 0) {
+    console.log('No forecasting tab found. Using GitHub Pages tab:', githubPagesTabs[0].url);
+    
+    // Create a new tab for the forecasting system
     console.log('Creating new forecasting tab');
-    // Create a new tab
     const tab = await chrome.tabs.create({
       url: 'https://fourthospitality.com/portal/menus/frameset.asp',
       active: true
@@ -117,6 +140,25 @@ async function findOrCreateForecastingTab() {
     
     return tab;
   }
+  
+  // If no relevant tabs exist, create a new one
+  console.log('No relevant tabs found. Creating new forecasting tab');
+  const tab = await chrome.tabs.create({
+    url: 'https://fourthospitality.com/portal/menus/frameset.asp',
+    active: true
+  });
+  
+  // Wait for the tab to load
+  await new Promise(resolve => {
+    chrome.tabs.onUpdated.addListener(function listener(tabId, changeInfo) {
+      if (tabId === tab.id && changeInfo.status === 'complete') {
+        chrome.tabs.onUpdated.removeListener(listener);
+        resolve();
+      }
+    });
+  });
+  
+  return tab;
 }
 
 /**
@@ -127,13 +169,42 @@ async function findOrCreateForecastingTab() {
  */
 function sendMessageToContentScript(tabId, message) {
   return new Promise((resolve, reject) => {
-    chrome.tabs.sendMessage(tabId, message, response => {
-      if (chrome.runtime.lastError) {
-        reject(new Error(chrome.runtime.lastError.message));
-      } else {
-        resolve(response);
-      }
-    });
+    // Wait for the content script to be fully loaded
+    setTimeout(() => {
+      console.log(`Sending message to tab ${tabId}:`, message);
+      
+      // First check if the content script is ready by sending a ping
+      chrome.tabs.sendMessage(tabId, { action: 'ping' }, pingResponse => {
+        if (chrome.runtime.lastError) {
+          console.warn('Content script not ready yet, retrying in 1 second...');
+          
+          // If the content script is not ready, wait a bit longer and try again
+          setTimeout(() => {
+            chrome.tabs.sendMessage(tabId, message, response => {
+              if (chrome.runtime.lastError) {
+                console.error('Failed to send message to content script:', chrome.runtime.lastError);
+                reject(new Error(chrome.runtime.lastError.message));
+              } else {
+                console.log('Received response from content script:', response);
+                resolve(response);
+              }
+            });
+          }, 1000);
+        } else {
+          // Content script is ready, send the actual message
+          console.log('Content script is ready, sending actual message');
+          chrome.tabs.sendMessage(tabId, message, response => {
+            if (chrome.runtime.lastError) {
+              console.error('Failed to send message to content script:', chrome.runtime.lastError);
+              reject(new Error(chrome.runtime.lastError.message));
+            } else {
+              console.log('Received response from content script:', response);
+              resolve(response);
+            }
+          });
+        }
+      });
+    }, 500); // Initial delay to ensure content script is loaded
   });
 }
 

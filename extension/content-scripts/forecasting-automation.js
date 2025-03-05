@@ -89,6 +89,13 @@ window.addEventListener('message', async (event) => {
 chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
   console.log('Content script received message from background:', message);
   
+  // Handle ping message to check if content script is loaded
+  if (message.action === 'ping') {
+    console.log('Received ping from background script, responding with success');
+    sendResponse({ success: true, message: 'Content script is active' });
+    return true;
+  }
+  
   if (message.action === 'startAutomation') {
     // Start the automation process
     startAutomation(message.data)

@@ -90,12 +90,20 @@ If you're seeing the error "Chrome extension not detected" even though the exten
     - This is more compatible with web page security restrictions
     - If you see errors about "Cannot read properties of undefined (reading 'sendMessage')", this fix addresses that issue
     
-11. **Tab handling**
+11. **Improved error handling**
+    - The extension now has more robust error handling throughout
+    - It properly handles cases where the content script isn't loaded yet
+    - It retries communication if the initial attempt fails
+    - Error messages are more descriptive and helpful
+    
+12. **Tab handling**
     - The extension will now use existing tabs with the forecasting system instead of always opening a new one
     - It checks for tabs with various URL patterns to find the right tab
     - This prevents duplicate tabs from being created
+    - The extension now prioritizes the currently active tab if it's relevant
+    - It will use the tab you're currently viewing if possible
 
-12. **Common issues**
+13. **Common issues**
     - If the extension doesn't detect employees, make sure the names match exactly with the forecasting system
     - If the extension can't find day cells, make sure you're on the correct week in the forecasting system
     - If the extension can't fill in shift details, make sure the forecasting system hasn't changed its interface

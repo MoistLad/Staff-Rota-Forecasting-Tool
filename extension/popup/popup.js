@@ -64,7 +64,7 @@ document.addEventListener('DOMContentLoaded', () => {
     statusElement.textContent = statusText;
     
     // Update progress bar
-    if (total > 0) {
+    if (total > 0 && typeof progress === 'number') {
       const percentage = Math.round((progress / total) * 100);
       progressBar.style.width = `${percentage}%`;
     } else {
@@ -72,14 +72,21 @@ document.addEventListener('DOMContentLoaded', () => {
     }
     
     // Update details
-    if (status === 'processing_employee') {
+    if (status === 'processing_employee' && progress && typeof progress === 'object') {
       detailsElement.textContent = `Processing employee ${progress.index} of ${progress.total}: ${progress.employee}`;
-    } else if (status === 'processing_shift') {
+    } else if (status === 'processing_shift' && progress && typeof progress === 'object') {
       detailsElement.textContent = `Processing ${progress.day} shift for ${progress.employee}`;
     } else if (status === 'login_required') {
       detailsElement.textContent = 'Please log in to the forecasting system to continue';
     } else if (status === 'error') {
-      detailsElement.textContent = `Error: ${progress.error}`;
+      // Handle the case where progress is an object with an error property
+      if (progress && typeof progress === 'object' && progress.error) {
+        detailsElement.textContent = `Error: ${progress.error}`;
+      } else if (progress && typeof progress === 'object' && progress.data && progress.data.error) {
+        detailsElement.textContent = `Error: ${progress.data.error}`;
+      } else {
+        detailsElement.textContent = 'An unknown error occurred';
+      }
     } else {
       detailsElement.textContent = '';
     }
