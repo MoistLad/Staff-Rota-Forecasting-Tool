@@ -73,13 +73,32 @@ async function startAutomation(data) {
  */
 async function findOrCreateForecastingTab() {
   // Check if there's already a tab with the forecasting system
-  const tabs = await chrome.tabs.query({ url: '*://fourthospitality.com/*' });
+  // Use a more comprehensive query to find existing tabs
+  const fourthHospitalityTabs = await chrome.tabs.query({ url: '*://fourthospitality.com/*' });
+  const wwwFourthHospitalityTabs = await chrome.tabs.query({ url: '*://www.fourthospitality.com/*' });
   
-  if (tabs.length > 0) {
-    // Use the existing tab
-    await chrome.tabs.update(tabs[0].id, { active: true });
-    return tabs[0];
+  // Combine the results
+  const existingTabs = [...fourthHospitalityTabs, ...wwwFourthHospitalityTabs];
+  
+  // Get all tabs and check their URLs manually for more flexibility
+  const allTabs = await chrome.tabs.query({});
+  const forecastingTabs = allTabs.filter(tab => {
+    const url = tab.url || '';
+    return url.includes('fourthospitality.com') || 
+           url.includes('fourthhospitality.com');
+  });
+  
+  // Use any existing tab we found
+  if (forecastingTabs.length > 0) {
+    console.log('Using existing forecasting tab:', forecastingTabs[0].url);
+    await chrome.tabs.update(forecastingTabs[0].id, { active: true });
+    return forecastingTabs[0];
+  } else if (existingTabs.length > 0) {
+    console.log('Using existing tab from query:', existingTabs[0].url);
+    await chrome.tabs.update(existingTabs[0].id, { active: true });
+    return existingTabs[0];
   } else {
+    console.log('Creating new forecasting tab');
     // Create a new tab
     const tab = await chrome.tabs.create({
       url: 'https://fourthospitality.com/portal/menus/frameset.asp',
