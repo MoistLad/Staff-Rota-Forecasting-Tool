@@ -4,12 +4,12 @@
   "version": "1.0",
   "description": "Automates data entry into the forecasting system",
   "permissions": ["tabs", "activeTab", "storage"],
-  "host_permissions": ["*://fourthospitality.com/*"],
+  "host_permissions": ["*://fourthospitality.com/*", "*://moistlad.github.io/*"],
   "background": {
     "service_worker": "background.js"
   },
   "content_scripts": [{
-    "matches": ["*://fourthospitality.com/*"],
+    "matches": ["*://fourthospitality.com/*", "*://moistlad.github.io/*"],
     "js": ["content-scripts/forecasting-automation.js"]
   }],
   "action": {
