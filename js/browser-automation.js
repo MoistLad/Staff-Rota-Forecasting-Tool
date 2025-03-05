@@ -49,7 +49,7 @@ const BrowserAutomation = {
         try {
             updateStatus('Starting automated data entry. Please wait...');
             
-            // Prepare data for API call
+            // Prepare data for Chrome extension
             const employees = processedData.employees.map(employee => {
                 // Map employee names to forecasting system names
                 const forecastingName = NameMatcher.findMatchForName(employee.name);
@@ -61,91 +61,66 @@ const BrowserAutomation = {
                 };
             });
             
-            updateStatus('Connecting to automation server...');
+            updateStatus('Checking for Chrome extension...');
             
-            // Check if server is running
+            // Check if the Chrome extension is installed
+            if (!window.chrome || !chrome.runtime || !chrome.runtime.sendMessage) {
+                updateStatus('Chrome extension not detected. Please install the Staff Rota Automation extension.');
+                throw new Error('Chrome extension not detected. Please install the Staff Rota Automation extension.');
+            }
+            
+            updateStatus('Sending data to Chrome extension...');
+            
+            // Send data to the Chrome extension
             try {
-                const serverCheckResponse = await fetch('http://localhost:3000/api/health', {
-                    method: 'GET'
+                const response = await new Promise((resolve, reject) => {
+                    chrome.runtime.sendMessage({
+                        action: 'startAutomation',
+                        data: { employees }
+                    }, response => {
+                        if (chrome.runtime.lastError) {
+                            reject(new Error(chrome.runtime.lastError.message));
+                        } else if (response && response.success) {
+                            resolve(response);
+                        } else {
+                            reject(new Error(response?.error || 'Failed to start automated data entry'));
+                        }
+                    });
                 });
                 
-                if (!serverCheckResponse.ok) {
-                    throw new Error('Automation server is not running. Please start the server with "npm start".');
-                }
-            } catch (error) {
-                updateStatus('Automation server is not running. Please start the server with "npm start".');
-                throw new Error('Automation server is not running. Please start the server with "npm start".');
-            }
-            
-            updateStatus('Sending data to automation server...');
-            
-            // Make API call to server
-            const response = await fetch('http://localhost:3000/api/automate', {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json'
-                },
-                body: JSON.stringify({ employees })
-            });
-            
-            if (!response.ok) {
-                const errorData = await response.json();
-                throw new Error(errorData.error || 'Failed to start automated data entry');
-            }
-            
-            updateStatus('Automation server is processing data. Please wait...');
-            
-            // In a real implementation, we would poll the server for status updates
-            // For this demo, we'll simulate the process
-            
-            // For each employee
-            for (let i = 0; i < processedData.employees.length; i++) {
-                const employee = processedData.employees[i];
-                updateStatus(`Processing employee ${i+1}/${processedData.employees.length}: ${employee.name}`);
+                updateStatus('Chrome extension is processing data. Please check the forecasting system tab.');
                 
-                // Find the employee in the forecasting system
-                const forecastingName = NameMatcher.findMatchForName(employee.name);
-                updateStatus(`Looking for employee: ${forecastingName}`);
-                
-                // For each shift
-                for (let j = 0; j < employee.shifts.length; j++) {
-                    const shift = employee.shifts[j];
-                    
-                    // Skip days with no shifts
-                    if (shift.shiftType === 'none') {
-                        continue;
-                    }
-                    
-                    updateStatus(`Processing ${shift.day} shift for ${employee.name}`);
-                    
-                    // Simulate clicking on the day cell
-                    updateStatus(`Clicking on ${shift.day} cell for ${forecastingName}`);
-                    
-                    // Simulate filling in shift details
-                    if (shift.shiftType === 'single') {
-                        updateStatus(`Entering single shift: ${Utils.formatTimeToHHMM(shift.startTime1)} - ${Utils.formatTimeToHHMM(shift.endTime1)}, Break: ${shift.breakDuration} minutes`);
-                    } else if (shift.shiftType === 'double') {
-                        // First shift
-                        updateStatus(`Entering first shift: ${Utils.formatTimeToHHMM(shift.startTime1)} - ${Utils.formatTimeToHHMM(shift.endTime1)}, Break: ${shift.breakDuration} minutes`);
+                // Set up a listener for status updates from the extension
+                chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
+                    if (message.action === 'automationUpdate') {
+                        // Update progress
+                        if (message.progress && message.total) {
+                            const progress = Math.min(message.progress, message.total);
+                            updateProgress(progress);
+                        }
                         
-                        // Second shift
-                        updateStatus(`Clicking on ${shift.day} cell again for second shift`);
-                        updateStatus(`Entering second shift: ${Utils.formatTimeToHHMM(shift.startTime2)} - ${Utils.formatTimeToHHMM(shift.endTime2)}, Break: 0 minutes`);
+                        // Update status
+                        if (message.status === 'processing_employee' && message.data) {
+                            updateStatus(`Processing employee ${message.data.index}/${message.data.total}: ${message.data.employee}`);
+                        } else if (message.status === 'processing_shift' && message.data) {
+                            updateStatus(`Processing ${message.data.day} shift for ${message.data.employee}`);
+                        } else if (message.status === 'login_required') {
+                            updateStatus('Please log in to the forecasting system to continue');
+                        } else if (message.status === 'complete') {
+                            updateStatus('Automated data entry completed successfully!');
+                            updateProgress(totalSteps);
+                            Utils.showSuccess('Automated data entry process completed successfully');
+                        } else if (message.status === 'error') {
+                            updateStatus(`Error during automated data entry: ${message.data?.error || 'Unknown error'}`);
+                            Utils.showError(`Failed to complete automated data entry: ${message.data?.error || 'Unknown error'}`);
+                        }
                     }
-                    
-                    // Update progress
-                    updateProgress(currentStep + (shift.shiftType === 'double' ? 2 : 1));
-                    
-                    // Add a small delay to simulate the process
-                    await new Promise(resolve => setTimeout(resolve, 500));
-                }
+                });
+                
+            } catch (error) {
+                updateStatus(`Error communicating with Chrome extension: ${error.message}`);
+                throw new Error(`Error communicating with Chrome extension: ${error.message}`);
             }
-            
-            // Complete the process
-            updateStatus('Automated data entry completed successfully!');
-            updateProgress(totalSteps);
-            
-            Utils.showSuccess('Automated data entry process completed successfully');
             
         } catch (error) {
             console.error('Error during automated data entry:', error);

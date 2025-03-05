@@ -401,9 +401,9 @@ const ExcelProcessor = {
             'Make sure you are logged into the forecasting system and have selected the correct week.',
             'Review the extracted names and make sure they match with names in the forecasting system.',
             'Review the extracted shift data to ensure it is correct.',
-            'Choose either "Start Manual Data Entry" or "Start Automated Data Entry":',
-            '- Manual: The tool will guide you through clicking on cells and entering data yourself.',
-            '- Automated: The tool will automatically enter the data into the forecasting system for you.'
+            'Click "Start Automated Data Entry" to begin the process.',
+            'The Chrome extension will automatically enter all shift data into the forecasting system.',
+            'Monitor progress through the progress bar and status updates.'
         ];
         
         steps.forEach(step => {
