@@ -1,20 +1,28 @@
 # Staff Rota Automation Chrome Extension
 
-This Chrome extension automates data entry into the forecasting system for the Staff Rota Forecasting Tool.
+This Chrome extension automates data entry into the forecasting system for staff rotas.
 
-## Installation
+## Installation Instructions
 
-1. Open Chrome and go to `chrome://extensions/`
-2. Enable "Developer mode" (toggle in the top-right corner)
-3. Click "Load unpacked" and select this directory
-4. The Staff Rota Automation extension should now appear in your extensions list
+1. **Download the extension files**
+   - Make sure you have all the extension files in a folder on your computer.
 
-## How to Use
+2. **Load the extension in Chrome**
+   - Open Chrome and navigate to `chrome://extensions/`
+   - Enable "Developer mode" by toggling the switch in the top-right corner
+   - Click "Load unpacked" and select the folder containing the extension files
+   - The extension should now appear in your list of installed extensions
 
-1. Use the Staff Rota Forecasting Tool web application to process your Excel file
-2. Click "Start Automated Data Entry" in the web application
-3. The extension will open the forecasting system in a new tab (or use an existing tab)
-4. The extension will automatically enter the shift data into the forecasting system
+3. **Verify installation**
+   - You should see the Staff Rota Automation icon in your Chrome toolbar
+   - If you don't see it, click the puzzle piece icon and pin the extension
+
+## Usage
+
+1. Open the Staff Rota Forecasting Tool website
+2. Upload and process your Excel file
+3. Click "Start Automated Data Entry" to begin the automation process
+4. The extension will handle the data entry into the forecasting system
 5. You can monitor the progress in both the web application and the extension popup
 
 ## Features
@@ -34,10 +42,38 @@ This Chrome extension automates data entry into the forecasting system for the S
 
 ## Troubleshooting
 
-- If the extension doesn't detect employees, make sure the names match exactly with the forecasting system
-- If the extension can't find day cells, make sure you're on the correct week in the forecasting system
-- If the extension can't fill in shift details, make sure the forecasting system hasn't changed its interface
+If you're seeing the error "Chrome extension not detected" even though the extension is installed, try these steps:
+
+1. **Ensure the extension is enabled**
+   - Go to `chrome://extensions/`
+   - Make sure the Staff Rota Automation extension is toggled on
+
+2. **Reload the extension**
+   - On the extensions page, click the refresh icon on the Staff Rota Automation extension
+
+3. **Reload the web page**
+   - Refresh the Staff Rota Forecasting Tool web page
+
+4. **Check permissions**
+   - Click on "Details" for the Staff Rota Automation extension
+   - Scroll down to "Site access" and ensure it has permission to access the website
+
+5. **Clear browser cache**
+   - Go to Chrome settings > Privacy and security > Clear browsing data
+   - Select "Cached images and files" and click "Clear data"
+
+6. **Restart Chrome**
+   - Close and reopen Chrome completely
+
+7. **Common issues**
+   - If the extension doesn't detect employees, make sure the names match exactly with the forecasting system
+   - If the extension can't find day cells, make sure you're on the correct week in the forecasting system
+   - If the extension can't fill in shift details, make sure the forecasting system hasn't changed its interface
 
 ## Privacy
 
 This extension only accesses the forecasting system website and does not collect or transmit any personal data. All data processing happens locally in your browser.
+
+## Support
+
+If you continue to experience issues, please contact the developer for assistance.

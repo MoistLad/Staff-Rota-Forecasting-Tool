@@ -22,6 +22,12 @@ chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
     sendResponse({ status: automationStatus });
     return true;
   }
+  
+  if (message.action === 'ping') {
+    // Simple ping to check if the extension is installed
+    sendResponse({ success: true });
+    return true;
+  }
 });
 
 // Global variables to track automation status

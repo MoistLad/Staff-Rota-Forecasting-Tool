@@ -63,8 +63,10 @@ const BrowserAutomation = {
             
             updateStatus('Checking for Chrome extension...');
             
-            // Check if the Chrome extension is installed
-            if (!window.chrome || !chrome.runtime || !chrome.runtime.sendMessage) {
+            // Check if the Chrome extension is installed using a more reliable method
+            const extensionDetected = await this.detectExtension();
+            
+            if (!extensionDetected) {
                 updateStatus('Chrome extension not detected. Please install the Staff Rota Automation extension.');
                 throw new Error('Chrome extension not detected. Please install the Staff Rota Automation extension.');
             }
@@ -312,5 +314,52 @@ const BrowserAutomation = {
         // Wait for the form to close
         await page.waitForSelector('.shift-form', { hidden: true });
         */
+    },
+    
+    /**
+     * Detect if the Chrome extension is installed and active
+     * @returns {Promise<boolean>} Promise that resolves to true if the extension is detected
+     */
+    detectExtension: function() {
+        return new Promise((resolve) => {
+            // Set up a timeout to handle cases where the extension doesn't respond
+            const timeout = setTimeout(() => {
+                // Remove the event listener to avoid memory leaks
+                document.removeEventListener('staffRotaExtensionInstalled', extensionDetectedHandler);
+                
+                // Try the traditional method as a fallback
+                if (window.chrome && chrome.runtime && chrome.runtime.sendMessage) {
+                    try {
+                        chrome.runtime.sendMessage({ action: 'ping' }, response => {
+                            if (chrome.runtime.lastError) {
+                                console.warn('Extension detection fallback failed:', chrome.runtime.lastError);
+                                resolve(false);
+                            } else {
+                                console.log('Extension detected via fallback method');
+                                resolve(true);
+                            }
+                        });
+                    } catch (error) {
+                        console.warn('Error in extension detection fallback:', error);
+                        resolve(false);
+                    }
+                } else {
+                    resolve(false);
+                }
+            }, 2000); // 2 second timeout
+            
+            // Handler for the custom event
+            const extensionDetectedHandler = () => {
+                console.log('Extension detected via custom event');
+                clearTimeout(timeout);
+                resolve(true);
+            };
+            
+            // Listen for the custom event from the extension
+            document.addEventListener('staffRotaExtensionInstalled', extensionDetectedHandler, { once: true });
+            
+            // Also try to dispatch an event to trigger any existing content scripts
+            document.dispatchEvent(new CustomEvent('checkStaffRotaExtension'));
+        });
     }
 };

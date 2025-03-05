@@ -3,6 +3,15 @@
  * Injected into the forecasting site to perform automation
  */
 
+// Inject a custom event to notify the page that the extension is installed
+document.dispatchEvent(new CustomEvent('staffRotaExtensionInstalled'));
+
+// Listen for the check event from the web page
+document.addEventListener('checkStaffRotaExtension', () => {
+  console.log('Received extension check request from web page');
+  document.dispatchEvent(new CustomEvent('staffRotaExtensionInstalled'));
+});
+
 // Listen for messages from the background script
 chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
   console.log('Content script received message:', message);
