@@ -53,10 +53,12 @@ If you're seeing the error "Chrome extension not detected" even though the exten
 
 3. **Reload the web page**
    - Refresh the Staff Rota Forecasting Tool web page
+   - Make sure you're accessing the page via https://moistlad.github.io/Staff-Rota-Forecasting-Tool/
 
 4. **Check permissions**
    - Click on "Details" for the Staff Rota Automation extension
    - Scroll down to "Site access" and ensure it has permission to access the website
+   - Make sure it has permission for "moistlad.github.io" and "fourthospitality.com"
 
 5. **Clear browser cache**
    - Go to Chrome settings > Privacy and security > Clear browsing data
@@ -65,7 +67,18 @@ If you're seeing the error "Chrome extension not detected" even though the exten
 6. **Restart Chrome**
    - Close and reopen Chrome completely
 
-7. **Common issues**
+7. **Check console for errors**
+   - Right-click on the web page and select "Inspect"
+   - Go to the "Console" tab
+   - Look for any error messages related to the extension
+   - If you see "Content script received message", the extension is working
+
+8. **Reinstall the extension**
+   - Remove the extension from Chrome
+   - Load it again using the "Load unpacked" button
+   - Make sure you're using the latest version of the extension
+
+9. **Common issues**
    - If the extension doesn't detect employees, make sure the names match exactly with the forecasting system
    - If the extension can't find day cells, make sure you're on the correct week in the forecasting system
    - If the extension can't fill in shift details, make sure the forecasting system hasn't changed its interface

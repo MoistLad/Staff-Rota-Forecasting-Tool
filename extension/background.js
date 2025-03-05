@@ -25,7 +25,8 @@ chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
   
   if (message.action === 'ping') {
     // Simple ping to check if the extension is installed
-    sendResponse({ success: true });
+    console.log('Received ping request, responding with success');
+    sendResponse({ success: true, message: 'Staff Rota Automation extension is active' });
     return true;
   }
 });

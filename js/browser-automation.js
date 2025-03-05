@@ -322,14 +322,39 @@ const BrowserAutomation = {
      */
     detectExtension: function() {
         return new Promise((resolve) => {
-            // Set up a timeout to handle cases where the extension doesn't respond
+            console.log('Starting extension detection process...');
+            
+            // Method 1: Check for the global variable
+            if (window.staffRotaExtensionInstalled) {
+                console.log('Extension detected via global variable');
+                resolve(true);
+                return;
+            }
+            
+            // Method 2: Check for the marker element
+            if (document.getElementById('staff-rota-extension-marker')) {
+                console.log('Extension detected via DOM marker');
+                resolve(true);
+                return;
+            }
+            
+            // Method 3: Use custom events with a longer timeout
             const timeout = setTimeout(() => {
+                console.log('Extension detection timeout reached');
                 // Remove the event listener to avoid memory leaks
                 document.removeEventListener('staffRotaExtensionInstalled', extensionDetectedHandler);
+                
+                // Final check for marker element (it might have been added after our initial check)
+                if (document.getElementById('staff-rota-extension-marker')) {
+                    console.log('Extension detected via DOM marker (delayed)');
+                    resolve(true);
+                    return;
+                }
                 
                 // Try the traditional method as a fallback
                 if (window.chrome && chrome.runtime && chrome.runtime.sendMessage) {
                     try {
+                        console.log('Trying fallback detection via chrome.runtime.sendMessage...');
                         chrome.runtime.sendMessage({ action: 'ping' }, response => {
                             if (chrome.runtime.lastError) {
                                 console.warn('Extension detection fallback failed:', chrome.runtime.lastError);
@@ -344,9 +369,10 @@ const BrowserAutomation = {
                         resolve(false);
                     }
                 } else {
+                    console.warn('Chrome runtime API not available');
                     resolve(false);
                 }
-            }, 2000); // 2 second timeout
+            }, 5000); // 5 second timeout (increased from 2 seconds)
             
             // Handler for the custom event
             const extensionDetectedHandler = () => {
@@ -358,8 +384,24 @@ const BrowserAutomation = {
             // Listen for the custom event from the extension
             document.addEventListener('staffRotaExtensionInstalled', extensionDetectedHandler, { once: true });
             
-            // Also try to dispatch an event to trigger any existing content scripts
+            // Dispatch an event to trigger any existing content scripts
+            console.log('Dispatching checkStaffRotaExtension event...');
             document.dispatchEvent(new CustomEvent('checkStaffRotaExtension'));
+            
+            // Try multiple times with a delay
+            setTimeout(() => {
+                console.log('Retrying extension detection...');
+                // Check for the marker element again
+                if (document.getElementById('staff-rota-extension-marker')) {
+                    console.log('Extension detected via DOM marker (retry)');
+                    clearTimeout(timeout);
+                    resolve(true);
+                    return;
+                }
+                
+                // Dispatch the event again
+                document.dispatchEvent(new CustomEvent('checkStaffRotaExtension'));
+            }, 1000);
         });
     }
 };

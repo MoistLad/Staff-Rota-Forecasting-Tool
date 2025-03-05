@@ -3,13 +3,43 @@
  * Injected into the forecasting site to perform automation
  */
 
-// Inject a custom event to notify the page that the extension is installed
+console.log('Staff Rota Automation extension content script loaded');
+
+// Method 1: Inject a custom event to notify the page that the extension is installed
 document.dispatchEvent(new CustomEvent('staffRotaExtensionInstalled'));
+
+// Method 2: Add a hidden element to the DOM that the page can check for
+const extensionMarker = document.createElement('div');
+extensionMarker.id = 'staff-rota-extension-marker';
+extensionMarker.style.display = 'none';
+document.body.appendChild(extensionMarker);
+
+// Method 3: Try to set a global variable that the page can check for
+try {
+  // This requires the "scripting" permission in manifest.json
+  const script = document.createElement('script');
+  script.textContent = `
+    console.log('Injecting global variable for Staff Rota extension detection');
+    window.staffRotaExtensionInstalled = true;
+  `;
+  document.head.appendChild(script);
+  document.head.removeChild(script);
+} catch (error) {
+  console.error('Error injecting script:', error);
+}
 
 // Listen for the check event from the web page
 document.addEventListener('checkStaffRotaExtension', () => {
   console.log('Received extension check request from web page');
   document.dispatchEvent(new CustomEvent('staffRotaExtensionInstalled'));
+  
+  // Re-add the marker element in case it was removed
+  if (!document.getElementById('staff-rota-extension-marker')) {
+    const extensionMarker = document.createElement('div');
+    extensionMarker.id = 'staff-rota-extension-marker';
+    extensionMarker.style.display = 'none';
+    document.body.appendChild(extensionMarker);
+  }
 });
 
 // Listen for messages from the background script
