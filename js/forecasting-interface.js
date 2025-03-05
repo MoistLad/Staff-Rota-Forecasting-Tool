@@ -8,6 +8,7 @@ const ForecastingInterface = {
     currentShift: null,
     currentStep: 0,
     totalSteps: 0,
+    isAutomated: false,
     
     /**
      * Initialize the forecasting interface
@@ -24,6 +25,29 @@ const ForecastingInterface = {
         document.getElementById('startDataEntry').addEventListener('click', () => {
             this.startDataEntry();
         });
+        
+        // Start automated data entry button
+        document.getElementById('startAutomatedDataEntry').addEventListener('click', () => {
+            this.startAutomatedDataEntry();
+        });
+    },
+    
+    /**
+     * Start the automated data entry process
+     */
+    startAutomatedDataEntry: function() {
+        const processedData = ExcelProcessor.getProcessedData();
+        
+        if (!processedData || !processedData.employees || processedData.employees.length === 0) {
+            Utils.showError('No data to enter. Please process an Excel file first.');
+            return;
+        }
+        
+        // Set automated flag
+        this.isAutomated = true;
+        
+        // Start the automated data entry process
+        BrowserAutomation.startAutomatedDataEntry(processedData);
     },
     
     /**

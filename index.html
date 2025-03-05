@@ -139,7 +139,30 @@
                 <ol id="instructions">
                     <!-- Instructions will be dynamically added here -->
                 </ol>
-                <button id="startDataEntry" class="btn btn-success">Start Data Entry</button>
+                <div class="row mb-3">
+                    <div class="col-md-6">
+                        <div class="card">
+                            <div class="card-header">
+                                <h6>Manual Data Entry</h6>
+                            </div>
+                            <div class="card-body">
+                                <p>The tool will guide you through entering data manually into the forecasting system.</p>
+                                <button id="startDataEntry" class="btn btn-success">Start Manual Data Entry</button>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-md-6">
+                        <div class="card">
+                            <div class="card-header">
+                                <h6>Automated Data Entry</h6>
+                            </div>
+                            <div class="card-body">
+                                <p>The tool will automatically enter data into the forecasting system.</p>
+                                <button id="startAutomatedDataEntry" class="btn btn-primary">Start Automated Data Entry</button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
                 <div id="entryProgress" class="mt-3">
                     <div class="progress">
                         <div id="progressBar" class="progress-bar" role="progressbar" style="width: 0%;" aria-valuenow="0" aria-valuemin="0" aria-valuemax="100">0%</div>
@@ -170,6 +193,7 @@
     <script src="js/template-manager.js"></script>
     <script src="js/excel-processor.js"></script>
     <script src="js/name-matcher.js"></script>
+    <script src="js/browser-automation.js"></script>
     <script src="js/forecasting-interface.js"></script>
     <script src="js/app.js"></script>
 </body>

@@ -55,173 +55,136 @@ const NameMatcher = {
         
         // Apply common nickname mappings
         const nicknames = {
-            'robert': 'rob',
-            'roberto': 'rob',
-            'robbie': 'rob',
-            'bob': 'rob',
-            'bobby': 'rob',
+            // Nicknames map to full names, but full names remain unchanged
+            'rob': 'robert',
+            'roberto': 'robert',
+            'robbie': 'robert',
+            'bob': 'robert',
+            'bobby': 'robert',
             
-            'richard': 'rick',
             'rick': 'richard',
             'dick': 'richard',
             'richie': 'richard',
             
-            'william': 'will',
             'will': 'william',
             'bill': 'william',
             'billy': 'william',
             
-            'james': 'jim',
             'jim': 'james',
             'jimmy': 'james',
             'jamie': 'james',
             
-            'john': 'johnny',
             'johnny': 'john',
             'jon': 'john',
             
-            'michael': 'mike',
             'mike': 'michael',
             'mikey': 'michael',
             'mick': 'michael',
             
-            'thomas': 'tom',
             'tom': 'thomas',
             'tommy': 'thomas',
             
-            'christopher': 'chris',
             'chris': 'christopher',
             
-            'joseph': 'joe',
             'joe': 'joseph',
             'joey': 'joseph',
             
-            'daniel': 'dan',
             'dan': 'daniel',
             'danny': 'daniel',
             
-            'matthew': 'matt',
             'matt': 'matthew',
             'matty': 'matthew',
             
-            'david': 'dave',
             'dave': 'david',
             'davey': 'david',
             
-            'nicholas': 'nick',
             'nick': 'nicholas',
             'nicky': 'nicholas',
             
-            'anthony': 'tony',
             'tony': 'anthony',
             
-            'andrew': 'andy',
             'andy': 'andrew',
             'drew': 'andrew',
             
-            'steven': 'steve',
             'steve': 'steven',
-            'stephen': 'steve',
+            'stephen': 'steven',
             
-            'edward': 'ed',
             'ed': 'edward',
             'eddie': 'edward',
             'ted': 'edward',
             
-            'charles': 'charlie',
             'charlie': 'charles',
             'chuck': 'charles',
             
-            'benjamin': 'ben',
             'ben': 'benjamin',
             'benji': 'benjamin',
             
-            'samuel': 'sam',
             'sam': 'samuel',
             'sammy': 'samuel',
             
-            'alexander': 'alex',
             'alex': 'alexander',
             
-            'patrick': 'pat',
             'pat': 'patrick',
             'patty': 'patrick',
             
-            'victoria': 'vicky',
             'vicky': 'victoria',
             'vicki': 'victoria',
             
-            'elizabeth': 'liz',
             'liz': 'elizabeth',
             'beth': 'elizabeth',
             'lizzie': 'elizabeth',
             'eliza': 'elizabeth',
             
-            'catherine': 'cathy',
-            'katherine': 'cathy',
             'cathy': 'catherine',
+            'katherine': 'catherine',
             'kate': 'catherine',
             'katie': 'catherine',
+            'cat': 'cathrine',
             
-            'jennifer': 'jen',
             'jen': 'jennifer',
             'jenny': 'jennifer',
             
-            'margaret': 'maggie',
             'maggie': 'margaret',
             'meg': 'margaret',
             'peggy': 'margaret',
             
-            'rebecca': 'becky',
             'becky': 'rebecca',
             
-            'stephanie': 'steph',
             'steph': 'stephanie',
             
-            'deborah': 'debbie',
             'debbie': 'deborah',
             'deb': 'deborah',
             
-            'jessica': 'jess',
             'jess': 'jessica',
             'jessie': 'jessica',
             
-            'susan': 'sue',
             'sue': 'susan',
             'suzie': 'susan',
             
-            'barbara': 'barb',
             'barb': 'barbara',
             
-            'kimberly': 'kim',
             'kim': 'kimberly',
             
-            'amanda': 'mandy',
             'mandy': 'amanda',
             
-            'patricia': 'patty',
             'patty': 'patricia',
             'pat': 'patricia',
             
-            'nicole': 'nikki',
             'nikki': 'nicole',
             
-            'christine': 'chris',
             'chris': 'christine',
             'christy': 'christine',
             
-            'samantha': 'sam',
             'sam': 'samantha',
             
-            'michelle': 'shelly',
             'shelly': 'michelle',
             
-            'angela': 'angie',
             'angie': 'angela',
             
-            'melissa': 'mel',
             'mel': 'melissa',
-            'missy': 'melissa'
+            'missy': 'melissa',
+            
+            'izzy': 'isabelle'
         };
         
         if (nicknames[normalized]) {

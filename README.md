@@ -8,7 +8,8 @@ A web-based tool that allows you to input staff rota data from an Excel sheet in
 - Select specific tabs/sheets from the Excel file
 - Create and manage templates for default break durations and finish times
 - Match employee names between Excel and the forecasting system
-- Step-by-step guidance for entering shift data into the forecasting system
+- Automated data entry into the forecasting system
+- Step-by-step guidance for manual data entry as an alternative
 - Error handling and progress tracking
 
 ## How to Use
@@ -50,16 +51,29 @@ Before processing your Excel file, you can create templates with default setting
 ### 6. Enter Data into Forecasting System
 
 - Make sure you're logged into the forecasting system and have selected the correct week
-- Follow the step-by-step instructions to enter the shift data
-- The tool will guide you through each employee and shift
+- Choose between automated or manual data entry:
+  - **Automated**: The tool will automatically enter all shift data into the forecasting system
+  - **Manual**: Follow the step-by-step instructions to enter the shift data yourself
+- Monitor progress through the progress bar and status updates
 
 ## Technical Details
 
 - Built with HTML, CSS, and JavaScript
 - Uses SheetJS (xlsx) library for Excel file processing
+- Uses Puppeteer for browser automation (automated data entry)
 - Stores templates and name mappings in localStorage
-- Runs entirely in the browser (no server-side processing)
 - Compatible with modern browsers (Chrome, Firefox, Edge, Safari)
+
+## Installation
+
+To use the automated data entry feature, you need to install the required dependencies:
+
+1. Make sure you have [Node.js](https://nodejs.org/) installed
+2. Clone or download this repository
+3. Open a terminal/command prompt in the project directory
+4. Run `npm install` to install the dependencies
+
+If you only want to use the manual data entry feature, you can skip the installation steps and open the `index.html` file directly in your browser.
 
 ## Hosting
 
@@ -88,6 +102,7 @@ Once deployed, the tool will be available at `https://<your-username>.github.io/
 
 ## Version History
 
+- v1.1.0: Added automated data entry feature
 - v1.0.0: Initial release
 
 ## License

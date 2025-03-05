@@ -16,6 +16,9 @@ document.addEventListener('DOMContentLoaded', function() {
     // Initialize name matcher
     NameMatcher.init();
     
+    // Initialize browser automation
+    BrowserAutomation.init();
+    
     // Initialize forecasting interface
     ForecastingInterface.init();
     
