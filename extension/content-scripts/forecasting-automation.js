@@ -282,9 +282,50 @@ function waitForLogin() {
  * @returns {boolean} True if we're on the scheduling page
  */
 function isSchedulingPage() {
-  // This is a placeholder implementation
-  // In a real implementation, you would check for scheduling page elements
-  return document.querySelector('.scheduling') !== null;
+  // Based on the screenshots, check for multiple indicators that we're on the scheduling page
+  
+  // Check 1: Look for the SCHEDULING heading in the top navigation
+  const schedulingHeading = Array.from(document.querySelectorAll('div, span, a, h1, h2, h3, h4, h5, h6'))
+    .find(el => el.textContent === 'SCHEDULING' && el.textContent.trim() === el.textContent);
+  
+  if (schedulingHeading) {
+    console.log('Found SCHEDULING heading');
+    return true;
+  }
+  
+  // Check 2: Look for "Plan & Manage Your Team" text which appears under SCHEDULING
+  const planManageText = Array.from(document.querySelectorAll('div, span, a, p'))
+    .find(el => el.textContent && el.textContent.includes('Plan & Manage Your Team'));
+  
+  if (planManageText) {
+    console.log('Found "Plan & Manage Your Team" text');
+    return true;
+  }
+  
+  // Check 3: Look for the employee grid structure
+  const employeesList = document.querySelector('[id*="employee"], [class*="employee"], [id*="Employees"], [class*="Employees"]');
+  const weekDayHeaders = Array.from(document.querySelectorAll('th, td, div'))
+    .filter(el => {
+      const text = el.textContent && el.textContent.trim();
+      return text && (text.includes('Mon,') || text.includes('Tue,') || text.includes('Wed,'));
+    });
+  
+  if (employeesList && weekDayHeaders.length > 0) {
+    console.log('Found employee grid with day headers');
+    return true;
+  }
+  
+  // Check 4: Look for specific UI elements from the screenshots
+  const publishButton = Array.from(document.querySelectorAll('button, a, div'))
+    .find(el => el.textContent === 'Publish');
+  
+  if (publishButton) {
+    console.log('Found Publish button');
+    return true;
+  }
+  
+  // If none of the above checks passed, we're probably not on the scheduling page
+  return false;
 }
 
 /**
@@ -292,25 +333,101 @@ function isSchedulingPage() {
  * @returns {Promise} Promise that resolves when navigation is complete
  */
 async function navigateToSchedulingPage() {
-  // This is a placeholder implementation
-  // In a real implementation, you would click on the scheduling link
-  const schedulingLink = document.querySelector('a[href*="scheduling"]');
+  console.log('Attempting to navigate to scheduling page...');
   
-  if (schedulingLink) {
-    schedulingLink.click();
+  // First check if we're already on the scheduling page
+  if (isSchedulingPage()) {
+    console.log('Already on scheduling page');
+    return;
+  }
+  
+  // Method 1: Look for the SCHEDULING tab in the top navigation
+  const schedulingTab = Array.from(document.querySelectorAll('a, div, span, button'))
+    .find(el => {
+      const text = el.textContent && el.textContent.trim();
+      return text === 'SCHEDULING' && (el.tagName === 'A' || el.onclick || el.role === 'button' || 
+             el.className && (el.className.includes('tab') || el.className.includes('nav') || el.className.includes('menu')));
+    });
+  
+  if (schedulingTab) {
+    console.log('Found SCHEDULING tab, clicking it');
+    schedulingTab.click();
     
     // Wait for the page to load
-    await new Promise(resolve => {
+    await new Promise((resolve, reject) => {
+      let attempts = 0;
+      const maxAttempts = 10;
+      
       const interval = setInterval(() => {
+        attempts++;
+        
         if (isSchedulingPage()) {
           clearInterval(interval);
+          console.log('Successfully navigated to scheduling page');
+          resolve();
+        } else if (attempts >= maxAttempts) {
+          clearInterval(interval);
+          console.warn(`Made ${maxAttempts} attempts but couldn't confirm we're on scheduling page`);
+          // Don't reject, just continue with best effort
           resolve();
         }
       }, 1000);
     });
-  } else {
-    throw new Error('Could not find scheduling link');
+    
+    return;
   }
+  
+  // Method 2: Look for any element containing "scheduling" text that might be clickable
+  const schedulingLinks = Array.from(document.querySelectorAll('a, button, div[onclick], span[onclick]'))
+    .filter(el => {
+      const text = el.textContent && el.textContent.toLowerCase();
+      return text && (text.includes('schedul') || text.includes('rota') || text.includes('shift'));
+    });
+  
+  if (schedulingLinks.length > 0) {
+    console.log(`Found ${schedulingLinks.length} potential scheduling links`);
+    
+    // Try clicking each link until we get to the scheduling page
+    for (const link of schedulingLinks) {
+      console.log(`Trying to click element with text: ${link.textContent}`);
+      link.click();
+      
+      // Wait a bit to see if we navigate to the scheduling page
+      await new Promise(resolve => setTimeout(resolve, 2000));
+      
+      if (isSchedulingPage()) {
+        console.log('Successfully navigated to scheduling page');
+        return;
+      }
+    }
+  }
+  
+  // Method 3: Look for navigation menu items
+  const menuItems = Array.from(document.querySelectorAll('li, div[role="menuitem"], a[role="menuitem"]'));
+  const potentialSchedulingItems = menuItems.filter(item => {
+    const text = item.textContent && item.textContent.toLowerCase();
+    return text && (text.includes('schedul') || text.includes('rota') || text.includes('shift') || text.includes('plan'));
+  });
+  
+  if (potentialSchedulingItems.length > 0) {
+    console.log(`Found ${potentialSchedulingItems.length} potential menu items`);
+    
+    for (const item of potentialSchedulingItems) {
+      console.log(`Trying to click menu item with text: ${item.textContent}`);
+      item.click();
+      
+      await new Promise(resolve => setTimeout(resolve, 2000));
+      
+      if (isSchedulingPage()) {
+        console.log('Successfully navigated to scheduling page');
+        return;
+      }
+    }
+  }
+  
+  // If we've tried all methods and still can't navigate, throw an error
+  console.error('Could not find any way to navigate to the scheduling page');
+  throw new Error('Could not find scheduling link or tab. Please navigate to the scheduling page manually.');
 }
 
 /**
@@ -319,16 +436,77 @@ async function navigateToSchedulingPage() {
  * @returns {Element|null} The employee row element or null if not found
  */
 function findEmployeeRow(employeeName) {
-  // This is a placeholder implementation
-  // In a real implementation, you would find the row with the employee name
-  const rows = document.querySelectorAll('tr');
+  console.log(`Looking for employee row with name: ${employeeName}`);
   
-  for (const row of rows) {
-    if (row.textContent.toLowerCase().includes(employeeName.toLowerCase())) {
-      return row;
+  // Method 1: Look for rows with the employee name
+  // Based on the screenshot, employee names are displayed in the leftmost column
+  const allRows = Array.from(document.querySelectorAll('tr, div[role="row"], .row, [class*="row"]'));
+  
+  // First try exact match
+  let matchingRow = allRows.find(row => {
+    const rowText = row.textContent.trim();
+    return rowText.includes(employeeName);
+  });
+  
+  if (matchingRow) {
+    console.log(`Found exact match for employee: ${employeeName}`);
+    return matchingRow;
+  }
+  
+  // If no exact match, try case-insensitive match
+  matchingRow = allRows.find(row => {
+    const rowText = row.textContent.trim().toLowerCase();
+    return rowText.includes(employeeName.toLowerCase());
+  });
+  
+  if (matchingRow) {
+    console.log(`Found case-insensitive match for employee: ${employeeName}`);
+    return matchingRow;
+  }
+  
+  // Method 2: Look for employee name elements specifically
+  // From the screenshot, we can see employee names with initials in circles
+  const employeeElements = Array.from(document.querySelectorAll('[class*="employee"], [id*="employee"], [class*="name"], [id*="name"]'));
+  
+  // Check each element and its parent row
+  for (const element of employeeElements) {
+    if (element.textContent.includes(employeeName)) {
+      // Find the parent row
+      let parent = element;
+      while (parent && !parent.matches('tr, div[role="row"], .row, [class*="row"]')) {
+        parent = parent.parentElement;
+      }
+      
+      if (parent) {
+        console.log(`Found employee element with parent row: ${employeeName}`);
+        return parent;
+      }
     }
   }
   
+  // Method 3: Look for elements with initials that match the employee's initials
+  const nameParts = employeeName.split(' ');
+  if (nameParts.length >= 2) {
+    const initials = nameParts[0][0] + nameParts[nameParts.length - 1][0];
+    
+    const initialElements = Array.from(document.querySelectorAll('div, span'))
+      .filter(el => el.textContent.trim().toUpperCase() === initials.toUpperCase());
+    
+    for (const element of initialElements) {
+      // Find the parent row
+      let parent = element;
+      while (parent && !parent.matches('tr, div[role="row"], .row, [class*="row"]')) {
+        parent = parent.parentElement;
+      }
+      
+      if (parent) {
+        console.log(`Found element with matching initials (${initials}) for: ${employeeName}`);
+        return parent;
+      }
+    }
+  }
+  
+  console.warn(`Could not find employee row for: ${employeeName}`);
   return null;
 }
 
@@ -339,31 +517,179 @@ function findEmployeeRow(employeeName) {
  * @returns {Promise} Promise that resolves when the click is complete
  */
 async function clickDayCell(employeeRow, day) {
-  // This is a placeholder implementation
-  // In a real implementation, you would find and click the day cell
-  const cells = employeeRow.querySelectorAll('td');
+  console.log(`Looking for ${day} cell in employee row`);
   
-  // Map day names to column indices
-  const dayMap = {
-    'Monday': 1,
-    'Tuesday': 2,
-    'Wednesday': 3,
-    'Thursday': 4,
-    'Friday': 5,
-    'Saturday': 6,
-    'Sunday': 7
+  // From the screenshots, we can see the day headers are in the format "Mon, 10 Mar"
+  // First, find all day headers to determine column indices
+  const dayHeaders = Array.from(document.querySelectorAll('th, td, div'))
+    .filter(el => {
+      const text = el.textContent && el.textContent.trim();
+      return text && (
+        text.includes('Mon,') || 
+        text.includes('Tue,') || 
+        text.includes('Wed,') || 
+        text.includes('Thu,') || 
+        text.includes('Fri,') || 
+        text.includes('Sat,') || 
+        text.includes('Sun,')
+      );
+    });
+  
+  console.log(`Found ${dayHeaders.length} day headers`);
+  
+  // Map day names to their short forms
+  const dayShortForms = {
+    'Monday': 'Mon,',
+    'Tuesday': 'Tue,',
+    'Wednesday': 'Wed,',
+    'Thursday': 'Thu,',
+    'Friday': 'Fri,',
+    'Saturday': 'Sat,',
+    'Sunday': 'Sun,'
   };
   
-  const dayIndex = dayMap[day];
+  // Find the index of the day we're looking for
+  const dayShortForm = dayShortForms[day];
+  let dayHeaderIndex = -1;
   
-  if (dayIndex && dayIndex < cells.length) {
-    cells[dayIndex].click();
+  for (let i = 0; i < dayHeaders.length; i++) {
+    if (dayHeaders[i].textContent.includes(dayShortForm)) {
+      dayHeaderIndex = i;
+      break;
+    }
+  }
+  
+  if (dayHeaderIndex === -1) {
+    console.error(`Could not find header for day: ${day}`);
+    throw new Error(`Could not find header for day: ${day}`);
+  }
+  
+  console.log(`Found header for ${day} at index ${dayHeaderIndex}`);
+  
+  // Method 1: Try to find cells directly in the employee row
+  const cells = Array.from(employeeRow.querySelectorAll('td, div[role="cell"], .cell, [class*="cell"]'));
+  
+  // If we have cells and the day index is within range
+  if (cells.length > 0 && dayHeaderIndex < cells.length) {
+    console.log(`Found ${cells.length} cells in the row, clicking cell at index ${dayHeaderIndex}`);
+    cells[dayHeaderIndex].click();
     
     // Wait for the shift form to appear
-    await waitForElement('.shift-form');
-  } else {
-    throw new Error(`Cell for ${day} not found in row`);
+    try {
+      // Based on the screenshot, look for the shift form elements
+      await waitForElement('input, [class*="shift"], [id*="shift"], [class*="form"], [id*="form"]');
+      console.log('Shift form appeared after clicking cell');
+      return;
+    } catch (error) {
+      console.warn('Could not detect shift form after clicking cell, trying alternative methods');
+    }
   }
+  
+  // Method 2: Try to find the cell based on its position relative to the employee row
+  // This handles cases where the cells might be in a different container than the employee name
+  const rowRect = employeeRow.getBoundingClientRect();
+  const rowTop = rowRect.top;
+  const rowBottom = rowRect.bottom;
+  
+  // Find all elements that could be cells and are vertically aligned with the employee row
+  const allPossibleCells = Array.from(document.querySelectorAll('td, div, span'))
+    .filter(el => {
+      const rect = el.getBoundingClientRect();
+      return rect.top >= rowTop && rect.bottom <= rowBottom && rect.width > 20 && rect.height > 20;
+    });
+  
+  // Group cells by their horizontal position
+  const cellsByColumn = {};
+  allPossibleCells.forEach(cell => {
+    const rect = cell.getBoundingClientRect();
+    const centerX = rect.left + rect.width / 2;
+    
+    // Round to nearest 10px to group cells in the same column
+    const columnKey = Math.round(centerX / 10) * 10;
+    
+    if (!cellsByColumn[columnKey]) {
+      cellsByColumn[columnKey] = [];
+    }
+    cellsByColumn[columnKey].push(cell);
+  });
+  
+  // Sort columns by x position
+  const sortedColumns = Object.keys(cellsByColumn).sort((a, b) => a - b);
+  
+  // If we have enough columns and the day index is within range
+  if (sortedColumns.length > dayHeaderIndex) {
+    const columnKey = sortedColumns[dayHeaderIndex];
+    const cellsInColumn = cellsByColumn[columnKey];
+    
+    // Find the cell that's vertically aligned with our row
+    const targetCell = cellsInColumn.find(cell => {
+      const rect = cell.getBoundingClientRect();
+      const centerY = rect.top + rect.height / 2;
+      return centerY >= rowTop && centerY <= rowBottom;
+    });
+    
+    if (targetCell) {
+      console.log(`Found cell for ${day} using position-based method`);
+      targetCell.click();
+      
+      // Wait for the shift form to appear
+      try {
+        await waitForElement('input, [class*="shift"], [id*="shift"], [class*="form"], [id*="form"]');
+        console.log('Shift form appeared after clicking cell');
+        return;
+      } catch (error) {
+        console.warn('Could not detect shift form after clicking cell with position-based method');
+      }
+    }
+  }
+  
+  // If we still haven't found the cell, try a more aggressive approach
+  console.warn(`Could not find cell for ${day} using standard methods, trying fallback approach`);
+  
+  // Method 3: Look for any clickable element in the general area where the day cell should be
+  const allElements = Array.from(document.querySelectorAll('*'));
+  
+  // Filter elements that are likely to be cells based on their appearance and position
+  const potentialCells = allElements.filter(el => {
+    const rect = el.getBoundingClientRect();
+    const centerY = rect.top + rect.height / 2;
+    
+    // Check if the element is vertically aligned with our row
+    const isInRow = centerY >= rowTop && centerY <= rowBottom;
+    
+    // Check if the element has a reasonable size for a cell
+    const hasReasonableSize = rect.width >= 20 && rect.height >= 20;
+    
+    // Check if the element is empty or has minimal content (cells often are)
+    const hasMinimalContent = el.textContent.trim().length <= 10;
+    
+    return isInRow && hasReasonableSize && hasMinimalContent;
+  });
+  
+  // Sort potential cells by their horizontal position
+  potentialCells.sort((a, b) => {
+    const rectA = a.getBoundingClientRect();
+    const rectB = b.getBoundingClientRect();
+    return rectA.left - rectB.left;
+  });
+  
+  // If we have enough potential cells and the day index is within range
+  if (potentialCells.length > dayHeaderIndex) {
+    console.log(`Found ${potentialCells.length} potential cells, clicking cell at index ${dayHeaderIndex}`);
+    potentialCells[dayHeaderIndex].click();
+    
+    // Wait for the shift form to appear
+    try {
+      await waitForElement('input, [class*="shift"], [id*="shift"], [class*="form"], [id*="form"]');
+      console.log('Shift form appeared after clicking potential cell');
+      return;
+    } catch (error) {
+      console.error('Could not detect shift form after trying all methods');
+      throw new Error(`Could not interact with cell for ${day}`);
+    }
+  }
+  
+  throw new Error(`Cell for ${day} not found in row`);
 }
 
 /**
@@ -372,40 +698,300 @@ async function clickDayCell(employeeRow, day) {
  * @returns {Promise} Promise that resolves when the form is filled and saved
  */
 async function fillShiftForm(shiftData) {
-  // This is a placeholder implementation
-  // In a real implementation, you would fill in the form fields and click save
+  console.log('Filling shift form with data:', shiftData);
   
-  // Fill in start time
-  const startTimeInput = document.querySelector('input[name="startTime"]');
+  // Wait a moment for the form to be fully loaded and interactive
+  await sleep(500);
+  
+  // Based on the screenshot, find the start time input
+  // Method 1: Try to find inputs by name or placeholder
+  let startTimeInput = document.querySelector('input[name="startTime"], input[placeholder*="start"], input[aria-label*="start"]');
+  
+  // Method 2: If not found, look for any input near text that indicates start time
+  if (!startTimeInput) {
+    const startTimeLabels = Array.from(document.querySelectorAll('label, div, span'))
+      .filter(el => {
+        const text = el.textContent && el.textContent.toLowerCase();
+        return text && (text.includes('start') || text.includes('from'));
+      });
+    
+    for (const label of startTimeLabels) {
+      // Look for an input near this label
+      const nearbyInput = findNearbyInput(label);
+      if (nearbyInput) {
+        startTimeInput = nearbyInput;
+        break;
+      }
+    }
+  }
+  
+  // Method 3: From the screenshot, we can see there are two required fields at the top
+  // These are likely the start and end time inputs
+  if (!startTimeInput) {
+    const requiredFields = Array.from(document.querySelectorAll('input[required], input[aria-required="true"], input.required'));
+    if (requiredFields.length >= 2) {
+      startTimeInput = requiredFields[0]; // First required field is likely start time
+    }
+  }
+  
+  // Method 4: Look for any input in a section labeled "Start date and time"
+  if (!startTimeInput) {
+    const startSection = Array.from(document.querySelectorAll('div, section, fieldset'))
+      .find(el => el.textContent && el.textContent.includes('Start date and time'));
+    
+    if (startSection) {
+      startTimeInput = startSection.querySelector('input');
+    }
+  }
+  
+  // If we found a start time input, fill it
   if (startTimeInput) {
+    console.log('Found start time input, filling with:', shiftData.startTime);
     startTimeInput.value = shiftData.startTime;
     startTimeInput.dispatchEvent(new Event('input', { bubbles: true }));
+    startTimeInput.dispatchEvent(new Event('change', { bubbles: true }));
+    
+    // Some forms require clicking outside the input to register the change
+    document.body.click();
+  } else {
+    console.warn('Could not find start time input');
   }
   
-  // Fill in end time
-  const endTimeInput = document.querySelector('input[name="endTime"]');
+  // Find the end time input using similar methods
+  let endTimeInput = document.querySelector('input[name="endTime"], input[placeholder*="end"], input[aria-label*="end"]');
+  
+  if (!endTimeInput) {
+    const endTimeLabels = Array.from(document.querySelectorAll('label, div, span'))
+      .filter(el => {
+        const text = el.textContent && el.textContent.toLowerCase();
+        return text && (text.includes('end') || text.includes('to'));
+      });
+    
+    for (const label of endTimeLabels) {
+      const nearbyInput = findNearbyInput(label);
+      if (nearbyInput) {
+        endTimeInput = nearbyInput;
+        break;
+      }
+    }
+  }
+  
+  if (!endTimeInput && startTimeInput) {
+    // If we found the start time input but not the end time input,
+    // the end time input is likely the next input after the start time input
+    const allInputs = Array.from(document.querySelectorAll('input'));
+    const startTimeIndex = allInputs.indexOf(startTimeInput);
+    if (startTimeIndex !== -1 && startTimeIndex < allInputs.length - 1) {
+      endTimeInput = allInputs[startTimeIndex + 1];
+    }
+  }
+  
+  // Method 3: From the screenshot, we can see there are two required fields at the top
+  if (!endTimeInput) {
+    const requiredFields = Array.from(document.querySelectorAll('input[required], input[aria-required="true"], input.required'));
+    if (requiredFields.length >= 2) {
+      endTimeInput = requiredFields[1]; // Second required field is likely end time
+    }
+  }
+  
+  // Method 4: Look for any input in a section labeled "End date and time"
+  if (!endTimeInput) {
+    const endSection = Array.from(document.querySelectorAll('div, section, fieldset'))
+      .find(el => el.textContent && el.textContent.includes('End date and time'));
+    
+    if (endSection) {
+      endTimeInput = endSection.querySelector('input');
+    }
+  }
+  
+  // If we found an end time input, fill it
   if (endTimeInput) {
+    console.log('Found end time input, filling with:', shiftData.endTime);
     endTimeInput.value = shiftData.endTime;
     endTimeInput.dispatchEvent(new Event('input', { bubbles: true }));
+    endTimeInput.dispatchEvent(new Event('change', { bubbles: true }));
+    
+    // Some forms require clicking outside the input to register the change
+    document.body.click();
+  } else {
+    console.warn('Could not find end time input');
   }
   
-  // Fill in break duration
-  const breakDurationInput = document.querySelector('input[name="breakDuration"]');
-  if (breakDurationInput) {
+  // Find and fill the break duration input
+  // From the screenshot, we can see a "Breaks" section with a "Break 1 (min)" field
+  let breakDurationInput = document.querySelector('input[name="breakDuration"], input[placeholder*="break"], input[aria-label*="break"]');
+  
+  if (!breakDurationInput) {
+    const breakLabels = Array.from(document.querySelectorAll('label, div, span'))
+      .filter(el => {
+        const text = el.textContent && el.textContent.toLowerCase();
+        return text && (text.includes('break') && text.includes('min'));
+      });
+    
+    for (const label of breakLabels) {
+      const nearbyInput = findNearbyInput(label);
+      if (nearbyInput) {
+        breakDurationInput = nearbyInput;
+        break;
+      }
+    }
+  }
+  
+  // Method 3: Look for any input in a section labeled "Breaks"
+  if (!breakDurationInput) {
+    const breaksSection = Array.from(document.querySelectorAll('div, section, fieldset'))
+      .find(el => el.textContent && el.textContent.includes('Breaks'));
+    
+    if (breaksSection) {
+      breakDurationInput = breaksSection.querySelector('input');
+    }
+  }
+  
+  // If we found a break duration input and have a break duration, fill it
+  if (breakDurationInput && shiftData.breakDuration) {
+    console.log('Found break duration input, filling with:', shiftData.breakDuration);
     breakDurationInput.value = shiftData.breakDuration;
     breakDurationInput.dispatchEvent(new Event('input', { bubbles: true }));
+    breakDurationInput.dispatchEvent(new Event('change', { bubbles: true }));
+    
+    // Some forms require clicking outside the input to register the change
+    document.body.click();
+  } else if (shiftData.breakDuration) {
+    console.warn('Could not find break duration input');
   }
   
-  // Click save button
-  const saveButton = document.querySelector('.save-button');
+  // Wait a moment for any form validation to complete
+  await sleep(500);
+  
+  // Find and click the save button
+  // From the screenshot, we can see a "Save" button at the bottom of the form
+  let saveButton = document.querySelector('button[type="submit"], input[type="submit"], button.save, .save-button, button:contains("Save")');
+  
+  if (!saveButton) {
+    // Look for any button with "Save" text
+    saveButton = Array.from(document.querySelectorAll('button, input[type="button"], a.button, .btn, [role="button"]'))
+      .find(el => el.textContent && el.textContent.trim() === 'Save');
+  }
+  
+  if (!saveButton) {
+    // Look for any element that looks like a button and has "Save" text
+    saveButton = Array.from(document.querySelectorAll('div, span, a'))
+      .find(el => {
+        const text = el.textContent && el.textContent.trim();
+        return text === 'Save' && (
+          el.onclick || 
+          el.role === 'button' || 
+          el.className && (el.className.includes('button') || el.className.includes('btn'))
+        );
+      });
+  }
+  
   if (saveButton) {
+    console.log('Found save button, clicking it');
     saveButton.click();
     
     // Wait for the form to close
-    await waitForElementToDisappear('.shift-form');
+    try {
+      // Wait for the shift form to disappear
+      await new Promise((resolve, reject) => {
+        // Check if the form is already gone
+        if (!document.querySelector('input, [class*="shift"], [id*="shift"], [class*="form"], [id*="form"]')) {
+          resolve();
+          return;
+        }
+        
+        // Set a timeout to prevent waiting forever
+        const timeout = setTimeout(() => {
+          observer.disconnect();
+          console.log('Timed out waiting for form to close, but continuing anyway');
+          resolve(); // Resolve anyway to continue the process
+        }, 5000);
+        
+        // Watch for DOM changes to detect when the form is removed
+        const observer = new MutationObserver(mutations => {
+          if (!document.querySelector('input, [class*="shift"], [id*="shift"], [class*="form"], [id*="form"]')) {
+            clearTimeout(timeout);
+            observer.disconnect();
+            resolve();
+          }
+        });
+        
+        observer.observe(document.body, {
+          childList: true,
+          subtree: true
+        });
+      });
+      
+      console.log('Shift form closed successfully');
+    } catch (error) {
+      console.warn('Error waiting for shift form to close:', error);
+      // Continue anyway
+    }
   } else {
+    console.error('Could not find save button');
     throw new Error('Could not find save button');
   }
+}
+
+/**
+ * Find an input element near a label element
+ * @param {Element} labelElement - The label element
+ * @returns {Element|null} The input element or null if not found
+ */
+function findNearbyInput(labelElement) {
+  // Method 1: Check if the label has a "for" attribute
+  if (labelElement.htmlFor) {
+    const input = document.getElementById(labelElement.htmlFor);
+    if (input && (input.tagName === 'INPUT' || input.tagName === 'SELECT' || input.tagName === 'TEXTAREA')) {
+      return input;
+    }
+  }
+  
+  // Method 2: Check if the label contains an input
+  const input = labelElement.querySelector('input, select, textarea');
+  if (input) {
+    return input;
+  }
+  
+  // Method 3: Check if the label is followed by an input
+  let sibling = labelElement.nextElementSibling;
+  while (sibling) {
+    if (sibling.tagName === 'INPUT' || sibling.tagName === 'SELECT' || sibling.tagName === 'TEXTAREA') {
+      return sibling;
+    }
+    sibling = sibling.nextElementSibling;
+  }
+  
+  // Method 4: Check if the label's parent contains an input
+  const parentInput = labelElement.parentElement.querySelector('input, select, textarea');
+  if (parentInput && parentInput !== labelElement) {
+    return parentInput;
+  }
+  
+  // Method 5: Look for inputs near the label based on position
+  const labelRect = labelElement.getBoundingClientRect();
+  const allInputs = Array.from(document.querySelectorAll('input, select, textarea'));
+  
+  // Sort inputs by distance to the label
+  const sortedInputs = allInputs.sort((a, b) => {
+    const rectA = a.getBoundingClientRect();
+    const rectB = b.getBoundingClientRect();
+    
+    const distanceA = Math.sqrt(
+      Math.pow(rectA.left - labelRect.right, 2) + 
+      Math.pow(rectA.top - labelRect.top, 2)
+    );
+    
+    const distanceB = Math.sqrt(
+      Math.pow(rectB.left - labelRect.right, 2) + 
+      Math.pow(rectB.top - labelRect.top, 2)
+    );
+    
+    return distanceA - distanceB;
+  });
+  
+  // Return the closest input
+  return sortedInputs[0] || null;
 }
 
 /**
