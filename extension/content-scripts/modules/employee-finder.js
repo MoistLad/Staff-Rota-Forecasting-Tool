@@ -7,6 +7,79 @@ window.StaffRotaAutomation = window.StaffRotaAutomation || {};
 window.StaffRotaAutomation.EmployeeFinder = {};
 
 /**
+ * Helper function to normalize a name for comparison
+ * @param {string} name - The name to normalize
+ * @returns {string} The normalized name
+ */
+window.StaffRotaAutomation.EmployeeFinder.normalizeName = function(name) {
+  if (!name) return '';
+  
+  // Convert to lowercase
+  let normalized = name.toLowerCase();
+  
+  // Remove common titles
+  normalized = normalized.replace(/^(mr|mrs|miss|ms|dr|prof)\.?\s+/i, '');
+  
+  // Remove punctuation and extra spaces
+  normalized = normalized.replace(/[.,\/#!$%\^&\*;:{}=\-_`~()]/g, '');
+  normalized = normalized.replace(/\s+/g, ' ').trim();
+  
+  return normalized;
+}
+
+/**
+ * Check if two names are similar
+ * @param {string} name1 - First name to compare
+ * @param {string} name2 - Second name to compare
+ * @returns {boolean} True if the names are similar
+ */
+window.StaffRotaAutomation.EmployeeFinder.areSimilarNames = function(name1, name2) {
+  if (!name1 || !name2) return false;
+  
+  // Normalize both names
+  const normalized1 = window.StaffRotaAutomation.EmployeeFinder.normalizeName(name1);
+  const normalized2 = window.StaffRotaAutomation.EmployeeFinder.normalizeName(name2);
+  
+  // Exact match after normalization
+  if (normalized1 === normalized2) return true;
+  
+  // Check if one name is contained within the other
+  if (normalized1.includes(normalized2) || normalized2.includes(normalized1)) return true;
+  
+  // Check for name parts (first name, last name)
+  const parts1 = normalized1.split(' ');
+  const parts2 = normalized2.split(' ');
+  
+  // If both names have multiple parts
+  if (parts1.length > 1 && parts2.length > 1) {
+    // Check if first names match
+    if (parts1[0] === parts2[0]) return true;
+    
+    // Check if last names match
+    if (parts1[parts1.length - 1] === parts2[parts2.length - 1]) return true;
+    
+    // Check for first initial + last name match
+    if (parts1[0].charAt(0) === parts2[0].charAt(0) && 
+        parts1[parts1.length - 1] === parts2[parts2.length - 1]) return true;
+  }
+  
+  // Check for initials
+  if (parts1.length === 1 && parts2.length > 1) {
+    // Check if the single part matches the first letter of each part in the other name
+    const initials = parts2.map(part => part.charAt(0)).join('');
+    if (parts1[0] === initials) return true;
+  }
+  
+  if (parts2.length === 1 && parts1.length > 1) {
+    // Check if the single part matches the first letter of each part in the other name
+    const initials = parts1.map(part => part.charAt(0)).join('');
+    if (parts2[0] === initials) return true;
+  }
+  
+  return false;
+}
+
+/**
  * Find the employee row in the scheduling table
  * @param {string} employeeName - The name of the employee to find
  * @returns {Element|null} The employee row element, or null if not found
@@ -14,57 +87,106 @@ window.StaffRotaAutomation.EmployeeFinder = {};
 window.StaffRotaAutomation.EmployeeFinder.findEmployeeRow = function(employeeName) {
   console.log(`Looking for employee row with name: ${employeeName}`);
   
+  if (!employeeName) {
+    console.warn('Empty employee name provided');
+    return null;
+  }
+  
   // Helper function to search for employee in a document
   const searchForEmployee = (doc) => {
-    // Method 1: Look for employee rows in tables with more specific selectors
-    const tables = doc.querySelectorAll('table');
-    for (const table of tables) {
-      // Look for rows that might contain employee data
-      const rows = table.querySelectorAll('tr');
+    try {
+      // Method 1: Look for exact match in tables
+      const tables = doc.querySelectorAll('table');
+      for (const table of tables) {
+        // Look for rows that might contain employee data
+        const rows = table.querySelectorAll('tr');
+        
+        for (const row of rows) {
+          if (row.textContent && row.textContent.includes(employeeName)) {
+            console.log(`Found exact match for employee ${employeeName} in table`);
+            return row;
+          }
+        }
+      }
       
-      for (const row of rows) {
+      // Method 2: Look for specific employee row selectors with exact match
+      const specificRows = doc.querySelectorAll('tr[class*="employee"], tr[id*="employee"], div[class*="employee-row"], div[id*="employee-row"]');
+      for (const row of specificRows) {
         if (row.textContent && row.textContent.includes(employeeName)) {
-          console.log(`Found employee row for ${employeeName} in table`);
+          console.log(`Found exact match for employee ${employeeName} with specific selector`);
           return row;
         }
       }
-    }
-    
-    // Method 2: Look for specific employee row selectors
-    const specificRows = doc.querySelectorAll('tr[class*="employee"], tr[id*="employee"], div[class*="employee-row"], div[id*="employee-row"]');
-    for (const row of specificRows) {
-      if (row.textContent && row.textContent.includes(employeeName)) {
-        console.log(`Found employee row with specific selector for ${employeeName}`);
-        return row;
+      
+      // Method 3: Try fuzzy matching if exact match failed
+      console.log(`Exact match not found for ${employeeName}, trying fuzzy matching...`);
+      
+      // Get all potential employee rows
+      const allRows = Array.from(doc.querySelectorAll('tr, div[class*="row"], div[role="row"]'));
+      
+      // Find rows that might contain employee names
+      const potentialRows = allRows.filter(row => {
+        // Skip rows with too little text
+        if (!row.textContent || row.textContent.trim().length < 2) return false;
+        
+        // Skip rows that are likely headers
+        if (row.tagName === 'TR' && row.querySelector('th')) return false;
+        
+        // Skip rows with specific classes that indicate they're not employee rows
+        if (row.className && (
+          row.className.includes('header') || 
+          row.className.includes('heading') ||
+          row.className.includes('title')
+        )) return false;
+        
+        return true;
+      });
+      
+      // Try to find a row with a similar name
+      for (const row of potentialRows) {
+        if (window.StaffRotaAutomation.EmployeeFinder.areSimilarNames(row.textContent, employeeName)) {
+          console.log(`Found similar name match for ${employeeName}: "${row.textContent.trim()}"`);
+          return row;
+        }
       }
-    }
-    
-    // Method 3: Generic approach - look for any element containing the employee name
-    const employeeElements = Array.from(doc.querySelectorAll('tr, div[class*="row"], div[role="row"]'))
-      .filter(el => el.textContent && el.textContent.includes(employeeName));
-    
-    if (employeeElements.length > 0) {
-      console.log(`Found ${employeeElements.length} elements containing employee name`);
       
-      // Find the element that looks most like a row
-      const rowLikeElement = employeeElements.find(el => 
-        el.tagName === 'TR' || 
-        el.className.includes('row') || 
-        el.id.includes('row') ||
-        el.getAttribute('role') === 'row'
-      );
+      // Method 4: Generic approach - look for any element containing parts of the employee name
+      const nameParts = employeeName.split(' ').filter(part => part.length > 1);
       
-      if (rowLikeElement) {
-        console.log(`Found row-like element for employee: ${employeeName}`);
-        return rowLikeElement;
+      if (nameParts.length > 0) {
+        for (const namePart of nameParts) {
+          const employeeElements = allRows.filter(el => 
+            el.textContent && el.textContent.toLowerCase().includes(namePart.toLowerCase())
+          );
+          
+          if (employeeElements.length > 0) {
+            console.log(`Found ${employeeElements.length} elements containing name part "${namePart}"`);
+            
+            // Find the element that looks most like a row
+            const rowLikeElement = employeeElements.find(el => 
+              el.tagName === 'TR' || 
+              (el.className && el.className.includes('row')) || 
+              (el.id && el.id.includes('row')) ||
+              (el.getAttribute('role') === 'row')
+            );
+            
+            if (rowLikeElement) {
+              console.log(`Found row-like element for employee using name part "${namePart}": "${rowLikeElement.textContent.trim()}"`);
+              return rowLikeElement;
+            }
+            
+            // If no row-like element, return the first element that contains the name part
+            console.log(`Returning first element containing name part "${namePart}": "${employeeElements[0].textContent.trim()}"`);
+            return employeeElements[0];
+          }
+        }
       }
       
-      // If no row-like element, return the first element that contains the name
-      console.log(`Returning first element containing employee name: ${employeeName}`);
-      return employeeElements[0];
+      return null;
+    } catch (error) {
+      console.error(`Error searching for employee ${employeeName}:`, error);
+      return null;
     }
-    
-    return null;
   };
   
   // First try to find the employee in the main iframe

@@ -74,6 +74,10 @@ window.StaffRotaAutomation.Core.startAutomation = async function(data) {
       }
     }
     
+    // Keep track of missing employees and failed shifts
+    const missingEmployees = [];
+    const failedShifts = [];
+    
     // Process each employee
     for (let i = 0; i < data.employees.length; i++) {
       const employee = data.employees[i];
@@ -84,10 +88,41 @@ window.StaffRotaAutomation.Core.startAutomation = async function(data) {
         total: data.employees.length
       });
       
-      const employeeRow = await window.StaffRotaAutomation.EmployeeFinder.findEmployeeRow(employee.name);
-      
-      if (!employeeRow) {
-        console.warn(`Employee ${employee.name} not found in the forecasting system`);
+      try {
+        // Try to find the employee row
+        const employeeRow = await window.StaffRotaAutomation.EmployeeFinder.findEmployeeRow(employee.name);
+        
+        if (!employeeRow) {
+          // Employee not found, log and continue to next employee
+          console.warn(`Employee ${employee.name} not found in the forecasting system`);
+          
+          // Update status to indicate missing employee
+          window.StaffRotaAutomation.Utils.updateStatus('employee_not_found', {
+            employee: employee.name,
+            index: i + 1,
+            total: data.employees.length
+          });
+          
+          // Add to missing employees list
+          missingEmployees.push(employee.name);
+          
+          // Skip to next employee
+          continue;
+        }
+      } catch (employeeError) {
+        // Error finding employee, log and continue to next employee
+        console.error(`Error finding employee ${employee.name}:`, employeeError);
+        
+        // Update status to indicate error finding employee
+        window.StaffRotaAutomation.Utils.updateStatus('employee_error', {
+          employee: employee.name,
+          error: employeeError.message || 'Unknown error'
+        });
+        
+        // Add to missing employees list
+        missingEmployees.push(employee.name);
+        
+        // Skip to next employee
         continue;
       }
       
@@ -189,8 +224,30 @@ window.StaffRotaAutomation.Core.startAutomation = async function(data) {
       }
     }
     
-    window.StaffRotaAutomation.Utils.updateStatus('complete');
-    return { message: 'Automation completed successfully' };
+    // Add failed shifts to the list
+    const shiftErrors = document.querySelectorAll('.error, .alert-danger, [class*="error"], [class*="alert"]');
+    if (shiftErrors.length > 0) {
+      Array.from(shiftErrors).forEach(error => {
+        if (error.textContent && error.textContent.trim() !== '') {
+          failedShifts.push(error.textContent.trim());
+        }
+      });
+    }
+    
+    // Create a summary of the automation results
+    const summary = {
+      message: 'Automation completed',
+      missingEmployees: missingEmployees.length > 0 ? missingEmployees : [],
+      failedShifts: failedShifts.length > 0 ? failedShifts : []
+    };
+    
+    // Log the summary
+    console.log('Automation summary:', summary);
+    
+    // Update status with the summary
+    window.StaffRotaAutomation.Utils.updateStatus('complete', summary);
+    
+    return summary;
   } catch (error) {
     window.StaffRotaAutomation.Utils.updateStatus('error', { error: error.message });
     console.error('Error during automation:', error);
