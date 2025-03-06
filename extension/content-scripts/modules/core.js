@@ -161,7 +161,26 @@ window.StaffRotaAutomation.Core.startAutomation = async function(data) {
             }
           }
         } catch (shiftError) {
-          console.error(`Error processing shift for ${employee.name} on ${shift.day}:`, shiftError);
+          try {
+            // Safely log the error with additional context
+            const errorMessage = shiftError ? (shiftError.message || 'Unknown error') : 'Unknown error';
+            console.error(`Error processing shift for ${employee.name} on ${shift.day}: ${errorMessage}`);
+            
+            // Log additional details if available
+            if (shiftError && shiftError.stack) {
+              console.debug('Error stack:', shiftError.stack);
+            }
+            
+            // Update status to indicate the error
+            window.StaffRotaAutomation.Utils.updateStatus('shift_error', {
+              employee: employee.name,
+              day: shift.day,
+              error: errorMessage
+            });
+          } catch (loggingError) {
+            // Fallback error handling if there's an issue with the error object itself
+            console.error(`Error occurred while processing shift for ${employee.name} on ${shift.day}. Additionally, there was an error logging the original error:`, loggingError);
+          }
           
           // Try to recover by waiting a bit and continuing with the next shift
           await window.StaffRotaAutomation.Utils.sleep(2000);
