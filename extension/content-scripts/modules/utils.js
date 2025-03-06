@@ -61,31 +61,59 @@ window.StaffRotaAutomation.Utils.updateProgress = function(increment) {
  */
 window.StaffRotaAutomation.Utils.waitForElement = function(selector, timeout = 5000) {
   return new Promise((resolve, reject) => {
-    const element = document.querySelector(selector);
-    
-    if (element) {
-      resolve(element);
-      return;
-    }
-    
-    const observer = new MutationObserver(mutations => {
-      const element = document.querySelector(selector);
-      
-      if (element) {
-        observer.disconnect();
-        resolve(element);
+    try {
+      // Validate the selector
+      if (!selector || typeof selector !== 'string') {
+        reject(new Error(`Invalid selector provided to waitForElement: ${selector}`));
+        return;
       }
-    });
-    
-    observer.observe(document.body, {
-      childList: true,
-      subtree: true
-    });
-    
-    setTimeout(() => {
-      observer.disconnect();
-      reject(new Error(`Timeout waiting for element: ${selector}`));
-    }, timeout);
+      
+      // Try to find the element immediately
+      try {
+        const element = document.querySelector(selector);
+        if (element) {
+          resolve(element);
+          return;
+        }
+      } catch (selectorError) {
+        reject(new Error(`Invalid selector "${selector}": ${selectorError.message}`));
+        return;
+      }
+      
+      // Set up mutation observer to watch for the element
+      let observer;
+      try {
+        observer = new MutationObserver(mutations => {
+          try {
+            const element = document.querySelector(selector);
+            if (element) {
+              if (observer) observer.disconnect();
+              resolve(element);
+            }
+          } catch (observerSelectorError) {
+            if (observer) observer.disconnect();
+            reject(new Error(`Invalid selector "${selector}" in mutation observer: ${observerSelectorError.message}`));
+          }
+        });
+        
+        observer.observe(document.body, {
+          childList: true,
+          subtree: true
+        });
+      } catch (observerError) {
+        reject(new Error(`Error setting up mutation observer: ${observerError.message}`));
+        return;
+      }
+      
+      // Set timeout to avoid waiting forever
+      setTimeout(() => {
+        if (observer) observer.disconnect();
+        reject(new Error(`Timeout waiting for element: ${selector}`));
+      }, timeout);
+    } catch (error) {
+      // Catch any unexpected errors
+      reject(new Error(`Unexpected error in waitForElement: ${error.message}`));
+    }
   });
 }
 
@@ -109,27 +137,51 @@ window.StaffRotaAutomation.Utils.waitForPageLoad = function() {
  * @returns {NodeList} The found elements
  */
 window.StaffRotaAutomation.Utils.findElementsInAllContexts = function(selector) {
-  // Try in main document first
-  let elements = document.querySelectorAll(selector);
-  if (elements && elements.length > 0) {
-    return elements;
-  }
-  
-  // Try in all iframes
-  const allIframes = document.querySelectorAll('iframe');
-  for (const iframe of allIframes) {
-    try {
-      const iframeDoc = iframe.contentDocument || iframe.contentWindow.document;
-      if (iframeDoc) {
-        elements = iframeDoc.querySelectorAll(selector);
-        if (elements && elements.length > 0) {
-          return elements;
-        }
-      }
-    } catch (e) {
-      console.warn(`Error accessing iframe content for ${iframe.id || 'unnamed iframe'}:`, e);
+  try {
+    // Validate the selector first
+    if (!selector || typeof selector !== 'string') {
+      console.warn('Invalid selector provided to findElementsInAllContexts:', selector);
+      return [];
     }
+    
+    // Try in main document first
+    try {
+      let elements = document.querySelectorAll(selector);
+      if (elements && elements.length > 0) {
+        return elements;
+      }
+    } catch (selectorError) {
+      console.warn(`Invalid selector "${selector}" in main document:`, selectorError.message);
+      // Continue to try in iframes
+    }
+    
+    // Try in all iframes
+    const allIframes = document.querySelectorAll('iframe');
+    for (const iframe of allIframes) {
+      try {
+        const iframeDoc = iframe.contentDocument || iframe.contentWindow.document;
+        if (iframeDoc) {
+          try {
+            const elements = iframeDoc.querySelectorAll(selector);
+            if (elements && elements.length > 0) {
+              return elements;
+            }
+          } catch (iframeSelectorError) {
+            console.warn(`Invalid selector "${selector}" in iframe ${iframe.id || 'unnamed'}:`, iframeSelectorError.message);
+            // Continue to next iframe
+          }
+        }
+      } catch (iframeAccessError) {
+        console.warn(`Error accessing iframe content for ${iframe.id || 'unnamed iframe'}:`, iframeAccessError.message);
+        // Continue to next iframe
+      }
+    }
+    
+    // If we get here, no elements were found
+    return [];
+  } catch (error) {
+    // Catch any unexpected errors
+    console.error('Unexpected error in findElementsInAllContexts:', error);
+    return [];
   }
-  
-  return [];
 }

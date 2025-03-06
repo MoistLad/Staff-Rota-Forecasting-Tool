@@ -62,7 +62,6 @@ window.StaffRotaAutomation.ShiftHandler.fillShiftForm = async function(shiftData
   const saveButtonSelectors = [
     'button[type="submit"]', 
     'input[type="submit"]', 
-    'button:contains("Save")', 
     'button.save', 
     'input.save', 
     'button[id*="save"]', 
@@ -71,24 +70,61 @@ window.StaffRotaAutomation.ShiftHandler.fillShiftForm = async function(shiftData
     'input[class*="save"]'
   ];
   
+  // Try to find the save button using valid CSS selectors
   let saveButton = null;
   for (const selector of saveButtonSelectors) {
-    const buttons = window.StaffRotaAutomation.Utils.findElementsInAllContexts(selector);
-    if (buttons.length > 0) {
-      saveButton = buttons[0];
-      break;
+    try {
+      const buttons = window.StaffRotaAutomation.Utils.findElementsInAllContexts(selector);
+      if (buttons.length > 0) {
+        saveButton = buttons[0];
+        break;
+      }
+    } catch (error) {
+      console.warn(`Error using selector "${selector}":`, error.message);
+      // Continue with next selector
     }
   }
   
   // If we still haven't found a save button, try a more generic approach
   if (!saveButton) {
-    const allButtons = window.StaffRotaAutomation.Utils.findElementsInAllContexts('button, input[type="button"]');
-    saveButton = Array.from(allButtons).find(el => 
-      el.textContent && 
-      (el.textContent.trim().toLowerCase() === 'save' || 
-       el.textContent.trim().toLowerCase().includes('save') ||
-       el.value && el.value.trim().toLowerCase() === 'save')
-    );
+    console.log('No save button found with CSS selectors, trying text content approach...');
+    try {
+      // Get all buttons and inputs that might be submit buttons
+      const allButtons = window.StaffRotaAutomation.Utils.findElementsInAllContexts('button, input[type="button"], input[type="submit"]');
+      
+      // Convert to array and find one with "save" text
+      const buttonsArray = Array.from(allButtons || []);
+      console.log(`Found ${buttonsArray.length} potential buttons to check`);
+      
+      // First try exact match for "Save"
+      saveButton = buttonsArray.find(el => 
+        (el.textContent && el.textContent.trim().toLowerCase() === 'save') ||
+        (el.value && el.value.trim().toLowerCase() === 'save')
+      );
+      
+      // If not found, try buttons containing "save"
+      if (!saveButton) {
+        saveButton = buttonsArray.find(el => 
+          (el.textContent && el.textContent.trim().toLowerCase().includes('save')) ||
+          (el.value && el.value.trim().toLowerCase().includes('save'))
+        );
+      }
+      
+      // If still not found, try buttons with common save icons or classes
+      if (!saveButton) {
+        saveButton = buttonsArray.find(el => 
+          (el.innerHTML && el.innerHTML.includes('fa-save')) || // Font Awesome
+          (el.innerHTML && el.innerHTML.includes('save-icon')) || // Common icon class
+          (el.className && (
+            el.className.includes('save') || 
+            el.className.includes('submit') || 
+            el.className.includes('confirm')
+          ))
+        );
+      }
+    } catch (error) {
+      console.warn('Error in fallback button search:', error.message);
+    }
   }
   
   if (saveButton) {
