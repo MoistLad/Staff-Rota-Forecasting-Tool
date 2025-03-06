@@ -1,0 +1,2732 @@
+<html class="main-frameset webkit chrome win js" x-ms-format-detection="none"><head>
+
+	<title>Fourth Hospitality : 180</title>
+
+	<link href="../stylesheets/ui_xl/?theme=7192ac&amp;rnd=4919883&amp;pageready=yes&amp;ui=portal_menus_frameset" rel="stylesheet" type="text/css">
+	
+<script language="javascript" type="text/javascript" src="../include/jquery-1.11.1.min.js"></script>
+<script language="javascript" type="text/javascript" src="../include/onPaste/?version=0.7980883" id="js_onPasteValidator" onreadystatechange="if (!this.readyState || this.readyState === 'loaded' || this.readyState === 'complete') { try { onPasteValidator_Startup(); } catch(e) { } }" onload="try { onPasteValidator_Startup(); } catch(e) { }"></script>
+
+
+<script language="javascript" type="text/javascript">
+<!-- //
+
+    
+
+	// ----------------------------------------------------------------------
+	// generic function to open a popup window in the centre of the main browser window
+	// ----------------------------------------------------------------------
+	 async  function openPopupWindow(popup_url, popup_name, popup_width, popup_height) {
+
+        var parent_window = window;
+
+		if (popup_url == null || popup_url == '') {
+			return 0;
+		}
+        if (popup_name == null || popup_name == '') {
+            popup_name = 'PSPopupWindow';
+        }
+
+        // ensure popup will fit in the screen
+        var screen_width = (parent_window.screen.availWidth || screen.width);
+        var screen_height = (parent_window.screen.availHeight || screen.height);
+        if (popup_width == null || popup_width <= 0) { popup_width = 600; }
+        if (popup_width > screen_width) { popup_width = screen_width; }
+        if (popup_height == null || popup_height <= 0) { popup_height = 400; }
+        if (popup_height > (screen_height - 30)) { popup_height = (screen_height - 30); }
+
+        // position the popup centered to the parent window (where possible)
+        var popup_position =  await  getPositionForPopup(popup_width, popup_height, 'parent', parent_window.top);
+
+		try {
+            var popup_window = parent_window.open(popup_url, popup_name, ((popup_position.ignore_left == true) ? '' : 'left=' + popup_position.left + ',') + ((popup_position.ignore_top == true) ? '' : 'top=' + popup_position.top + ',') + "width=" + popup_width + ",height=" + popup_height + ",resizable=no,toolbar=no,status=no,titlebar=no,menubar=no,location=no,scrollbars=yes");
+            if (popup_window != null) {
+                popup_window.focus();
+			} else {
+				alert("Failed to open popup window.");
+			}
+            return popup_window;
+		} catch(e) {
+			alert("An error has occurred.\n\nThe popup window is currently unavailable.");
+			return 0;
+		}
+	}
+
+	// ----------------------------------------------------------------------
+	// generic function to resize an existing popup window to fit its content (ensuring it fits in screen width x height)
+	// ----------------------------------------------------------------------
+     async  function resizePopup2Content(content, width_padding, height_padding, resizeonreload) {
+
+        var popup_window = window.top;
+
+        if (height_padding == null) { height_padding = 0; }
+        if (width_padding == null) { width_padding = 0; }
+        if (resizeonreload == null) { resizeonreload = false; }
+
+		if (resizeonreload == false) {
+			var page_reloaded = false;
+			try {
+                if (popup_window.performance) {
+					if (performance.navigation) {
+						page_reloaded = (performance.navigation.type == performance.navigation.TYPE_RELOAD);
+					} else {
+                        var navigation_entries = popup_window.performance.getEntriesByType('navigation');
+						if (navigation_entries && navigation_entries.length > 0) {
+							page_reloaded = (navigation_entries[0].type == 'reload');
+						}
+					}
+				}
+			} catch (e) { }
+
+			if (page_reloaded == true) {
+				return; // dont attempt to resize again if page is being refreshed/reloaded after already being opened
+			}
+		}
+
+		if (content != null) {
+
+            var screen_width = (popup_window.screen.availWidth || screen.width);
+            var screen_height = (popup_window.screen.availHeight || screen.height);
+
+			// determine how high to make the popup (reduce to fit in screen height)
+            var max_window_height = (screen_height - 30);
+            var inner_height = (popup_window.innerHeight || Math.max(popup_window.document.documentElement.clientHeight, popup_window.document.body.clientHeight));
+            var height_of_window = (popup_window.outerHeight || inner_height);
+            var window_height_excess = (height_of_window - inner_height); 
+            var needed_height = (content.scrollHeight + window_height_excess) + height_padding;
+			if (needed_height > max_window_height) {
+                needed_height = (max_window_height - window_height_excess);
+            }
+
+			// determine how wide to make the popup (reduce to fit in screen width)
+            var max_window_width = (screen_width - 30);
+            var inner_width = (popup_window.innerWidth || Math.max(popup_window.document.documentElement.clientWidth, popup_window.document.body.clientWidth));
+            var width_of_window = (popup_window.outerWidth || inner_width);
+            var window_width_excess = (width_of_window - inner_width);
+			var needed_width = (content.scrollWidth + window_width_excess) + width_padding;
+			if (needed_width > max_window_width) {
+				needed_width = (max_window_width - window_width_excess);
+			}
+
+			// determine where we are going to position the popup once resized
+            var popup_position =  await  getPositionForPopup(needed_width, needed_height, 'parent', popup_window.opener.top);
+
+            // resize window to fit content and position centered to parent
+            if (popup_position.ignore_left == false && popup_position.ignore_top == false) {
+                var move_x = 0, move_y = 0;
+                move_x = ((width_of_window > needed_width) ? ((width_of_window - needed_width) / 2) : -((needed_width - width_of_window) / 2));
+                move_y = ((height_of_window > needed_height) ? ((height_of_window - needed_height) / 2) : -((needed_height - height_of_window) / 2));
+                popup_window.moveBy(move_x, move_y);
+                popup_window.resizeTo(needed_width, needed_height);
+                popup_window.focus();
+            }
+
+		}
+
+	}
+
+    // ----------------------------------------------------------------------
+    // popup window can be positioned either in the center of the parent browser window or in the center of the screen (where possible)
+    // ----------------------------------------------------------------------
+     async  function getPositionForPopup(popup_width, popup_height, center_mode, parent_window) {
+
+        var popup_position = { left: 0, top: 0, ingore_left: false, ignore_top: false };
+
+        var multiscreen_offset =  await  getMultiScreenOffset(parent_window);
+        var screen_width = Math.max(parent_window.screen.availWidth, screen.width);
+        var screen_height = Math.max(parent_window.screen.availHeight, screen.height);
+
+        if (center_mode == 'parent') {
+
+            // parent width / height
+            var parent_width = (parent_window.innerWidth || Math.max(parent_window.document.documentElement.clientWidth, parent_window.document.body.clientWidth));
+            var parent_height = (parent_window.innerHeight || Math.max(parent_window.document.documentElement.clientHeight, parent_window.document.body.clientHeight));
+            var maximised_width = ((parent_window.outerWidth == screen_width) || (parent_window.innerWidth == screen_width));
+            var maximised_height = (parent_window.outerHeight == screen_height);
+
+            // parent top
+            var moz_parent_top = null;
+            if (parent_window.mozInnerScreenY != null) {
+                moz_parent_top = (parent_window.mozInnerScreenY - (parent_window.outerHeight - parent_window.innerHeight))
+            }
+            var parent_top = ((maximised_height == true) ? 0 : (moz_parent_top || parent_window.screenY || parent_window.screenTop || 0));
+            if (parent_top != 0 && multiscreen_offset.top == -1) { multiscreen_offset.top = 0 }
+            if (parent_top < 0) {
+                parent_top = 0;
+            } else if (parent_top > screen_height) {
+                parent_top -= ((multiscreen_offset.top == -1) ? 0 : multiscreen_offset.top); // usually means on non-primary screen, set parent_top based within current screen its on
+            }
+
+            // parent left
+            var moz_parent_left = null;
+            if (parent_window.mozInnerScreenX != null) {
+                moz_parent_left = parent_window.mozInnerScreenX;
+            }
+            var parent_left = ((maximised_width == true) ? 0 : (moz_parent_left || parent_window.screenX || parent_window.screenLeft || 0));
+            if (parent_left != 0 && multiscreen_offset.left == -1) {
+                multiscreen_offset.left = 0;
+            }
+            if (parent_left < 0) {
+                parent_left = 0;
+            } else if (parent_left > screen_width) {
+                parent_left -= ((multiscreen_offset.left == -1) ? 0 : multiscreen_offset.left); // usually means on non-primary screen, set parent_left based within current screen its on
+            }
+
+            // popup position (left / top)
+            popup_position.left = ((multiscreen_offset.left == -1) ? 0 : multiscreen_offset.left) + parent_left + ((parent_width / 2) - (popup_width / 2));
+            popup_position.top = ((multiscreen_offset.top == -1) ? 0 : multiscreen_offset.top) + parent_top + ((parent_height / 2) - (popup_height / 2));
+            popup_position.ignore_left = (multiscreen_offset.left == -1);
+            popup_position.ignore_top = (multiscreen_offset.top == -1);
+
+        } else if (center_mode == 'screen') {
+
+            popup_position.left = (multiscreen_offset.left + ((screen_width / 2) - (popup_width / 2)));
+            popup_position.top = (multiscreen_offset.top + ((screen_height / 2) - (popup_height / 2)));
+            popup_position.ignore_left = (multiscreen_offset.left == -1);
+            popup_position.ignore_top = (multiscreen_offset.top == -1);
+
+        }
+
+		
+
+		return popup_position;
+    }
+
+	// ----------------------------------------------------------------------
+	// function to obtain the left/top offsets based on which monitor the browser window in open in
+	// ----------------------------------------------------------------------
+     async  function getMultiScreenOffset(for_window) {
+
+		var multiscreen_offset = { left: -1, top: -1 };
+        var window_left = (for_window.screenX || for_window.screenLeft);
+        var window_top = (for_window.screenY || for_window.screenTop);
+
+		
+        if (for_window.screen.isExtended == true) { // } && (window_left == 0 || window_top == 0)) { // usually when on non-primary screen
+
+            var state;
+            try {
+                ({ state } = await navigator.permissions.query({ name: 'window-placement' }));
+            } catch (e) {
+                // ignore this error as this is the old version of chrome
+            }
+
+            if (!state)
+            {
+                try {
+                    ({ state } = await navigator.permissions.query({ name: 'window-management' }));
+                } catch (e) {
+                    console.error('Both window-management and window-placement permission queries failed');
+                }
+            }
+
+            if (state !== 'denied') {
+                if (state !== 'granted') {
+                    alert('We may need permission to access your browsers "Windows Management" API to fully support displaying popup windows on multiple displays.\n\nPlease "Allow" if prompted by your browser.')
+                }
+				var prompting_for_screendetails = true;
+				var fn_ScreenDetails = async function () {
+                    var { currentScreen } = await for_window.getScreenDetails(); // access the API, will prompt user for permission
+					multiscreen_offset.left = currentScreen.left;
+					multiscreen_offset.top = currentScreen.top;
+					prompting_for_screendetails = false;
+				}
+                for_window.setTimeout(fn_ScreenDetails, 0);
+                for_window.setTimeout(function () { prompting_for_screendetails == false; }, 10000); // setup a max wait time of 10 seconds
+                while (prompting_for_screendetails == true) { await sleep(50); }
+                if ((multiscreen_offset.left == null || multiscreen_offset.left == -1) && for_window.screen.availWidth > 0) { multiscreen_offset.left = (for_window.screen.availWidth * (window_left / for_window.screen.availWidth).toFixed(0)); }
+                if ((multiscreen_offset.top == null || multiscreen_offset.top == -1) && for_window.screen.availHeight > 0) { multiscreen_offset.top = (for_window.screen.availHeight * (window_top / for_window.screen.availHeight).toFixed(0)); }
+            } else if (for_window.screen.isExtended == true) { // fallback for when window is maximised
+                if (for_window.screen.availWidth > 0) { multiscreen_offset.left = (for_window.screen.availWidth * (window_left / for_window.screen.availWidth).toFixed(0)); }
+                if (for_window.screen.availHeight > 0) { multiscreen_offset.top = (for_window.screen.availHeight * (window_top / for_window.screen.availHeight).toFixed(0)); }
+			}
+
+		} else {
+            if (for_window.screen.availWidth > 0) { multiscreen_offset.left = (for_window.screen.availWidth * (window_left / for_window.screen.availWidth).toFixed(0)); }
+            if (for_window.screen.availHeight > 0) { multiscreen_offset.top = (for_window.screen.availHeight * (window_top / for_window.screen.availHeight).toFixed(0)); }
+		}
+
+		
+
+		return multiscreen_offset;
+
+	}
+
+	// ----------------------------------------------------------------------
+
+    
+	function sleep(ms) {
+        return new Promise(resolve => setTimeout(resolve, ms));
+	}
+	
+
+// -->
+</script>
+
+<script language="javascript" type="text/javascript">
+<!-- //
+
+
+	// setup frame pointers
+	var Locale = window;
+	var Main = Locale;
+    
+	// setup LCID variables
+	var LCID_UK = 2057;
+	var LCID_US = 1033;
+	
+	var LCID = 2057;
+	
+
+	// ----------------------------------------------------------------------
+	// Retrieve the variable MyHeight from the IFrame content and set the height of the IFrame
+	// ----------------------------------------------------------------------
+
+	function GetHeight(MyHeight, parentFrame) {
+		MyHeight = MyHeight + 1;
+		if(!isNaN(MyHeight)){MyHeight = MyHeight + "px";}
+		var parentFrame = document.getElementById(parentFrame);
+		if (parentFrame && parentFrame.style) {
+			parentFrame.style.height = MyHeight;
+		}
+	}
+
+	// ----------------------------------------------------------------------
+	//	Creates a help tooltip. It creates its own DIV so that it can stand alone. Just call the function and it will do the rest.
+	//
+	//	helpwidth 	= width of tooltip in px
+	//	layerposX 	= left position relative to the button that initiated this function
+	//	layerposX 	= top position relative to the button that initiated this function
+	//	title 		= The title in the tooltip
+	//	text		= The text in the tooltip
+	//	e			= The element. Just put "this" in the call.
+	//
+	//	Example: 
+	//		DisplayHelp(200,-210,0,'Top Tip:','Select this option to allow users to update annual salary for employees not attached to payroll',this)
+	// ----------------------------------------------------------------------
+
+    function DisplayHelp(helpwidth, layerposX, layerposY, title, text, e, iframeOffset) {
+
+		// get rect co-ordinates of the help icon element
+		var icon_rect = e.getBoundingClientRect();
+
+		// if help icon is in a frameset then try to determine its X/Y offset
+		var iframe_offsetX = 0;
+		var iframe_offsetY = 0;
+		if (iframeOffset != null) {
+			var iframe_rect = iframeOffset.getBoundingClientRect();
+            iframe_offsetX = ((iframe_rect != null && iframe_rect.left != null) ? iframe_rect.left : 0);
+            iframe_offsetY = ((iframe_rect != null && iframe_rect.top != null) ? iframe_rect.top : 0);
+        }
+
+	
+		// Default helpwidth if missing
+		if (helpwidth == null) { helpwidth = "20%"; }
+    
+		// create the helpcontainer div if it doesnt exist yet
+		var helpcontainer = document.getElementById('helpcontainerJS');
+		if (helpcontainer == null) {
+			var help_div = document.createElement('div');
+			help_div.id = 'helpcontainerJS';
+			help_div.style.top = '0px';
+			help_div.style.visibility = 'hidden';
+			help_div.innerHTML = '<div class="helpheader" id="helptitleJS" ontouchstart="HideHelp();event.preventDefault();event.cancelBubble = true;if(event.stopPropagation){event.stopPropagation();}else{window.event.cancelBubble = true;};"></div><div class="helpbody" id="helpcontentJS"></div>'
+			document.getElementsByTagName('body')[0].appendChild(help_div);
+			helpcontainer = document.getElementById('helpcontainerJS');
+		}
+		// check browser
+		var brwsr = null;
+        if (window.top.name != 'FHWindow' && window.top.opener != null && window.top.opener.top.UIXL_browser != null) { 
+			brwsr = window.top.opener.top.UIXL_browser;
+		} else if (window.top.UIXL_browser != null) {
+			brwsr = window.top.UIXL_browser;
+		} else if (window.UIXL_browser != null) {
+			brwsr = window.UIXL_browser;
+		}
+		// create arrow to connect help icon to help popup
+		var helpcontainer_arrow = document.getElementById('helpcontainerArrow');
+		if (helpcontainer_arrow == null) {
+			var arrow_div = document.createElement('div');
+			arrow_div.id = 'helpcontainerArrow';
+			arrow_div.style.top = '0px';
+			arrow_div.style.visibility = 'hidden';
+			document.getElementsByTagName('body')[0].appendChild(arrow_div);
+			helpcontainer_arrow = document.getElementById('helpcontainerArrow');
+		}
+		if (helpcontainer != null && helpcontainer_arrow != null) {
+			// set the width
+			helpcontainer.style.width = (helpwidth) + 'px';
+			// insert the help title and text
+			if (isDeviceMobile()) {
+				document.getElementById('helptitleJS'). innerHTML = title + ' <input class="calcclose" type="button" ontouchstart="HideHelp();event.preventDefault();event.cancelBubble = true;if(event.stopPropagation){event.stopPropagation();}else{window.event.cancelBubble = true;};" style="position:absolute; right:5px;"></input>';
+			} else {
+				document.getElementById('helptitleJS'). innerHTML = title;
+			}
+			document.getElementById('helpcontentJS'). innerHTML = (text == null || text == '') ? '<i>No help available.</i>': text;
+			// ensure popup doesnt display off the bottom of the screen
+			var help_rect = helpcontainer.getBoundingClientRect();
+			var window_height = (('innerHeight' in window) ? window.innerHeight : document.documentElement.offsetHeight);
+			var help_height = (help_rect.bottom - help_rect.top);
+            if ((icon_rect.top + iframe_offsetY + help_height) > (window_height - 10)) {
+                helpcontainer.style.top = (((icon_rect.bottom - (help_height + iframe_offsetY)) + 10) + window.pageYOffset) + 'px';
+				if (helpcontainer_arrow != null) { helpcontainer_arrow.style.top = ((icon_rect.bottom - 30) + window.pageYOffset) + 'px'; }
+			} else {
+                helpcontainer.style.top = (((icon_rect.top + iframe_offsetY) - 10) + window.pageYOffset) + 'px';
+				if (helpcontainer_arrow != null) { helpcontainer_arrow.style.top = helpcontainer.style.top; }
+			}
+			// ensure popup doesnt display off the left of the screen
+			var help_rect = helpcontainer.getBoundingClientRect();
+			var help_width = (help_rect.right - help_rect.left);
+            if (((icon_rect.left + iframe_offsetX) - help_width) < 10) {
+				helpcontainer_arrow.innerHTML = (brwsr != null && brwsr.safari == true) ? '&#9664;' : '&#11207;';
+                helpcontainer.style.left = ((icon_rect.right + iframe_offsetX + 10) + window.pageXOffset) + 'px';
+                if (helpcontainer_arrow != null) { helpcontainer_arrow.style.left = ((icon_rect.right + iframe_offsetX + 4) + window.pageXOffset) + 'px'; }
+			} else {
+				helpcontainer_arrow.innerHTML = (brwsr != null && brwsr.safari == true) ? '&#9654;' : '&#11208;';
+                helpcontainer.style.left = ((icon_rect.left + iframe_offsetX) - helpwidth - 7) + 'px';
+                helpcontainer_arrow.style.left = ((icon_rect.left + iframe_offsetX) - 12) + 'px';
+			}
+			// display the help popup
+			helpcontainer.style.visibility = 'visible';
+			helpcontainer_arrow.style.visibility = 'visible';
+		}
+	
+	}
+
+	// ----------------------------------------------------------------------
+	// This function goes with DisplayHelp(). It hides the tooltip/help box.
+	// ----------------------------------------------------------------------
+	function HideHelp() {
+	
+		if (document.getElementById('helpcontainerJS') != null) { document.getElementById('helpcontainerJS').style.visibility = 'hidden'; }
+		if (document.getElementById('helpcontainerArrow') != null) { document.getElementById('helpcontainerArrow').style.visibility = 'hidden'; }
+	    
+	}
+
+	// ----------------------------------------------------------------------
+	// This function looks for the enter key and clicks the element if found
+	// ----------------------------------------------------------------------
+	function ReturnPressedKey(t, e) {
+		var keyp = 0;
+		if (window.event) {
+			keyp = event.keyCode;
+		} else {
+			keyp = e.which;
+		}
+		if (keyp === 13) {
+			$( t ).trigger( "click" );
+		}
+	}
+
+	// ----------------------------------------------------------------------
+	// Only accept characters included in the pattern
+	// ----------------------------------------------------------------------
+	function validKeyPressTest(pattern, e, callback, args) {
+		var keyp = 0;
+		if (window.event) {
+			keyp = event.keyCode;
+		} else {
+			keyp = e.which;
+		}
+		if (keyp == 13 && typeof callback == "function") {
+			callback.call(null, args);
+			return true;
+		}
+		// If the key was arrows or del or backspace - allow them
+		if (keyp === 0 || keyp === 8) {
+			return true;
+		}
+		if (!pattern.test(String.fromCharCode(keyp))) {
+			if (e.preventDefault) {
+				e.preventDefault();
+			} else if (window.event) {
+				event.keyCode = 0;
+			}
+			return false;
+		}	
+		return true;
+	}
+
+	// ----------------------------------------------------------------------
+
+	function ReturnKeySearchTest(callback, args,e) {
+		if (e && e.keyCode == 13 && typeof callback == "function") {
+			callback.call(null, args);
+		}
+		return true;
+	}
+
+	// ----------------------------------------------------------------------
+
+	function removeOnScreenReportOutput(){
+		// UIXL : start
+		var activex_test_1 = false, activex_test_2 = false;
+		if (window.ActiveXObject != null) { 
+			activex_test_1 = true; 
+		}
+		try { 
+			if (typeof(window.ActiveXObject.prototype) == 'object') { 
+				activex_test_2 = true;
+			}
+		} catch (e) { }
+		if ( activex_test_1 == false && activex_test_2 == false ) {
+			$("#cboReportCreationFormat option[value=NOR]").remove();
+		}
+		// UIXL : end
+	}
+
+	// ----------------------------------------------------------------------
+
+	function isDeviceMobile() {
+		var userAgent = (navigator.userAgent || navigator.vendor || window.opera).toLowerCase();
+		return /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(userAgent); 
+	}
+
+	// ----------------------------------------------------------------------
+
+	function isDeviceAndroid() {
+		var userAgent = (navigator.userAgent || navigator.vendor || window.opera).toLowerCase();
+		if (userAgent.indexOf('android') !== -1) {
+			return true;
+		}
+		return false;
+	}
+
+	// ----------------------------------------------------------------------
+
+	function cssBrowserSelector(userAgent)  {
+		var is = function (t) { return userAgent.indexOf(t)>-1 };
+		var g="gecko", w="webkit", s="safari", o="opera", m="mobile";
+		var activeDocument = document.documentElement;
+		var agentStringList = [(!(/opera|webtv/i.test(userAgent))&&/msie\s(\d)/.test(userAgent))?('ie ie'+RegExp.$1):is('gecko/')?g:is('opera')?o+(/version\/(\d+)/.test(userAgent)?' '+o+RegExp.$1:(/opera(\s|\/)(\d+)/.test(userAgent)?' '+o+RegExp.$2:'')):is('konqueror')?'konqueror':is('blackberry')?m+' blackberry':is('android')?m+' android':is('chrome')?w+' chrome':is('iron')?w+' iron':is('applewebkit/')?w+' '+s+(/version\/(\d+)/.test(userAgent)?' '+s+RegExp.$1:''):is('mozilla/')?g:'',is('j2me')?m+' j2me':is('iphone')?m+' iphone':is('ipod')?m+' ipod':is('ipad')?m+' ipad':is('mac')?'mac':is('darwin')?'mac':is('webtv')?'webtv':is('win')?'win'+(is('windows nt 6.0')?' vista':''):is('freebsd')?'freebsd':(is('x11')||is('linux'))?'linux':'','js']; 
+		var agentString = agentStringList.join(" "); 
+		activeDocument.className += " " + agentString; 
+	}
+	cssBrowserSelector((navigator.userAgent || navigator.vendor || window.opera).toLowerCase());
+
+	// ----------------------------------------------------------------------
+
+	function GetCurrencySymbol(html_encode) {
+
+        var currencySymbolASCII = '£';
+
+		if (currencySymbolASCII == '') {
+			return '';
+        } else if (currencySymbolASCII.charCodeAt(0) == 163) { // pound sybmol
+			if (html_encode != null && html_encode == true) {
+				return '&pound;';
+			} else {
+				return '\u00A3';
+			}
+        } else if (currencySymbolASCII.charCodeAt(0) == 8364) { // euro symbol
+			if (html_encode != null && html_encode == true) {
+				return '&euro;';
+			} else {
+                return '\u20AC';
+			}
+		} else {
+            return currencySymbolASCII;
+		}
+
+	}
+
+	function removeInvalid(field)
+	{
+	   var fieldContent = field.value;
+	   var result = fieldContent.search(/([\"\'][ ]*(([^a-z0-9~_:\' ])|(in)).+?\(.*?\))/gim);
+	   if(result >= 0)
+	   {
+			fieldContent = fieldContent.replaceAll("'", "");
+			fieldContent = fieldContent.replaceAll("\"", "");
+			field.value = fieldContent;
+	   }
+	   var result = fieldContent.search(/([\"\'].*?\)[ ]*(([^a-z0-9~_:\' ])|(in)).+?\()/gim);
+	   if(result >= 0)
+	   {
+			fieldContent = fieldContent.replaceAll("'", "");
+			fieldContent = fieldContent.replaceAll("\"", "");
+			field.value = fieldContent;
+	   }
+	}
+// -->
+</script>
+
+
+
+	<script language="javascript" src="../include/menufunctions.js"></script>
+	<script language="javascript" src="../include/SwapImage.js"></script>
+
+	
+
+<!-- confirm message box css and javascript -->
+<style type="text/css">
+	body.confirmFrozen {
+		overflow:hidden;
+		overflow-x:hidden;
+		overflow-y:hidden;
+	}
+	div.confirmBackground {
+		z-index:10010;
+		background-color:#ccc;
+		position:absolute;
+		top:0px; left:0px; bottom:0px; right:0px;
+		width:100%; *width:200%;
+		height:100%; *height:200%;
+		margin:0px; padding:0px; 
+		-ms-filter:"progid:DXImageTransform.Microsoft.Alpha(Opacity=50)"; filter: alpha(opacity=50); -moz-opacity:0.5; -khtml-opacity: 0.5; opacity: 0.5;
+		-webkit-user-select:none; -khtml-user-select:none; -moz-user-select:-moz-none; -o-user-select:none; user-select:none;
+	}
+	div.confirmMessageBox {
+		z-index:10011;
+		background-color:#fff;
+		position:absolute;
+		top:15%; left:25%; bottom:45%; right:25%;
+		width:50%; height:320px;
+		margin:0px; padding:5px; 
+		border-style:solid; border-width:1px; 
+		border-color:#ddd;
+		-moz-box-shadow:2px 2px 4px #777; -webkit-box-shadow:2px 2px 4px #777; box-shadow:2px 2px 4px #777;
+		-webkit-user-select:none; -khtml-user-select:none; -moz-user-select:-moz-none; -o-user-select:none; user-select:none;
+	}
+	tr.confirmOptionRow {
+		cursor:pointer;
+	}
+	td.confirmOptionLabel {
+		border-style:dotted; border-width:1px; border-color:Transparent;
+		font-size:12px;
+	}
+	td.confirmOptionLabelOver {
+		border-style:dotted; border-width:1px; border-color:#ccc;
+	}
+	td.confirmInstructions {
+		
+		padding:2px;
+	}
+</style>
+
+<script type="text/javascript" language="javascript">
+<!-- //
+
+	function confirmQuestion(params) {
+		var doc_body = document.getElementsByTagName('BODY')[0];
+		if (doc_body != null) {
+			doc_body.className = 'confirmFrozen';
+
+			// add background layer to prevent clickable access to page
+			var confirm_bg = document.getElementById('confirm_bg_' + params.id);
+			if (confirm_bg == null) {
+				var confirm_bg = document.createElement('div');
+				confirm_bg.id = 'confirm_bg_' + params.id;
+				confirm_bg.className = 'confirmBackground';
+				doc_body.appendChild(confirm_bg);
+			}
+
+			// add confirmation popup with title, instructions, options/values passed as parameters
+			var confirm_msgbox = document.getElementById('confirm_msgbox_' + params.id);
+			if (confirm_msgbox == null) {
+				var confirm_msgbox = document.createElement('div');
+				confirm_msgbox.id = 'confirm_msgbox_' + params.id;
+				confirm_msgbox.className = 'confirmMessageBox';
+				var msgbox_html = '';
+				msgbox_html += '<table width="100%" height="100%" cellspacing="2" cellpadding="2" border="0">';
+				msgbox_html += '  <tr height="28px"><td class="mainheader_themed_hl">' + params.title.replace(/\'/g, '\'') + '</td></tr>';
+				msgbox_html += '  <tr><td class="formspacer"></td></tr>';
+				msgbox_html += '  <tr><td class="summarytext confirmInstructions">' + params.instructions.replace(/\'/g, '\'') + '</td></tr>';
+				msgbox_html += '  <tr><td class="formspacer"></td></tr>';
+				msgbox_html += '  <tr>';
+				msgbox_html += '    <td>';
+				msgbox_html += '      <table width="100%" height="100%" cellspacing="2" cellpadding="2" border="0" class="subcontainer_noshadow">';
+				for (var i=0; i < params.options.length; i++) {
+					msgbox_html += '        <tr class="rowsummary2" valign="middle" onclick="document.getElementById(\'confirm_option_' + params.id + '_' + i + '\').click();"><td height="28px" class="summarytext"><input type="radio" name="confirm_option_' + params.id + '" id="confirm_option_' + params.id + '_' + i + '" value="' + params.values[i] + '" text="' + params.options[i].replace(/\'/g, '\'') + '" ' + ((i==0) ? 'checked' : '') + '></td><td width="100%" class="confirmOptionLabel" >&nbsp; ' + params.options[i].replace(/\'/g, '\'') + '</td></tr>';
+				}
+				msgbox_html += '     </table>'; 
+				msgbox_html += '    </td>';
+				msgbox_html += '  </tr>';
+				msgbox_html += '  <tr><td height="100%" valign="top"></td></tr>';
+				msgbox_html += '  <tr><td class="formspacer"></td></tr>';
+				msgbox_html += '  <tr height="28px">';
+				msgbox_html += '    <td align="right" >';
+				msgbox_html += '      <input type="button" value="Confirm" onclick="if(confirmSubmit != null) { confirmSubmit( { id:\'' + params.id + '\', selected:confirmSelected(\'confirm_option_' + params.id + '\') } ); }" class="formbutton" onmouseover="this.className=\'formbuttonhover\'" onmouseout="this.className=\'formbutton\'" onfocus="this.className=\'formbuttonhover\'" onblur="this.className=\'formbutton\'">';
+				msgbox_html += '      <input type="button" value="Cancel" onclick="confirmCancel( { id:\'' + params.id + '\' } );" class="formbutton" onmouseover="this.className=\'formbuttonhover\'" onmouseout="this.className=\'formbutton\'" onfocus="this.className=\'formbuttonhover\'" onblur="this.className=\'formbutton\'">';
+				msgbox_html += '    </td>';
+				msgbox_html += '  </tr>';
+				msgbox_html += '</table>';
+				confirm_msgbox.innerHTML = msgbox_html;
+				doc_body.appendChild(confirm_msgbox);
+			}
+		}
+	}
+
+	function confirmSelected(option_name) {
+		var selected_value = null;
+		var selected_text = null;
+		var radio_buttons = document.getElementsByTagName('input');
+		if (radio_buttons != null && radio_buttons.length > 0) {
+			for (var i=0; i < radio_buttons.length; i++) {
+				if (radio_buttons[i].name == option_name && radio_buttons[i].checked) {
+					selected_value = radio_buttons[i].value;
+					selected_text = radio_buttons[i].getAttribute('text');
+				}
+			}
+		}
+		return { value:selected_value, text:selected_text };
+	}
+
+	function confirmCancel(params) {
+		var doc_body = document.getElementsByTagName('BODY')[0];
+		if (doc_body != null) {
+			var confirm_msgbox = document.getElementById('confirm_msgbox_' + params.id);
+			if (confirm_msgbox != null) {
+				doc_body.removeChild(confirm_msgbox);
+			}
+			var confirm_bg = document.getElementById('confirm_bg_' + params.id);
+			if (confirm_bg != null) {
+				doc_body.removeChild(confirm_bg);
+			}
+			doc_body.className = '';
+		}
+	}
+
+// -->
+</script>
+
+
+	<script language="javascript">
+	<!-- //
+
+		function RefreshFramesetTitle(current_server) {
+            if (current_server != null && current_server != '') {
+                document.title = "Fourth Hospitality : " + current_server;
+            }
+		}
+
+		// session countdown popup
+		function confirmSubmit(params) {
+			if (params.id == 'noactivty') {
+				confirmCancel( { id: params.id } );
+				if (params.selected.value == '1') {
+					PingSession(); // ping keep-alive page to reset session timeout
+					window.header.checkTime();
+				} else if (params.selected.value == '2') {
+					window.header.LogMeOut();
+				}
+			}
+		}
+			
+		// ping the server to keep the session alive
+		function PingSession() {
+			var xmlPing = getXMLHTTP();
+			if (xmlPing != null) {
+				xmlPing.abort();
+				xmlPing.open("GET", 'PingSession.asp', true);
+				xmlPing.send(null); 
+			}
+		}
+
+		function startFrameset() {
+			if (window.name != "FHWindow") {
+				window.parent.location = "../newwindowerror.asp";
+			} else {
+				document.getElementById('header').src = 'header.asp';
+			}
+		}
+
+		function getXMLHTTP() {
+			var XMLPROGIDS = new Array("Msxml2.XMLHTTP.7.0", "Msxml2.XMLHTTP.6.0", "Msxml2.XMLHTTP.5.0", "Msxml2.XMLHTTP.4.0", "MSXML2.XMLHTTP.3.0", "MSXML2.XMLHTTP", "Microsoft.XMLHTTP");
+			var httpRequest = null;
+			if (window.XMLHttpRequest != null)
+				httpRequest = new window.XMLHttpRequest();
+			else if (window.ActiveXObject != null)	{
+				var success = false;
+				for (var i = 0; i < XMLPROGIDS.length && !success; i++) {
+					try {
+						httpRequest = new ActiveXObject(XMLPROGIDS[i]);
+						success = true;
+					} catch (ex) { }
+				}
+			}
+			return httpRequest;
+		}
+
+		function CheckDisplayAsInactive() {
+			var xmlDAI = getXMLHTTP();
+			var blnDAI = false;
+			var lngDAI = 0;
+			var url = '/Portal/XML_Producers/DisplayAsInactive.asp';
+			if (xmlDAI != null) {
+				xmlDAI.abort();
+				xmlDAI.open("GET", url, false);
+				xmlDAI.send(null); 
+				try {
+					var xmlDoc = xmlDAI.responseXML;
+                    blnDAI = (xmlDoc.getElementsByTagName("Inactive")[0].childNodes[0].nodeValue == '1');
+                    lngDAI = parseFloat(xmlDoc.getElementsByTagName("CheckInactive")[0].childNodes[0].nodeValue);
+				} catch (ex) {
+					blnDAI = false;
+				}
+				if (blnDAI) {
+					window.parent.location = '../Registration/LogOutRedirect.asp';
+				} else {
+					if (lngDAI > 0) {
+						window.setTimeout("CheckDisplayAsInactive()", (1000 * 60 * lngDAI));
+					}
+				}
+			}
+		}
+
+		var isIE = false;
+        function positionMenuOverlay(blnHide) {
+			if (isIE == false) { return; }
+            var objMenu = document.getElementById('MenuLayer');
+            var objOverlay = document.getElementById('MenuOverlay');
+            if (objMenu != null && objOverlay != null) {
+                if (blnHide == true) {
+                    objOverlay.style.visibility = 'hidden';
+                    objOverlay.style.display = 'none';
+                } else {
+                    objOverlay.style.left = objMenu.style.left;
+                    objOverlay.style.width = objMenu.offsetWidth + 'px';
+                    objOverlay.style.height = objMenu.offsetHeight + 'px';
+                    objOverlay.style.visibility = objMenu.style.visibility;
+                    objOverlay.style.display = objMenu.style.display;
+                }
+            }
+        }
+
+        function addEvent(element, event_name, listener, use_capture) {
+            if (element.addEventListener) {
+                element.addEventListener(event_name, listener, use_capture);
+                return true;
+            } else if (element.attachEvent) {
+                var result = element.attachEvent("on" + event_name, listener);
+                return result;
+            }
+        }
+		function removeEvent(element, event_name, listener, user_capture) {
+			if (element.removeEventListener) {
+				element.removeEventListener(event_name, listener, user_capture);
+				return true;
+			} else if (element.detachEvent) {
+				var result = element.detachEvent('on' + event_name, listener);
+				return result;
+			}
+		}
+        if (/msie|trident/i.test((navigator.userAgent || navigator.vendor || window.opera).toLowerCase())) {
+            isIE = true;
+			addEvent(document, 'mousemove', function (e) { positionMenuOverlay(); }, true);
+        }
+
+		function CalculatePosition(id) {
+			var theOffset = window.document.getElementById(id).offsetLeft - 3;
+			window.document.getElementById("MenuLayer").style.left = theOffset + "px";
+			window.document.getElementById("MenuLayer").style.visibility = "visible";
+			window.document.getElementById("MenuLayer").style.display = "block";
+		}
+	
+		function showSubMenu(parentMenuID) {
+			try {
+				document.getElementById(parentMenuID).style.display = "block";
+				var blockHeight = document.getElementById(parentMenuID).offsetHeight + 5;
+				document.getElementById(parentMenuID).style.display = "none";
+					
+				document.getElementById("MenuLayer").style.height = blockHeight + "px";
+				document.getElementById("MenuLayer").style.width = "auto";
+					
+				MenuLayer.innerHTML = window.document.getElementById(parentMenuID).innerHTML;
+			}
+			catch(e) {
+				hideMenu();
+			}			
+		}
+	
+		function hideSubMenu(parentMenuID) {
+			window.document.getElementById(parentMenuID).style.display = "none";
+			window.document.getElementById("MenuLayer").style.visibility = "hidden";
+			positionMenuOverlay(true);
+		}	
+			
+		function displayMenu(menuID) {
+			try {
+				hideMainMenu();
+			
+			
+                var menu_from_id = document.getElementById('UIXL_menu_EMP' + menuID);
+                if (menu_from_id != null) {
+                    var side_menu = menu_from_id.getAttribute('sidemenu');
+                    if (side_menu != null && side_menu != '') {
+                        UIXL_sidebar_toggle(side_menu);
+                    }
+                }
+            
+
+				document.frmFrameset.txtCurrentMenuID.value = menuID;
+				window.ModLayer.style.display="none";
+			} catch(e) { }
+		}
+	
+		function hideMainMenu() {	
+            var current_menu = (document.frmFrameset.txtCurrentMenuID.value == '') ? null : window.document.getElementById(document.frmFrameset.txtCurrentMenuID.value);
+			if (current_menu != null) {
+                current_menu.style.display = "none";
+				hideMenu();
+			}
+		}
+	
+		function hideMenu() {
+        
+            UIXL_header_burger_toggle('closed');
+            UIXL_side_burger_toggle('closed');
+        
+		}
+			
+		function PreLoadImages() {
+			if (!document.images) {
+				return;
+			}
+			var ar = new Array();
+			var arguments = preload.arguments;
+			for (var i = 0; i < arguments.length; i++) {
+				ar[i] = new Image();
+				ar[i].src = arguments[i];
+			}
+		}
+
+        function openPopup(popup_name) {
+            hideMenu();
+            document.getElementById(popup_name + 'BG').style.display = 'block';
+            document.getElementById(popup_name).style.display = 'block';
+        }
+
+        function closePopup(popup_name) {
+            document.getElementById(popup_name + 'BG').style.display = 'none';
+            document.getElementById(popup_name).style.display = 'none';
+        }
+
+		
+		var nextScheduledMaintenanceWarning = null;
+        var nextScheduledMaintenance = null;
+		
+
+		function startup() {
+			startFrameset();
+			CheckDisplayAsInactive();
+		}
+
+	// -->
+    </script>
+
+	
+
+</head>
+	
+<body onload="startup();" style="height:100%" onselectstart="return false;" unselectable="on" footer="yes" uixl_browser="chrome" uixl_os="windows" data-staff-rota-extension-installed="true" uixlloaded="yes">
+		
+
+
+<script type="text/javascript" language="javascript">
+<!-- //
+
+	var current_server = '179'; // refresh the page title to show the current web server that is executing this page
+
+	// set UIXL javascript flag to indicate that current page has the new UI enabled
+	if (window.top.name != 'FHWindow' && window.top.opener != null) {
+		if (window.top.opener.top.UIXL_UsingUIXL != null) { 
+			window.top.opener.top.UIXL_UsingUIXL = true;
+		}
+		if (current_server != null && current_server != '') {
+			document.title = document.title + ' : ' + current_server;
+		}
+	} else {
+		if (window.top.UIXL_UsingUIXL != null) { 
+			window.top.UIXL_UsingUIXL = true; 
+		}
+		if (window.top.RefreshFramesetTitle != null) {
+			window.top.RefreshFramesetTitle(current_server);
+		}
+	}
+
+// -->
+</script>
+
+
+
+    <style id="UIXL_spinner_CSS" type="text/css">
+        /* please-wait spinner CSS : [ui_xl_spinner.css] */
+
+/* position over page */
+div.UIXL_loading_DIV { position:fixed; z-index:10000; left:0px; top:0px; width:100%; height:100%; background-color:Transparent; }
+div.UIXL_loading_DIV[open="none"] { display:none; }
+div.UIXL_loading_DIV div#UIXL_loadingbackground_DIV { display:block; left:0px; top:0px; width:100%; height:100%; z-index:-1; }
+div.UIXL_loading_DIV[open="full"] div#UIXL_loadingbackground_DIV { background-color:#fff; }
+div.UIXL_loading_DIV[open="tint"] div#UIXL_loadingbackground_DIV { background-color:#ccc; -ms-filter:"progid:DXImageTransform.Microsoft.Alpha(Opacity=50)"; filter: alpha(opacity=50); -moz-opacity:0.5; -khtml-opacity: 0.5; opacity: 0.5; }
+div.UIXL_loading_DIV[open="overlay"] div#UIXL_loadingbackground_DIV { background-color:Transparent; }
+div.UIXL_loading_DIV div#UIXL_loadingspinner_DIV { display:block; width:100%; height:100%; text-align:center; vertical-align:middle; background-color:Transparent; }
+div.UIXL_loading_DIV table { width:100%; height:100%; }
+div.UIXL_loading_DIV td { width:100%; height:100%; }
+div.UIXL_loading_DIV[login="yes"] div { display:block; border-style:solid; border-width:1px; border-color:#ddd; border-radius:4px; width:160px; background-color:#fff; -moz-box-shadow:5px 5px 10px #aaa; -webkit-box-shadow:5px 5px 10px #aaa; box-shadow:5px 5px 10px #aaa; }
+div.UIXL_loading_DIV[login="yes"] div#UIXL_loadingbackground_DIV { position:fixed; }
+
+/* embedded in page */
+div.UIXL_loading_embed_DIV { background-color:#fff; }
+div.UIXL_loading_embed_DIV[open="full"] { display:block; }
+div.UIXL_loading_embed_DIV[open="none"] { display:none; }
+div.UIXL_loading_embed_DIV table { width:100%; height:100%; }
+div.UIXL_loading_embed_DIV td { width:100%; height:100%; }
+div.UIXL_loading_embed_DIV div { display:block; width:125px; padding-top:10px; padding-bottom:10px; background-color:#fff; }
+
+/* login page specific : include a logo */
+.UIXL_loading_login_DIV .UIXL_spinner_image { height:115px; background-color:#fff; background-repeat:no-repeat; background-position:center 20px; background-image:url('/Portal/StyleSheets/ui_xl/ui_xl_fourth.png'); }
+.UIXL_loading_login_DIV .UIXL_spinner_image img { margin-top:62px; }
+.UIXL_loading_login_DIV .UIXL_spinner_image_ie { height:115px; background-color:#fff; background-repeat:no-repeat; background-position:center 15px; background-image:url('/Portal/StyleSheets/ui_xl/ui_xl_fourth.png'); }
+.UIXL_loading_login_DIV .UIXL_spinner_image_ie img { margin-top:62px; }
+
+/* for frameset header bar (replaces logo) theme coloured, or grayscale GIF for IE */
+.UIXL_spinner_image img { background-color:#fff; background-repeat:no-repeat; background-position:center center; background-image:url("data:image/svg+xml;charset=US-ASCII,%3Csvg%20class%3D%27lds-typing%27%20width%3D%2750px%27%20height%3D%2750px%27%20xmlns%3D%27http%3A//www.w3.org/2000/svg%27%20xmlns%3Axlink%3D%27http%3A//www.w3.org/1999/xlink%27%20viewBox%3D%270%200%20100%20100%27%20preserveAspectRatio%3D%27xMidYMid%27%20style%3D%27background%3A%20rgb%28255%2C%20255%2C%20255%29%20none%20repeat%20scroll%200%25%200%25%3B%27%3E%3Ccircle%20cx%3D%2718.5%27%20cy%3D%2762.5%27%20r%3D%278%27%20fill%3D%27%237192ac%27%3E%3Canimate%20attributeName%3D%27cy%27%20calcMode%3D%27spline%27%20keySplines%3D%270%200.5%200.5%201%3B0.5%200%201%200.5%3B0.5%200.5%200.5%200.5%27%20repeatCount%3D%27indefinite%27%20values%3D%2762.5%3B37.5%3B62.5%3B62.5%27%20keyTimes%3D%270%3B0.25%3B0.5%3B1%27%20dur%3D%271s%27%20begin%3D%27-0.5s%27/%3E%3C/circle%3E%20%3Ccircle%20cx%3D%2739.5%27%20cy%3D%2762.5%27%20r%3D%278%27%20fill%3D%27%237192ac%27%3E%3Canimate%20attributeName%3D%27cy%27%20calcMode%3D%27spline%27%20keySplines%3D%270%200.5%200.5%201%3B0.5%200%201%200.5%3B0.5%200.5%200.5%200.5%27%20repeatCount%3D%27indefinite%27%20values%3D%2762.5%3B37.5%3B62.5%3B62.5%27%20keyTimes%3D%270%3B0.25%3B0.5%3B1%27%20dur%3D%271s%27%20begin%3D%27-0.375s%27/%3E%3C/circle%3E%20%3Ccircle%20cx%3D%2760.5%27%20cy%3D%2762.5%27%20r%3D%278%27%20fill%3D%27%237192ac%27%3E%3Canimate%20attributeName%3D%27cy%27%20calcMode%3D%27spline%27%20keySplines%3D%270%200.5%200.5%201%3B0.5%200%201%200.5%3B0.5%200.5%200.5%200.5%27%20repeatCount%3D%27indefinite%27%20values%3D%2762.5%3B37.5%3B62.5%3B62.5%27%20keyTimes%3D%270%3B0.25%3B0.5%3B1%27%20dur%3D%271s%27%20begin%3D%27-0.25s%27/%3E%3C/circle%3E%20%3Ccircle%20cx%3D%2781.5%27%20cy%3D%2762.5%27%20r%3D%278%27%20fill%3D%27%237192ac%27%3E%3Canimate%20attributeName%3D%27cy%27%20calcMode%3D%27spline%27%20keySplines%3D%270%200.5%200.5%201%3B0.5%200%201%200.5%3B0.5%200.5%200.5%200.5%27%20repeatCount%3D%27indefinite%27%20values%3D%2762.5%3B37.5%3B62.5%3B62.5%27%20keyTimes%3D%270%3B0.25%3B0.5%3B1%27%20dur%3D%271s%27%20begin%3D%27-0.125s%27/%3E%3C/circle%3E%3C/svg%3E"); }
+.UIXL_spinner_image[loading="no"] img { display:none; }
+.UIXL_spinner_image[loading="yes"]  img { display:inline-block; }
+.UIXL_spinner_image_ie img { background-color:#fff; background-repeat:no-repeat; background-position:center -20px; background-image:url("/portal/stylesheets/ui_xl/ui_xl_spinner.gif"); }
+.UIXL_spinner_image_ie[loading="no"] img { display:none; }
+.UIXL_spinner_image_ie[loading="yes"]  img { display:inline-block; }
+    </style>
+
+    
+
+        <div id="UIXL_loading_DIV" class="UIXL_loading_DIV" open="none" onsubmit="none" onload="full">
+                <div id="UIXL_loadingbackground_DIV"></div>
+                <div id="UIXL_loadingspinner_DIV"></div>
+        </div>
+
+        <script id="UIXL_spinner_JS" type="text/javascript" language="javascript">
+        <!-- //
+            // show animated spinner in header bar (will be removed by frameset JS called onload)
+            if (top.UIXL_show_spinner != null) { top.UIXL_show_spinner(document, true); }
+        // -->
+        </script>
+    
+    
+	<!-- NO BACK ALLOWED MESSAGE -->
+	<div id="UIXL_noback_DIV" status="closed" onclick="setAttribute('status', 'closed');" title="Click to close this message">Using your browsers <b>BACK</b> button is not recommended in this site and may result in unexpected problems with data integrity.</div>
+
+
+<form name="frmFrameset" id="frmFrameset" action="">
+	<input type="hidden" name="txtCurrentMenuID" id="txtCurrentMenuID" value="5">
+	<input type="hidden" id="txtHelpID" value="">
+	<input type="hidden" id="txtFHID" value="123">
+	<input type="hidden" name="CRSF_TOKEN" id="CRSF_TOKEN" value="3xEnHT0UROFwlbNYHJopfh4tjo4fsikQRpmNqep1vffgZ8vGYCMqIpfNi30XSYYp">
+</form>
+
+	<table width="100%" height="100%" border="0" cellspacing="0" cellpadding="0">
+        
+	
+
+		<!-- UIXL HEADER -->
+		<tbody><tr>
+			<td height="50" valign="top" id="headerHolder" colspan="3">
+                <div id="UIXL_header" class="UIXL_header" status="closed">
+                    <table class="UIXL_header" width="100%" height="50" border="0" cellspacing="0" cellpadding="0">
+						<tbody><tr valign="middle">
+							<td class="UIXL_burger_portal" valign="top" id="UIXL_burger_access" status="enabled">
+								<div class="UIXL_burger">
+									<div class="UIXL_burger_label">MENU :</div><div class="UIXL_burger_icon">
+										<div class="UIXL_burger_stack" onclick="UIXL_header_burger_toggle();" id="UIXL_burger_title" title="Main Menu">
+											<span class="UIXL_burger_stack"></span>
+											<span class="UIXL_burger_stack"></span>
+											<span class="UIXL_burger_stack"></span>
+										</div>
+									</div>
+								</div>
+							</td>
+							<td class="UIXL_portal" valign="top">
+								<table cellspacing="0" cellpadding="0" border="0"><tbody><tr><td><div title="D &amp; D London portal"><span class="UIXL_group">D &amp; D London</span> Portal</div></td></tr></tbody></table>
+							</td>
+							<td class="UIXL_module"><table width="100%" height="49px" cellspacing="0" cellpadding="0" border="0"><tbody><tr><td align="center" valign="middle" id="UIXL_headermodule">Scheduling</td></tr></tbody></table></td>
+							<td class="UIXL_header_frame" valign="top">
+								<div><iframe src="header.asp" frameborder="0" width="100%" height="" scrolling="no" id="header" name="header" loaded="yes"></iframe></div>
+							</td>
+							
+							<td class="UIXL_header_links" valign="top" id="UIXL_header_links" status="closed">
+								<div class="UIXL_headerlink_label" onclick="UIXL_headerlink_toggle();">Quick Links</div>
+<div id="UIXL_headerlinks" class="UIXL_headerlinks" status="closed">
+<div id="_1b7ce5c6-01af-46c6-b0d8-080f67fedb7d" onclick="UIXL_headerlink_toggle('closed'); UIXL_header_doc.navigateToHomePage();" class="UIXL_headerlink">Home</div>
+<div id="_0fca2f27-b32e-4b39-01a8-6aba06f04eb2" onclick="UIXL_headerlink_toggle('closed'); UIXL_header_doc.navigateToModuleHomePage();" class="UIXL_headerlink">Module Home</div>
+<div id="_f25b4ead-0e20-4501-ca00-a052b564a397" onclick="UIXL_headerlink_toggle('closed'); UIXL_header_doc.navigateToFireReport();" class="UIXL_headerlink">Fire Report</div>
+<div id="_3161b2b2-2136-4c14-84eb-bfef279e0a62" onclick="UIXL_headerlink_toggle('closed'); UIXL_header_doc.displayFeedbackForm();" class="UIXL_headerlink">Feedback</div>
+<div id="_af153041-8072-456a-02b6-991f9e80b931" onclick="UIXL_headerlink_toggle('closed'); UIXL_header_doc.PopUpSupport();" class="UIXL_headerlink">Support</div>
+<div id="_b2994b40-750c-4c28-46c9-c766eb6295ba" onclick="UIXL_headerlink_toggle('closed'); UIXL_header_doc.LogMeOut();" class="UIXL_headerlink">Close</div>
+</div>
+<div onclick="UIXL_headerlink_toggle('closed'); UIXL_header_doc.LogMeOut();" class="UIXL_logout" title="Close">
+</div>
+<iframe id="MenuOverlayHeaderLinks" src="../blank.asp" frameborder="0" scrolling="no" status="closed" allowtransparency="true" xmlns:dt="urn:schemas-microsoft-com:datatypes"></iframe>
+
+							</td>
+							
+							<td id="UIXL_spinner" class="UIXL_portal_image UIXL_spinner_image" data-timer="" spinningtime="0" align="center" valign="top" loading="no"><img src="/portal/images/spacer.gif" width="120" height="50" border="0" align="center" title="loading page, please wait ..."></td>
+							
+						</tr>
+                    </tbody></table>
+                </div>
+			</td>
+		</tr>
+        
+	
+
+		<tr>
+            
+			
+			<!-- UIXL SIDE BAR -->
+            <td id="UIXL_side" sidemenu="" class="UIXL_sidebar_closed">
+                <div id="UIXL_side_menu" class="UIXL_side_menu" status="closed" onclick="UIXL_side_burger_toggle();" title="Employee Menu">
+                    <div class="UIXL_side_menu_bar">
+                        <table width="100%" height="100%" cellpadding="0" cellspacing="0" border="0">
+							<tbody><tr align="center" valign="top"><td class="UIXL_employee_menu" id="UIXL_resize_sidebar_menu"><div class="UIXL_employee_menu"><div class="UIXL_employee_icon"></div></div></td></tr>
+							<tr align="center" valign="top"><td class="UIXL_sidebar_labeltop"><div class="UIXL_rotate90" id="UIXL_sidebar_labeltop"></div></td></tr>
+							<tr align="center" valign="bottom"><td class="UIXL_sidebar_labelbot" id="UIXL_resize_sidebar_labelbot"><div class="UIXL_rotate90" id="UIXL_sidebar_labelbot"></div></td></tr>
+							<tr align="center" valign="top"><td class="UIXL_close_employee" id="UIXL_resize_sidebar_close"><div class="UIXL_close_employee"><div class="UIXL_close_icon" onclick="UIXL_close_employee_menu(); if (event.stopPropagation) { event.stopPropagation(); } else { window.event.cancelBubble = true; }; return false;" title="Exit Employee"></div></div></td></tr>
+                        </tbody></table>
+                    </div>
+                </div>
+            </td>
+            
+
+			<!-- MAIN CONTENT -->
+			<td valign="top" class="main-iframe-container" onmouseover="hideMenu();" style="height:100%; width:100vw;">
+				<iframe src="about:blank" frameborder="0" width="100%" scrolling="auto" id="main" name="main" loaded="yes"></iframe>
+			</td>
+
+			
+
+		</tr>
+
+		<!-- PAGE STATS FOOTER -->
+		<tr height="30px" id="page_stats_footer">
+			<td colspan="3" width="100%" class="pagefooterbar">
+				<table width="100%" cellspacing="0" cellpadding="0" border="0">
+					<tbody><tr>
+						<td width="14%" class="pagefootertext" align="left">logged in as : Jack Marsden&nbsp;(marsden.1995@googlemail.com)</td>
+						<td width="20%" class="pagefootertext" align="center" style="display:none;">current page : <span id="page_stats_name">portal_modules_labourproductivity_homepage</span></td>
+						<td width="14%" class="pagefootertext" align="center" style="display:none;">page size : <span id="page_stats_size">29.50</span> Kb</td>
+						<td width="14%" class="pagefootertext" align="center" style="display:none;">page generated in : <span id="page_stats_generation">0.056</span> seconds</td>
+						<td width="14" class="pagefootertext" align="right" style="display:none;">page UI processed in : <span id="page_stats_processing">0.001</span> seconds</td>
+						<td width="14%" class="pagefootertext" align="right">browser : <span class="browsersupported" title="You are using a supported browser">chrome : pc : windows</span></td>
+						<td width="10%" class="pagefootertext" align="right">ip address : <span>82.19.170.120</span></td>
+					</tr>
+				</tbody></table>
+				<iframe id="page_stats_monitor" style="display:none;"></iframe>
+				<input type="hidden" id="page_query" value="EnAID%3DScyfoY%257B%255Eu%255Dzufl%26MID%3D5%26refreshMID%3D1%26UIXLMID%3D5%26refreshMID%3D1">
+			</td>
+		</tr>
+
+	</tbody></table>
+
+
+
+<script type="text/javascript" language="javascript">
+<!-- //
+
+
+	try {
+		if (window.top.UIXL_sidebar_employeeid && window.top.UIXL_sidebar_employeeid != '0') {
+			if (window.top.UIXL_sidebar_employeeid != '0') {
+				window.top.UIXL_sidebar_toggle();
+				window.top.UIXL_sidebar_setlabel('', '', null, '0');
+			}
+		} else if (window.top.name != 'FHWindow' && window.top.opener != null && window.top.opener.top.UIXL_sidebar_employeeid && window.top.opener.top.UIXL_sidebar_employeeid != '0') { 
+			if (window.top.opener.top.UIXL_sidebar_employeeid != '0') {
+				window.top.opener.top.UIXL_sidebar_toggle();
+				window.top.opener.top.UIXL_sidebar_setlabel('', '', null, '0');
+			}
+		}
+	} catch (e) { }
+
+
+
+
+// -->
+</script>
+<div class="UIXL_frameset_bg"></div>
+
+<script type="text/javascript" language="javascript">
+<!-- //
+    var UIXL_isIE8 = false;
+// -->
+</script>
+
+<!--[if lt IE 9]>
+<script type="text/javascript" language="javascript">
+    UIXL_isIE8 = true;
+</script>
+<![endif]-->
+
+<script type="text/javascript" language="javascript">
+<!-- //
+    function uixl_whatbrowser() {
+        var browser = window.navigator.userAgent.toLowerCase();
+        var vendor = ''; 
+		if (window.navigator.vendor) { vendor = window.navigator.vendor.toLowerCase(); }
+        return {
+            safari:  ((browser.indexOf('safari') > -1) && (browser.indexOf('edge') == -1) && (browser.indexOf('chrome') == -1)) && (vendor.indexOf('apple computer') > -1),
+            chrome:  (browser.indexOf('chrome') > -1) && (vendor.indexOf('google inc') > -1),
+            firefox: (browser.indexOf('firefox') > -1),
+            ie:      ((browser.indexOf('edge') > -1) || (browser.indexOf('msie') > -1) || (browser.indexOf('trident') > -1)),
+            ieold:   UIXL_isIE8,
+            edge:    (browser.indexOf('edge') > -1),
+            mobile:  (browser.search(/(ipod|iphone|ipad|android)/i) > -1),
+            mac:     false,
+            windows: true
+        }
+    }
+    var UIXL_browser = uixl_whatbrowser();
+// -->
+</script>
+
+<script type="text/javascript" language="javascript">
+<!-- // following scripts are to replace CSS with UIXL version on the fly
+    var UIXL_header, UIXL_header_doc, UIXL_main;
+	var UIXL_UsingUIXL = false;
+
+    function UIXL_init() { 
+		// hide spinner onload of frameset document
+		UIXL_addEvent(window, "load", function() { UIXL_setpageloaded(document); UIXL_hide_spinner(document); });
+        
+        // add indexOf function to arrays if missing from older browsers
+        if (!Array.prototype.indexOf) { Array.prototype.indexOf = function(obj, start) { for (var i = (start || 0), j = this.length; i < j; i++) { if (this[i] === obj) { return i; } } return -1; } }
+        
+        // add UIXL attributes and events to "header" IFRAME
+        UIXL_header = document.getElementById('header');
+        if (UIXL_header != null) {
+            UIXL_header_doc = UIXL_header.contentWindow;
+            UIXL_header.setAttribute('loaded', 'no');
+            UIXL_addEvent(UIXL_header, "load", function() { UIXL_page_loaded(UIXL_header); });
+        }
+        // add UIXL attributes and events to "main" IFRAME
+        UIXL_main = document.getElementById('main');
+        if (UIXL_main != null) { 
+            UIXL_main.setAttribute('loaded', 'no');
+            UIXL_addEvent(UIXL_main, "load", function() { UIXL_page_loaded(UIXL_main); });
+        }
+    }
+
+    // event fired when either the "header" or "main" IFRAME finishes loading
+    function UIXL_page_loaded(event_window, force_as_ready) {
+		var dt_page_start = new Date();
+
+        // set frame_window and frame_document based on where called from
+        var frame_window = null, frame_document = null;
+        if (event_window.tagName == 'IFRAME') {
+            frame_window = event_window;
+        } else if (event_window.tagName == 'FRAME') {
+            frame_window = event_window;
+        } else if ((event_window instanceof Event) || event_window.constructor.name == 'Event' || event_window.toString().indexOf('Event') >= 0) {
+            frame_window = (event_window.srcElement || event_window.target); 
+        } else if (event_window.parentWindow != null) {
+            frame_window = event_window.parentWindow;
+        } else if (event_window != null) {
+            frame_window = event_window;
+        }
+        if (frame_window != null) {
+            frame_document = (frame_window.contentDocument || frame_window.document);
+            if (frame_document != null) {
+                // check if page is ready for new UI
+                var UIXL_page_ready = UIXL_check_page_ready(frame_document, frame_window, force_as_ready);
+
+                // strip inline CSS
+                if (UIXL_page_ready == true) {
+                    UIXL_strip_inline_CSS(frame_document);
+                }
+            
+                // setup events for frame document
+                var UIXL_fn_page_click = function(e) { UIXL_navigate_check(e); };
+                UIXL_addEvent(frame_document, 'click', UIXL_fn_page_click);
+                
+
+				// warn about browser back button being used (dont add to popup windows though)
+				if (UIXL_browser.safari == false) {
+					try {
+						if (frame_window.opener == null) { 
+							frame_window.contentWindow.history.pushState(null, null, frame_document.URL);
+							var UIXL_fn_page_noback = function(e) { UIXL_noback(); frame_window.contentWindow.history.pushState(null, null, frame_document.URL); }
+							UIXL_addEvent(frame_window.contentWindow, 'popstate', UIXL_fn_page_noback);
+						}
+					} catch (e) { }
+				}
+
+                // add "frame name" and "browser" name to body of document (to customise CSS where needed)
+                var document_body = frame_document.getElementsByTagName('body')[0];
+                if (document_body != null) {
+                    // add frame name to UIXL_frame attribute
+					if (frame_window.opener != null) {
+                        document_body.setAttribute('UIXL_frame', 'popup');
+                    } else if (frame_window.id != null && frame_window.id != '') {
+                        document_body.setAttribute('UIXL_frame', frame_window.id);
+                    } else if (frame_window.name != null && frame_window.name != '') {
+                        document_body.setAttribute('UIXL_frame', frame_window.name);
+                    }
+					// add browser name to UIXL_browser attribute
+					UIXL_setbrowserbody(document_body);
+                }
+
+                // check if page contains a "UIXL_pagination" element, set it's parent colspan to a high number to ensure page nav fills the width of table
+                if (UIXL_page_ready == true) {
+                    var pagination = frame_document.getElementById('UIXL_pagination');
+                    if (pagination != null) {
+                        pagination.parentNode.setAttribute('colspan', 30);
+                    }
+                }
+
+                // add wrapper elements to page title links and add goback icon to "go back" buttons
+                if (UIXL_page_ready == true) {
+					UIXL_wrap_pagetitle_links(frame_document);
+					UIXL_goback_makeicon(frame_document);
+					UIXL_update_assignbuttons(frame_document);
+				}
+
+				// clear maximised homepage block (if any)
+				UIXL_maximised = null;
+                
+                // check all scripts for .navigate
+                var frame_scripts = frame_document.getElementsByTagName('script');
+                if (frame_scripts != null && frame_scripts.length > 0) {
+                    for (var script_index = 0; script_index < frame_scripts.length; script_index++) {
+                        var frame_script = frame_scripts[script_index].innerHTML;
+                        if (frame_script != '' && frame_script.indexOf('.navigate(') != -1) {
+                            try {
+                                frame_scripts[script_index].innerHTML = frame_scripts[script_index].innerHTML.replace(/.navigate\(([^\)]*)\)/ig,'.location.href=$1');
+                            } catch(e) { }
+                        }
+                    }
+                }
+
+                // check if page contains any child iframes (monitor child iframes also)
+                var child_frames = frame_document.getElementsByTagName('iframe');
+                if (child_frames != null && child_frames.length > 0) {
+                    for (var child_frame_index = 0; child_frame_index < child_frames.length; child_frame_index++) {
+                        try {
+                            var ignore_iframe = (child_frames[child_frame_index].getAttribute('ignoreuixl') == 'yes');
+                            if (ignore_iframe == false) {
+                                if (child_frames[child_frame_index].contentDocument != null) {
+                                    if (child_frames[child_frame_index].contentDocument.readyState == 'complete' && child_frames[child_frame_index].getAttribute('src').indexOf('blank.') == -1) {
+                                        UIXL_page_loaded(child_frames[child_frame_index]);
+                                    }
+                                    var child_document = UIXL_page_loaded.bind(child_frames[child_frame_index]);
+                                    UIXL_addEvent(child_frames[child_frame_index], "load", child_document);
+                                }
+                            }
+						} catch (e) { 
+							// error can happen in IE if content of iframe is an image pdf or word document, ignore and continue 
+						}
+                    }
+                }
+                var child_frames = frame_document.getElementsByTagName('frame');
+                if (child_frames != null && child_frames.length > 0) {
+                    for (var child_frame_index = 0; child_frame_index < child_frames.length; child_frame_index++) {
+						try {
+                            var ignore_frame = (child_frames[child_frame_index].getAttribute('ignoreuixl') == 'yes');
+                            if (ignore_frame == false) {
+                                if (child_frames[child_frame_index].contentDocument != null) {
+                                    if (child_frames[child_frame_index].contentDocument.readyState == 'complete' && child_frames[child_frame_index].getAttribute('src').indexOf('blank.') == -1) {
+                                        UIXL_page_loaded(child_frames[child_frame_index]);
+                                    }
+                                    var child_document = UIXL_page_loaded.bind(child_frames[child_frame_index]);
+                                    UIXL_addEvent(child_frames[child_frame_index], "load", child_document);
+                                }
+                            }
+						} catch (e) { 
+							// error can happen in IE if content of frame is an image pdf or word document, ignore and continue
+						}
+                    }
+                }
+                
+            }
+
+            // ensure the frame height is still correct
+            if (frame_window !== UIXL_main && frame_window !== UIXL_header && frame_window.tagName == 'IFRAME' && !(frame_window.getAttribute('dontresize') == 'yes')) {
+                window.setTimeout(function () { try { resizeIframeToContent(frame_window); } catch (e) { } }, 100);
+            }
+
+            // scroll to top of newly loaded page
+            if (frame_document != null && frame_window.opener == null) {
+                UIXL_scroll_to_top(frame_document);
+            }
+
+            // mark frame and body elements as page loaded
+            if (frame_window != null) {
+                if (frame_window.setAttribute) {
+                    frame_window.setAttribute('loaded', 'yes');
+                } else if (frame_window.contentWindow && frame_window.contentWindow.setAttribute) {
+                    frame_window.contentWindow.setAttribute('loaded', 'yes');
+                }
+            }
+			UIXL_setpageloaded(frame_document);
+
+            // hide the spinner if still exists
+            UIXL_hide_spinner(frame_document);
+            
+            // force a DOM tree refresh
+            UIXL_force_redraw(frame_document);
+            
+			// check if the frame has a uixlonload event
+			if (frame_window != null && frame_document != null) {
+				UIXL_exec_onload(frame_window, frame_document.getElementsByTagName('body')[0]);
+			}
+        }
+		if (window.top.UIXL_update_page_stats) {
+			var dt_page_finish = new Date();
+            window.top.UIXL_update_page_stats(frame_document, null, null, null, null, ((dt_page_finish.getTime() - dt_page_start.getTime()) / 1000).toFixed(3), true);
+		}
+    }
+
+	function UIXL_exec_onload(frame_window, document_body) {
+		var uixlonload = '';
+		if (document_body != null) {
+			uixlonload = document_body.getAttribute('uixlonload');
+			if (uixlonload != null && uixlonload != '') {
+				var frame_type = document_body.getAttribute('uixl_frame');
+				if (document_body != null && (frame_type == 'popup' || frame_type == 'noframe')) {
+					frame_window.setTimeout('try { ' + uixlonload.replace(/'/g, "\'") + ' } catch(e) { }', 50);
+                } else {
+                    if (frame_window.contentWindow != null) {
+                        frame_window.contentWindow.setTimeout('try { ' + uixlonload.replace(/'/g, "\'") + ' } catch(e) { }', 50);
+                    }
+				}
+			}
+		}
+	}
+
+    function UIXL_page_loaded_no_frameset() {
+	    var dt_page_start = new Date();
+	    UIXL_strip_inline_CSS(document);
+		document.getElementsByTagName('body')[0].setAttribute('UIXL_frame', 'noframe'); 
+	    UIXL_force_redraw(document);
+	    UIXL_hide_spinner(document);
+	    if (window.top.UIXL_update_page_stats) {
+	        var dt_page_finish = new Date();
+            window.top.UIXL_update_page_stats(document, null, null, null, null, ((dt_page_finish.getTime() - dt_page_start.getTime()) / 1000).toFixed(3), true);
+	    }
+		UIXL_exec_onload(window, document.getElementsByTagName('body')[0]);
+	}
+
+	// add browser name to UIXL_browser attribute of the body tag (for facilitating browser specific CSS)
+	function UIXL_setbrowserbody(document_body) {
+		if (UIXL_browser.safari == true) {
+			document_body.setAttribute('UIXL_browser', 'safari');
+		} else if (UIXL_browser.chrome == true) {
+			document_body.setAttribute('UIXL_browser', 'chrome');
+		} else if (UIXL_browser.firefox == true) {
+			document_body.setAttribute('UIXL_browser', 'firefox');
+		} else if (UIXL_browser.edge == true) {
+			document_body.setAttribute('UIXL_browser', 'edge');
+		} else if (UIXL_browser.ie == true && UIXL_browser.ieold == false) {
+			document_body.setAttribute('UIXL_browser', 'ie_yes'); // yes supported
+		} else if (UIXL_browser.ie == true && UIXL_browser.ieold == true) {
+			document_body.setAttribute('UIXL_browser', 'ie_no'); // no not supported
+		}
+		if (UIXL_browser.mac == true) {
+			document_body.setAttribute('UIXL_os', 'mac');
+		} else if (UIXL_browser.windows == true) {
+			document_body.setAttribute('UIXL_os', 'windows');
+		}
+	}
+	UIXL_setbrowserbody(document.getElementsByTagName('body')[0]);
+
+	// set "uixlloaded" attribute in the body tag to flag the page as fully loaded (page and UIXL)
+	function UIXL_setpageloaded(frame_document) {
+		if (frame_document != null) {
+			var doc_body = frame_document.getElementsByTagName('body')[0];
+			if (doc_body != null) {
+				doc_body.setAttribute('uixlloaded', 'yes');
+			}
+		}
+	}
+
+	// using the browsers back button can caus the client and server module session variables to get out of sync. warn to not use back button
+	function UIXL_noback() {
+		var noback = document.getElementById('UIXL_noback_DIV');
+		if (noback != null) {
+			noback.setAttribute('status', 'open');
+		}
+	}
+
+    
+    function UIXL_check_page_ready(frame_document, frame_window, force_as_ready) {
+        var is_ready = false;
+        try {
+            if (force_as_ready != null && force_as_ready == true) {
+                is_ready = true;
+            } else if (frame_document != null) {
+                var stylesheets = frame_document.getElementsByTagName('LINK');
+                if (stylesheets != null & stylesheets.length > 0) {
+                    for (var link_index = 0; link_index < stylesheets.length; link_index++) {
+                        if (stylesheets[link_index].getAttribute('href').indexOf('/ui_xl/?') != -1) {
+                            var test_element = frame_document.createElement("DIV");
+                            test_element.className = 'UIXL_PageNotReady';
+                            test_element.style.display = 'none';
+                            test_element.id = 'UIXL_test_element';
+                            frame_document.getElementsByTagName('BODY')[0].appendChild(test_element);
+                            test_element = frame_document.getElementById('UIXL_test_element');
+                            if (test_element != null) {
+                                var test_element_zindex = '';
+                                if (test_element.currentStyle) {
+                                    test_element_zindex = test_element.currentStyle.zIndex;
+                                } else {
+                                    var test_element_style = (frame_document.defaultView || frame_document.parentWindow).getComputedStyle(test_element, null);
+                                    if (test_element_style != null) {
+                                        test_element_zindex = test_element_style.zIndex;
+                                    }
+                                }
+                                is_ready = (test_element_zindex == '12345') ? false : true;
+                                frame_document.body.removeChild(test_element);
+                                break;
+                            }
+                        }
+                    }
+                }
+            }
+        } catch (e) { }
+        return is_ready;
+    }
+    function UIXL_hide_spinner(frame_document) {
+        try {
+			// don't change the spinner if the page is still in the process of loading
+			if (frame_document != null && frame_document.getElementsByTagName('body')[0].getAttribute('uixlloaded') != 'yes') { return; }
+
+			// stop the spinner timer
+			UIXL_update_spinnertimer();
+
+			// hide spinner in page
+            if (frame_document != null && frame_document.location.href.indexOf('blank.') == -1) {
+                if (frame_document.getElementById('UIXL_loading_DIV') != null) {
+					frame_document.getElementById('UIXL_loading_DIV').setAttribute('open', 'none'); 
+				}
+            }
+
+            // remove animated spinner in header bar (over logo)
+            if (document.getElementById('UIXL_spinner') != null) { 
+				document.getElementById('UIXL_spinner').setAttribute('loading', 'no'); 
+				if (UIXL_browser.safari == true) { document.getElementById('UIXL_spinner').style.visibility = 'hidden';  window.setTimeout(function() { document.getElementById('UIXL_spinner').style.visibility = 'visible'; }, 200); }
+			}
+        } catch(e) { }
+    }
+    function UIXL_show_spinner(frame_document, onload) {
+        try {
+
+            // show animated spinner in header bar (over logo)
+            if (document.getElementById('UIXL_spinner') != null) {
+				document.getElementById('UIXL_spinner').setAttribute('loading', 'yes');
+				if (UIXL_browser.safari == true) { document.getElementById('UIXL_spinner').style.visibility = 'hidden';  window.setTimeout(function() { document.getElementById('UIXL_spinner').style.visibility = 'visible'; }, 200); }
+			}
+
+			// show spinner in page
+			if ((frame_document instanceof Event) || frame_document.constructor.name == 'Event' || frame_document.toString().indexOf('Event') >= 0) {
+				frame_document = (frame_document.srcElement || frame_document.target).ownerDocument;
+			}
+			if (frame_document != null && frame_document.location.href.indexOf('blank.asp') == -1) {
+				// if the document has a 'UIXL_loading_DIV' element
+				if (frame_document.getElementById('UIXL_loading_DIV') != null) { 
+					if (onload == null || onload == true) { // if onload == false, then dont change the display of the loading DIV
+						frame_document.getElementById('UIXL_loading_DIV').setAttribute('open', frame_document.getElementById('UIXL_loading_DIV').getAttribute(((onload == true) ? 'onload' : 'onsubmit'))); 
+					}
+				}
+			}
+
+			// start the spinner timer
+			UIXL_update_spinnertimer();
+
+        } catch(e) { }
+    }
+	var spinner_timer_id = 0
+	function UIXL_update_spinnertimer() {
+		if (spinner_timer_id == 0) { // if timeout already active, dont need to start it again
+			var spinner = document.getElementById('UIXL_spinner');
+			if (spinner != null) {
+				var status = spinner.getAttribute('loading');
+				var spinning_time = 0;
+				if (status == 'no') {
+					spinner.setAttribute('spinningtime', '0');
+				} else if (status == 'yes') {
+					spinning_time = (parseFloat(spinner.getAttribute('spinningtime')) + 1);
+					spinner.setAttribute('spinningtime', spinning_time);
+				}
+				if (spinning_time == 0) {
+					spinner.setAttribute('data-timer', '');
+				} else {
+					if (spinning_time <= 2) {
+						spinner.setAttribute('data-timer', '');
+					} else if (spinning_time >= 2) {
+						spinner.setAttribute('data-timer', spinning_time);
+					}
+					spinner_timer_id = setTimeout(function() { spinner_timer_id = 0; UIXL_update_spinnertimer(); }, 1000);
+				}
+			}
+		}
+	}
+    function UIXL_force_redraw(frame_document) {
+        // force a DOM tree refresh (might only need for IE)
+        if (frame_document != null) { 
+            var frame_document_body = frame_document.getElementsByTagName('BODY')[0];
+            if (frame_document_body != null) {
+                frame_document_body.style.display = 'none';
+				window.setTimeout(function () { try { frame_document_body.style.display = ''; } catch (e) { } }, 50);
+            }
+        }
+    }
+	function UIXL_refresh_logo() {
+		var uixl_logo = document.getElementById('UIXL_spinner');
+		if (uixl_logo != null) {
+			uixl_logo.style.backgroundImage = 'url(\'/portal/admin/portalsettings/showlogo.asp?rnd=' + (new Date().valueOf()) + '\')';
+		}
+	}
+
+    function UIXL_scroll_to_top(frame_document, frame_window) {
+        if (frame_document != null) {
+            // scroll document to top
+            if (frame_document.scrollingElement != null) {
+                if (frame_document.scrollingElement.scrollTop != null) { frame_document.scrollingElement.scrollTop = 0; } 
+                if (frame_document.scrollingElement.scrollTo != null) { frame_document.scrollingElement.scrollTo(0, 0); }
+            } else {
+                if (frame_document.documentElement.scrollTop != null) { frame_document.documentElement.scrollTop = 0; } 
+                if (frame_document.documentElement.scrollTo != null) { frame_document.documentElement.scrollTo(0, 0); }
+            }
+            var main_scrolling = (UIXL_main.contentDocument || UIXL_main.document);
+            if (main_scrolling != null && main_scrolling.scrollingElement != null) {
+                if (main_scrolling.scrollingElement.scrollTop != null) { main_scrolling.scrollingElement.scrollTop = 0; } 
+                if (main_scrolling.scrollingElement.scrollTo != null) { main_scrolling.scrollingElement.scrollTo(0, 0); }
+            } else if (main_scrolling != null && main_scrolling.documentElement != null) {
+                if (main_scrolling.documentElement.scrollTop != null) { main_scrolling.documentElement.scrollTop = 0; } 
+                if (main_scrolling.documentElement.scrollTo != null) { main_scrolling.documentElement.scrollTo(0, 0); }
+            }
+        }    
+    }
+
+    // check for .navigate in onclick events when they are clicked on and replace with location.href
+    function UIXL_navigate_check(e) {
+        if (e == null) { return; }
+
+        var element = (e.srcElement || e.target);
+        if (element != null) {
+            var found_navigate = false;
+            var found_href = false;
+            var onclick = element.getAttribute('onclick');
+            if (onclick != null && onclick != '') {
+                if (onclick.indexOf('.navigate(') != -1) {  found_navigate = true; }
+                if (onclick.indexOf('.location.href') != -1) { found_href = true; }
+            }
+            if (found_href == false && element.tagName == 'A') {
+                if (element.getAttribute('href') != null && element.getAttribute('href').toLowerCase().indexOf('javascript:') != -1) { found_href = true; }
+            }
+            if (found_navigate == false) {
+                while (element.parentNode != null) {
+                    element = element.parentNode;
+                    if (element.tagName == 'BODY') {
+                        break;
+                    } else {
+                        onclick = (element.getAttribute != null) ? element.getAttribute('onclick') : null;
+                        if (onclick != null && onclick != '') {
+                            if (onclick.indexOf('.navigate(') != -1) { found_navigate = true; break; }
+                            if (onclick.indexOf('.location.href') != -1) { found_href = true; break; }
+                        }
+                    }
+                }
+            }
+            if (found_navigate == true) {
+                element.setAttribute('onclick', onclick.replace(/.navigate\(([^\)]*)\)/ig,'.location.href=$1'));
+                found_href = true;
+            }
+            // clicked on a link to a new page, show spinner
+            if (found_href == true) {
+                UIXL_show_spinner(element.ownerDocument);
+            }
+        }
+    }
+    
+    // remove the preloaded stylesheet and inject the new UIXL CSS into the specified frame document
+    function UIXL_strip_inline_CSS(frame_document) {
+        if (frame_document === this.window) { return; } // dont strip from main frameset page
+        // strip out some of the existing inline styles (style, bgcolor)
+        if (frame_document != null) {
+            var UIXL_elements = null, UIXL_excludes = null;
+            try {
+                UIXL_elements = frame_document.querySelectorAll("*[uixlclass], *[style], *[bgcolor], body, *[onclick]");
+				UIXL_excludes = frame_document.querySelectorAll("*[preservestyle]");
+            } catch (e) { }
+            if (UIXL_elements != null && UIXL_elements.length > 0) {
+                try {
+                    Array.prototype.forEach.call(UIXL_elements, function(UIXL_element) {
+						var preserve_style = false;
+						if (UIXL_excludes != null && UIXL_excludes.length > 0) {
+							for (var exclude_index = 0; exclude_index < UIXL_excludes.length; exclude_index++) {
+								if (UIXL_excludes[exclude_index].contains(UIXL_element)) {
+									preserve_style = true;
+									break;
+								}
+							}
+						}
+						UIXL_strip_style(UIXL_element, preserve_style);
+                    });
+                } catch (e) { }
+            }
+        }
+    }
+    function UIXL_strip_style(element, preserve_style) {
+
+        // override class with uixlclass value if set
+        if (element.getAttribute('uixlclass') != null) {
+            if (element.className != '') { element.setAttribute('originalclass', element.className); }
+            element.className = element.getAttribute('uixlclass');
+        }
+        
+        // strip any bgcolor attributes
+        element.removeAttribute('bgcolor');
+        if (element.tagName == 'BODY') {
+            element.removeAttribute('leftmargin');
+            element.removeAttribute('rightmargin');
+            element.removeAttribute('topmargin');
+            element.removeAttribute('bottommargin');
+            element.removeAttribute('marginheight');
+            element.removeAttribute('marginwidth');
+        }
+
+        // retrieve existing style (if has one)
+        var current_style = element.getAttribute('style');
+        if (current_style != null && typeof(current_style) != 'string') {
+            try {
+                current_style = (current_style.cssText || window.getComputedCSSText(element));
+            } catch (e) { 
+                current_style = '';
+            }
+        }
+        
+        // check for styles to keep and remove everything else
+		if (preserve_style == false) {
+			if (current_style != null && current_style != '') {
+				var styles_to_keep = '';
+				styles_to_keep += (element.style.display != '') ? 'display:' + (element.style.display) + ';' : '';
+				styles_to_keep += (element.style.visibility != '') ? 'visibility:' + (element.style.visibility) + ';' : '';
+				styles_to_keep += (element.style.position != '') ? 'position:' + (element.style.position) + ';' : '';
+				if (current_style != '' && current_style != styles_to_keep) { 
+					element.setAttribute('originalstyle', current_style);
+				}
+				if (styles_to_keep != '') {
+					element.setAttribute('style', styles_to_keep);
+				} else {
+					element.removeAttribute('style');
+				}
+			}
+			if (UIXL_isIE8 == true) { element.className = element.className; } /* IE8 */
+		}
+    }
+
+	function UIXL_goback_makeicon(frame_document) {
+		if (frame_document === this.window) { return; } // dont try in main frameset page
+        if (frame_document != null) {
+            var UIXL_elements = null;
+            try {
+                UIXL_elements = frame_document.querySelectorAll("a.pagelinkup");
+            } catch (e) { }
+            if (UIXL_elements != null && UIXL_elements.length > 0) {
+                try {
+					Array.prototype.forEach.call(UIXL_elements, function (UIXL_element) {
+						var link_text = UIXL_element.innerHTML;
+						if (link_text.toLowerCase().indexOf('go back') >= 0 || link_text.toLowerCase().indexOf('return to') >= 0 && link_text.indexOf('UIXL_goback') == -1) {
+							UIXL_element.innerHTML = '<div class="UIXL_goback"></div>&nbsp;&nbsp;' + link_text;
+							// UIXL_element.title = link_text;
+						}
+                    });
+                } catch (e) { }
+            }
+        }
+	}
+
+	function UIXL_update_assignbuttons(frame_document) {
+        
+		if (frame_document === this.window) { return; } // dont try in main frameset page
+        if (frame_document != null && frame_document.getElementById('AvailableTableList') != null) {
+            var UIXL_elements = null;
+            try {
+                UIXL_elements = frame_document.querySelectorAll("input.formbutton");
+            } catch (e) { }
+            if (UIXL_elements != null && UIXL_elements.length > 0) {
+                try {
+					Array.prototype.forEach.call(UIXL_elements, function (UIXL_element) {
+						if (UIXL_element.value == '>>') {
+							UIXL_element.value = '';
+							UIXL_element.setAttribute('assign', 'addall');
+						} else if (UIXL_element.value == '>') {
+							UIXL_element.value = '';
+							UIXL_element.setAttribute('assign', 'addselected');
+						} else if (UIXL_element.value == '<') {
+							UIXL_element.value = '';
+							UIXL_element.setAttribute('assign', 'removeselected');
+						} else if (UIXL_element.value == '<<') {
+							UIXL_element.value = '';
+							UIXL_element.setAttribute('assign', 'removeall');
+						}
+                    });
+                } catch (e) { }
+            }
+        }
+	}
+
+	function UIXL_toggle_employeesummary(status_element) {
+
+		if (status_element != null) {
+			var new_status = ((status_element.getAttribute('status') == 'quick') ? '' : 'quick');
+			status_element.setAttribute('status', new_status);
+
+			try {
+				var xml_request = getXMLHTTP();
+				if (xml_request != null) {
+					xml_request.abort();
+					xml_request.open("GET", '/portal/include/uixl_set_employeesummary.asp?status=' + new_status, true);
+					xml_request.send(null);
+				}
+			} catch (e) { }
+		}
+        return false;
+    }
+
+	var UIXL_fn_selectstart = function (e) { return false; };
+	var UIXL_lastdots = null;
+
+	function UIXL_wrap_pagetitle_links(frame_document) {
+        
+		UIXL_lastdots = null;
+
+		if (frame_document === this.window) { return; } // dont try in main frameset page
+        if (frame_document != null) {
+            var UIXL_elements = null;
+            try {
+                UIXL_elements = frame_document.querySelectorAll("td.pagetitle,td.dotswrapper");
+			} catch (e) { }
+            if (UIXL_elements != null && UIXL_elements.length > 0) {
+                try {
+					Array.prototype.forEach.call(UIXL_elements, function (UIXL_element, index) {
+						if (UIXL_element.getAttribute('dotswrapper') == 'yes') {
+							if (UIXL_element.getElementsByTagName('a').length > 0 && UIXL_element.innerHTML.indexOf('UIXL_dots_wrapper') == -1) {
+								UIXL_element.setAttribute('hasdots', 'closed');
+								UIXL_element.innerHTML = '<div class="UIXL_dots_wrapper">' + UIXL_element.innerHTML + '</div>';
+								var dots = frame_document.createElement("DIV");
+								dots.id = 'UIXL_pagetitle_links_' + (index + 1);
+								dots.setAttribute('dotsindex', (index + 1));
+                                dots.className = 'UIXL_dots';
+                                if (UIXL_element.getAttribute('dotsicon') != null && UIXL_element.getAttribute('dotsicon') != '') {
+                                    dots.className += ' ' + UIXL_element.getAttribute('dotsicon');
+                                } else if (UIXL_element.getAttribute('dotslabel') != null) {
+									dots.innerHTML = '&#9660;';
+								} else {
+									dots.innerHTML = 'Page&nbsp;Links&nbsp;&nbsp;<span class="dotshighlight">&#9660;</span>';
+								}
+                                dots.setAttribute("onclick", "if (window.top.name != 'FHWindow' && window.top.opener != null) { window.top.opener.top.UIXL_pagetitle_links_toggle(this); } else { window.top.UIXL_pagetitle_links_toggle(this); }");
+                                dots.setAttribute("onmouseover", "if (window.top.name != 'FHWindow' && window.top.opener != null) { window.top.opener.top.UIXL_pagetitle_links_toggle(this, 'open'); } else { window.top.UIXL_pagetitle_links_toggle(this, 'open'); }");
+								dots.setAttribute('onselectstart', 'return false;');
+								UIXL_addEvent(dots, 'selectstart', UIXL_fn_selectstart, true);
+								dots.setAttribute('unselectable', 'on');
+								UIXL_element.appendChild(dots);
+							}
+						}
+                    });
+				} catch (e) { }
+            }
+        }
+	}
+
+	function UIXL_pagetitle_links_toggle(dots, new_status, close_by_clicking) {
+
+		// close previously opened dots menus (if it's still open)
+		if (UIXL_lastdots != null && (UIXL_lastdots.getAttribute('dotsindex') != dots.getAttribute('dotsindex'))) {
+			var lastdots = UIXL_lastdots;
+			UIXL_lastdots = null;
+			UIXL_pagetitle_links_toggle(lastdots, 'closed');
+		}
+
+		// open or close specified dots menu
+		if (dots != null) {
+
+            if (new_status != null) {
+                dots.parentNode.setAttribute('hasdots', new_status);
+            } else {
+                dots.parentNode.setAttribute('hasdots', ((dots.parentNode.getAttribute('hasdots') == 'open') ? 'closed' : 'open'));
+            }
+            dots.parentNode.className = dots.parentNode.className;
+
+            // ensure popup doesnt display off the bottom of the screen
+            var dots_window = (dots.ownerDocument.defaultView || dots.ownerDocument.parentWindow);
+            if (dots.parentNode.getAttribute('hasdots') == 'open') {
+                UIXL_position_dotsmenu(dots, dots_window);
+            }
+
+			//if (UIXL_browser.safari == true) { dots.style.right = '36px'; }
+
+			// add or remove a listener to close last opened dots menu when click elsewhere in the page
+			var UIXL_fn_click2close = function (e) {
+				if (UIXL_lastdots != null) {
+					if (!((e.srcElement || e.target) === UIXL_lastdots)) {
+						var lastdots = UIXL_lastdots;
+						UIXL_lastdots = null;
+						UIXL_pagetitle_links_toggle(lastdots, 'closed', true);
+					} else {
+						if (e.stopPropagation) { e.stopPropagation(); } else { window.event.cancelBubble = true; }
+					}
+				}
+            };
+            var UIXL_fn_scroll2close = function (e) {
+                if (UIXL_lastdots != null) {
+                    var lastdots = UIXL_lastdots;
+                    UIXL_lastdots = null;
+                    UIXL_pagetitle_links_toggle(lastdots, 'closed', true);
+                }
+            };
+			if (dots.parentNode.getAttribute('hasdots') == 'open' && dots.getAttribute('listening') != 'yes') {
+                // if anything gets clicked on, scrolled, or the window is resized, close the dots menu
+                UIXL_addEvent(dots.ownerDocument, 'click', UIXL_fn_click2close, false);
+                UIXL_addEvent(dots_window, 'resize', UIXL_fn_scroll2close, false);
+                // UIXL_addEvent(dots_window, 'scroll', UIXL_fn_scroll2close, false); // if main document window is scrolled (undecided)
+                var scrolling_elements = null;
+                try {
+                    scrolling_elements = dots.ownerDocument.querySelectorAll("div,body");
+                } catch (e) { }
+                if (scrolling_elements != null && scrolling_elements.length > 0) {
+                    try {
+                        Array.prototype.forEach.call(scrolling_elements, function (scrolling_element) { if (scrolling_element.contains(dots)) { UIXL_addEvent(scrolling_element, 'scroll', UIXL_fn_scroll2close, false); } });
+                    } catch (e) { }
+                }
+                // flag that we are listening to events
+				dots.setAttribute('listening', 'yes');
+			}
+            if (close_by_clicking == true) {
+                // stop listening to events
+                UIXL_removeEvent(dots.ownerDocument, 'click', UIXL_fn_click2close, false);
+                UIXL_removeEvent(dots_window, 'resize', UIXL_fn_scroll2close, false);
+                // UIXL_removeEvent(dots_window, 'scroll', UIXL_fn_scroll2close, false); // if main document window is scrolled (undecided)
+                var scrolling_elements = null;
+                try {
+                    scrolling_elements = dots.ownerDocument.querySelectorAll("div,body");
+                } catch (e) { }
+                if (scrolling_elements != null && scrolling_elements.length > 0) {
+                    try {
+                        Array.prototype.forEach.call(scrolling_elements, function (scrolling_element) { if (scrolling_element.contains(dots)) { UIXL_removeEvent(scrolling_element, 'scroll', UIXL_fn_scroll2close, false); } });
+                    } catch (e) { }
+                }
+                // clear flag that we are listening to events
+				dots.removeAttribute('listening');
+			}
+
+			// remember the currently open dots menu
+			UIXL_lastdots = ((dots.parentNode.getAttribute('hasdots') == 'closed') ? null : dots); // keep track of any currently open dots menus
+
+		}
+    }
+
+    function UIXL_position_dotsmenu(dots, dots_window) {
+        var dots_icon_rect = dots.getBoundingClientRect();
+        var dots_icon_height = (dots_icon_rect.bottom - dots_icon_rect.top);
+        var dots_icon_scrolltop = UIXL_get_scrolltop(dots);
+        var dots_menu = dots.parentNode.getElementsByClassName('UIXL_dots_wrapper')[0];
+        var dots_menu_rect = dots_menu.getBoundingClientRect();
+        var dots_menu_height = (dots_menu_rect.bottom - dots_menu_rect.top);
+        var dots_menu_width = (dots_menu_rect.right - dots_menu_rect.left);
+        var window_height = (('innerHeight' in dots_window) ? dots_window.innerHeight : dots.documentElement.offsetHeight);
+        if ((dots_icon_rect.bottom + dots_menu_height) > (window_height - 10)) {
+            dots_menu.style.marginTop = (0 - (dots_menu_height + 4 + dots_icon_scrolltop)) + 'px';
+        } else {
+            dots_menu.style.marginTop = ((dots_icon_height - dots_icon_scrolltop) + 2) + 'px';
+        }
+        var dots_icon_rect = dots.getBoundingClientRect(); // refresh dots icon position
+        dots_menu.style.left = (dots_icon_rect.right - dots_menu_width) + 'px';
+    }
+
+    function UIXL_get_scrolltop(element) {
+        var scroll_top = 0;
+        while (element != null) {
+            scroll_top += ((isNaN(element.scrollTop)) ? 0 : element.scrollTop);
+            element = element.parentNode;
+            if (element != null && element.tagName == 'BODY') { // stop once we reach the body tag
+                break;
+            }
+        }
+        return scroll_top;
+    }
+
+	// maximise homepage blocks
+	var UIXL_maximised = null;
+	function UIXL_maximise_block(max_block, max_icon) {
+		var restore_only = (UIXL_maximised != null && UIXL_maximised === max_icon);
+		var frame_document = max_block.ownerDocument;
+
+		if (UIXL_maximised != null) { // reset the icon of the current maximised block
+			UIXL_maximised.className = 'notmaximised';
+			UIXL_maximised.title = 'Maximise This Section';
+		}
+		if (restore_only == false) { // set the maximise icon
+			if (max_block != null && max_icon != null) {
+				max_icon.className = 'maximised';
+				max_icon.title = 'Restore This Section';
+			}
+		}
+		// show / hide blocks as required
+		var max_content = null;
+        try {
+			max_content = frame_document.querySelectorAll(".UIXL_maximisable_content");
+		} catch (e) {
+			max_content = frame_document.getElementsByClassName('UIXL_maximisable_content');
+		}
+		if (max_content != null && max_content.length > 0) {
+			for (var i = 0; i < max_content.length; i++) {
+				max_content[i].style.display = (((restore_only == true) || (max_content[i] === max_block)) ? 'block' : 'none');
+			}
+		}
+		// remember current maximised block
+		if (restore_only == false) {
+			UIXL_maximised = max_icon;
+		} else {
+			UIXL_maximised = null;
+		}
+		// refresh the block heights so that they fill up the available space
+		var max_blocks = null;
+		try {
+			max_blocks = frame_document.querySelectorAll(".UIXL_maximisable");
+		} catch (e) {
+			max_blocks = frame_document.getElementsByClassName('UIXL_maximisable');
+		}
+		if (max_blocks != null && max_blocks.length > 0) {
+			for (var i = 0; i < max_blocks.length; i++) {
+				if (restore_only == true) {
+					max_blocks[i].setAttribute('height', (100 / max_blocks.length).toFixed(2) + '%');
+				} else {
+					if (max_blocks[i].getElementsByClassName('maximised').length > 0) {
+						max_blocks[i].setAttribute('height', '100%');
+					} else if (max_blocks[i].getElementsByClassName('notmaximised').length > 0) {
+						max_blocks[i].setAttribute('height', '0%');
+					}
+				}
+			}
+        }
+        // notify the page that the toggle state has changed (in case it needs to perform additional tasks)
+        var frame_window = (frame_document.parentWindow || frame_document.defaultView);
+        if (frame_window != null && frame_window.toggleMaximiseBlock != null) {
+            frame_window.toggleMaximiseBlock(max_block, max_icon);
+        }
+	}
+
+    // UIXL burger / menu functions
+	function UIXL_header_burger_toggle(new_status, from_headerlinks) {
+		if (document.getElementById('UIXL_burger_access').getAttribute('status') == 'disabled') {
+			return;
+		}
+        new_status = (new_status == null) ? '' : new_status;
+        from_headerlinks = (from_headerlinks == null) ? false : from_headerlinks;
+        var burger_menu = document.getElementById('UIXL_header');
+        if (burger_menu != null) {
+            var status = '';
+            if (new_status == '') {
+                status = burger_menu.getAttribute('status');
+                new_status = (status == 'open') ? 'closed' : 'open';
+            }
+            burger_menu.setAttribute('status', new_status); if (UIXL_isIE8 == true) { burger_menu.className = burger_menu.className; } /* IE8 */
+			
+            if (new_status == 'open') {
+                UIXL_side_burger_toggle('closed');
+            }
+            UIXL_menu_toggle(new_status);
+            // close header "quick links" dropdown menu if open
+			if ((from_headerlinks == true && new_status == 'open') || (from_headerlinks == false)) {
+                UIXL_headerlink_toggle('closed');
+            }
+            // close "records per page" popup menu if open
+			try {
+                if (UIXL_main.contentWindow.UIXL_recordspp_toggle) { UIXL_main.contentWindow.UIXL_recordspp_toggle('closed'); }
+            } catch (e) { }
+            // close "page options" popup menu if open
+			try { 
+				var dots_wrapper = UIXL_main.contentWindow.document.getElementById('UIXL_pagetitle_links');
+				if ((dots_wrapper != null) && (dots_wrapper.parentNode.getAttribute('hasdots') == 'open')) { dots_wrapper.parentNode.setAttribute('hasdots', 'closed'); }
+            } catch (e) { }
+        }
+	}
+	function UIXL_header_burger_access(status, info) {
+		var burger_access = document.getElementById('UIXL_burger_access');
+		var burger_title = document.getElementById('UIXL_burger_title');
+		if (burger_access != '' && burger_title != null) {
+			if (status == 'enabled') {
+				burger_access.setAttribute('status', 'enabled');
+				burger_title.title = 'Main Menu';
+			} else if (status == 'disabled') {
+				burger_access.setAttribute('status', 'disabled');
+				burger_title.title = 'Main Menu : ' + info;
+			}
+		}
+	}
+	function UIXL_sidebar_toggle(new_menu) {
+        new_menu = (new_menu == null) ? '' : new_menu;
+        var sidebar = document.getElementById('UIXL_side');
+        if (sidebar != null) {
+			sidebar.setAttribute('sidemenu', new_menu);
+			sidebar.className = ((sidebar.getAttribute('sidemenu') == '') ? 'UIXL_sidebar_closed' : 'UIXL_sidebar_open');
+			if (UIXL_isIE8 == true) { sidebar.className = sidebar.className; } /* IE8 */
+			UIXL_sidebar_resizelabel();
+        }
+    }
+    function UIXL_sidebar_toggle_content(ids) {
+        var sidebar = document.getElementById('UIXL_menu_employee');
+        if (sidebar != null) {
+            var sidebar_content = null;
+            try {
+                sidebar_content = sidebar.querySelectorAll(".UIXL_menu_holder");
+            } catch (e) {
+                sidebar_content = sidebar.getElementsByClassName('UIXL_menu_holder');
+            }
+            if (sidebar_content != null && sidebar_content.length > 0) {
+                var content_ids = ids.split(';');
+                if (content_ids != null && content_ids.length > 0) {
+                    for (var id_loop = 0; id_loop < content_ids.length; id_loop++) {
+                        var content_id = content_ids[id_loop].split(':');
+                        if (content_id != null && content_id.length == 2) {
+                            for (var sidebar_loop = 0; sidebar_loop < sidebar_content.length; sidebar_loop++) {
+                                if (content_id[0] == sidebar_content[sidebar_loop].getAttribute('moduleid')) {
+                                    sidebar_content[sidebar_loop].style.display = ((content_id[1] == '0') ? 'none' : 'block');
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        }
+    }
+    var UIXL_sidebar_employeeid = 0;
+    function UIXL_sidebar_setlabel(label_top, label_bot, ids, employee_id) {
+        if (label_top != null) {
+            document.getElementById('UIXL_sidebar_labeltop').innerHTML = label_top; // employee name
+			UIXL_sidebar_resizelabel();
+        }
+        if (label_bot != null) {
+            document.getElementById('UIXL_sidebar_labelbot').innerHTML = UIXL_module_check(label_bot); // module name
+			UIXL_sidebar_resizelabel();
+        }
+        if (ids != null && ids != '') {
+            UIXL_sidebar_toggle_content(ids);
+        }
+        if (employee_id != null) {
+            UIXL_sidebar_employeeid = employee_id; // keep track of which employees details are displayed in the sidebar
+        }
+    }
+	var fn_UIXL_resizelabel = function() { UIXL_sidebar_resizelabel(); }
+	var UIXL_resizelabel_listening = false;
+	function UIXL_sidebar_resizelabel() {
+		var sidebar = document.getElementById('UIXL_side');
+		if (sidebar != null) {
+			if (sidebar.getAttribute('sidemenu') != '') {
+				var h_sidebar_full = null;
+				if (UIXL_browser.safari == true && UIXL_browser.windows == true) {
+					var h_sidebar_full = sidebar.clientHeight - 20;
+					document.getElementById('UIXL_side_menu').style.height = h_sidebar_full + 'px';
+				}				
+				// adjust the name label height accordingly
+				var sidebar_toplabel = document.getElementById('UIXL_sidebar_labeltop');
+				var h_sidebar = ((h_sidebar_full != null) ? h_sidebar_full : document.getElementById('UIXL_side_menu').clientHeight);
+				var h_sidebar_menu = document.getElementById('UIXL_resize_sidebar_menu').clientHeight;
+				var h_sidebar_bottom = document.getElementById('UIXL_resize_sidebar_labelbot').clientHeight;
+				var h_sidebar_close = document.getElementById('UIXL_resize_sidebar_close').clientHeight;
+				sidebar_toplabel.style.height = (h_sidebar - (h_sidebar_menu + h_sidebar_bottom + h_sidebar_close + 30)) + 'px';
+				if (UIXL_resizelabel_listening == false) {
+					UIXL_resizelabel_listening = true;
+					UIXL_addEvent(window, "resize", fn_UIXL_resizelabel);
+				}
+			} else {
+				UIXL_removeEvent(window, "resize", fn_UIXL_resizelabel);
+				UIXL_resizelabel_listening = false;
+			}
+		}
+	}
+    function UIXL_side_burger_toggle(new_status, from_headerlinks) {
+        new_status = (new_status == null) ? '' : new_status;
+        from_headerlinks = (from_headerlinks == null) ? false : from_headerlinks;
+        var burger_menu = document.getElementById('UIXL_side_menu');
+        if (burger_menu != null) {
+            var status = '';
+            if (new_status == '') {
+                status = burger_menu.getAttribute('status');
+                new_status = (status == 'open') ? 'closed' : 'open';
+            }
+            burger_menu.setAttribute('status', new_status); if (UIXL_isIE8 == true) { burger_menu.className = burger_menu.className; } /* IE8 */
+			
+            if (new_status == 'open') {
+                UIXL_header_burger_toggle('closed');
+            }
+            UIXL_side_menu_toggle(new_status);
+            // close header "quick links" dropdown menu if open
+			if ((from_headerlinks == true && new_status == 'open') || (from_headerlinks == false)) {
+                UIXL_headerlink_toggle('closed');
+            }
+            // close "records per page" popup menu if open
+			try {
+                if (UIXL_main.contentWindow.UIXL_recordspp_toggle) { UIXL_main.contentWindow.UIXL_recordspp_toggle('closed'); }
+            } catch (e) { }
+            // close "page options" popup menu if open
+			try { 
+				var dots_wrapper = UIXL_main.contentWindow.document.getElementById('UIXL_pagetitle_links');
+				if ((dots_wrapper != null) && (dots_wrapper.parentNode.getAttribute('hasdots') == 'open')) { dots_wrapper.parentNode.setAttribute('hasdots', 'closed'); }
+            } catch (e) { }
+        }
+    }
+    function UIXL_menu_toggle(new_status) {
+        new_status = (new_status == null) ? '' : new_status;
+        var UIXL_menu_DIV = document.getElementById('UIXL_menu');
+        if (UIXL_menu_DIV != null) {
+            var status = '';
+            if (new_status == '') {
+                status = UIXL_menu_DIV.getAttribute('status');
+                new_status = ((status == 'open') ? 'closed' : 'open');
+            }
+            UIXL_menu_DIV.setAttribute('status', new_status); if (UIXL_isIE8 == true) { UIXL_menu_DIV.className = UIXL_menu_DIV.className; } /* IE8 */
+        }
+    }
+    function UIXL_side_menu_toggle(new_status) {
+        new_status = (new_status == null) ? '' : new_status;
+        var side_menu = document.getElementById('UIXL_side').getAttribute('sidemenu');
+        var UIXL_menu_DIV = document.getElementById('UIXL_menu' + '_' + side_menu);
+        if (UIXL_menu_DIV != null) {
+            var status = '';
+            if (new_status == '') {
+                status = UIXL_menu_DIV.getAttribute('status');
+                new_status = ((status == 'open') ? 'closed' : 'open');
+            }
+            UIXL_menu_DIV.setAttribute('status', new_status); if (UIXL_isIE8 == true) { UIXL_menu_DIV.className = UIXL_menu_DIV.className; } /* IE8 */
+        }
+    }
+    function UIXL_close_employee_menu() {
+		var closed_employeemenu = false;
+		var header_form = UIXL_header_doc.document.forms['frmModules'];
+        var module_id = parseFloat((header_form.cboModules.value == '') ? header_form.txtModuleID.value : ((header_form.cboModules.value == '') ? '0' : header_form.cboModules.value));
+        var parent_menu = document.getElementById('UIXL_menu_employee');
+        if (parent_menu != null) {
+            var module_menus = parent_menu.getElementsByTagName('DIV');
+            if (module_menus != null && module_menus.length > 0) {
+                for (var menu_index = 0; menu_index < module_menus.length; menu_index++) {
+                    if (module_menus[menu_index].getAttribute('title') == 'Return To Employee List' && parseFloat(module_menus[menu_index].getAttribute('module')) == module_id || module_id == 0) {
+						if (module_id != 0) {
+							var close_menu_url = module_menus[menu_index].getAttribute('url');
+							UIXL_menu_open(close_menu_url, 'main', module_id);
+							closed_employeemenu = true;
+							break;
+						}
+                    }
+				}
+				if (closed_employeemenu == false) {
+					UIXL_side_burger_toggle('closed');
+					UIXL_sidebar_toggle('');
+				}
+            }
+        }
+    }
+    function UIXL_menuitem_toggle(menu_item) {
+        if (menu_item != null) {
+            var menu_holder = document.getElementById('UIXL_menu_' + menu_item.getAttribute('menuid'))
+            if (menu_holder != null) {
+                menu_item.setAttribute('status', ((menu_item.getAttribute('status') == 'closed') ? 'open' : 'closed')); if (UIXL_isIE8 == true) { menu_item.className = menu_item.className; } /* IE8 */
+                menu_holder.setAttribute('status', menu_item.getAttribute('status')); if (UIXL_isIE8 == true) { menu_holder.className = menu_holder.className; } /* IE8 */
+            }
+        }
+    }
+	function UIXL_menuoverlay_setwidth() {
+	
+	}
+    function UIXL_module_check(module_id) {
+        switch (parseFloat(module_id)) {
+            case 0:  return 'Home';
+            case 1:  return 'HR';
+            case 2:  return 'Payroll';
+            case 4:  return 'Rotas'; 
+            case 5:  return 'Scheduling'; 
+            case 6: return 'CRM';
+            case 7: return 'Onboarding';
+            case 10: return 'Cash Management'; 
+            case 12: return 'Tronc'; 
+            case 19: return 'Help Builder'; 
+            case 21: return 'Training'; 
+            case 23: return 'Benefits'; 
+            case 25: return 'MI'; 
+            case 26: return 'Recruitment'; 
+            case 28: return 'Bureau'; 
+            case 30: return 'Fit to Trade'; 
+            case 32: return 'Tronc2'; 
+            case 33: return 'Dashboard'; 
+            case 40: return 'Pension'; 
+            case 50: return 'System Admin'; 
+            case 55: return 'PS FEAS'; 
+            case 60: return 'BIK'; 
+            default: return '';
+        }
+    }
+    function UIXL_menu_open(url, target, new_moduleid, employee_menu) {
+        var module_originalid = -1, client_changed = false, success = false;
+
+        // ensure new moduleid is valid : moduleids = [0 (Home), 1, 2, 4, 5, 6, 10, 12, 19, 21, 23, 25, 26, 28, 30, 32, 33, 40, 50, 55, 60]
+        var module_name = UIXL_module_check(new_moduleid);
+        if (module_name == '') {
+            alert('Sorry, unable to find that module.\n\nFailed to open the menu option.'); 
+            return;
+        }
+        // determine the current module (from the header dropdown list)
+        try {
+            if (UIXL_header_doc != null) {
+                var module_list = UIXL_header_doc.document.forms['frmModules'].cboModules;
+                if (module_list != null) {
+                    module_originalid = parseFloat(module_list.options[module_list.selectedIndex].value);
+                }
+            }
+        } catch (e) { }
+        if (module_originalid == -1) {
+            alert('Sorry, unable to select that module.\n\nFailed to open the menu option.'); 
+            return;
+        }
+        // update the module client-side
+        if (module_originalid != new_moduleid) {
+	        client_changed = UIXL_setmodule_client(new_moduleid, employee_menu); // update client-side items (header dropdown list, employee sidebar)
+        }
+        // open the menu page url
+        if (client_changed == true || module_originalid == new_moduleid) {
+            try {
+                var frame_window = window.top.frames[(target == null || target == '') ? 'main' : target];
+                if (frame_window != null) {
+                    UIXL_show_spinner((frame_window.contentDocument || frame_window.document));
+                    frame_window.location.href = url + ((url.indexOf('?') == -1) ? '?' : '&') + 'UIXLMID=' + new_moduleid + '&refreshMID=1';
+                    success = true;
+                }
+            } catch (e) { }
+        }
+        // update the module label in the header
+        UIXL_header_setmodulelabel(module_name);
+        // close burger/menu/headerlinks or display an error message
+        if (success == true) {
+            UIXL_header_burger_toggle('closed');
+            UIXL_side_burger_toggle('closed');
+        } else {
+            alert('Sorry, unable to update the module.\n\nFailed to open the menu option.');
+        }
+    }
+    function UIXL_setmodule_client(new_moduleid, employee_menu) {
+        try {
+            if (UIXL_header_doc != null) {
+                var header_form = UIXL_header_doc.document.forms['frmModules'];
+                var module_list = header_form.cboModules;
+                if (module_list != null) {
+                    for (var module_index = 0; module_index < module_list.options.length; module_index++) {
+                        if ((module_list.options[module_index].value == new_moduleid) && (module_list.options[module_index].selected == false)) {
+                            module_list.options[module_index].selected = 'selected';
+                            header_form.txtModuleID.value = new_moduleid;
+							header_form.txtCurrentHomePage.value = module_list.options[module_index].getAttribute('title');
+                            UIXL_sidebar_setlabel(null, new_moduleid, null, null);
+                            UIXL_header_setmodulelabel(UIXL_module_check(new_moduleid));
+                            return (parseFloat(module_list.options[module_list.selectedIndex].value) == new_moduleid);
+                        }
+                    }
+                }
+            }
+        } catch (e) { }
+        return false;
+    }
+    function UIXL_header_setmodulelabel(module_name) {
+        if (document.getElementById('UIXL_headermodule') != null) {
+            document.getElementById('UIXL_headermodule').innerHTML = ((module_name == null || module_name == '') ? 'Home' : module_name);
+        }
+    }
+
+    // toggle the header frame quick link popup menu
+    function UIXL_headerlink_toggle(new_status) {
+        new_status = (new_status == null) ? '' : new_status;
+        var UIXL_headerlink_TD = document.getElementById('UIXL_header_links');
+        if (UIXL_headerlink_TD != null) {
+            var status = '';
+            if (new_status == '') {
+                status = UIXL_headerlink_TD.getAttribute('status');
+                new_status = ((status == 'open') ? 'closed' : 'open');
+            }
+            UIXL_headerlink_TD.setAttribute('status', new_status); if (UIXL_isIE8 == true) { UIXL_headerlink_TD.className = UIXL_headerlink_TD.className; } /* IE8 */
+			
+            if (new_status == 'open') {
+                UIXL_header_burger_toggle('closed', true);
+                UIXL_side_burger_toggle('closed', true);
+            }
+        }
+    }
+
+    function UIXL_addEvent(element, event_name, listener) {
+		if (element.addEventListener) {
+            element.addEventListener(event_name, listener, false);
+            return true;
+        } else if (element.attachEvent) {
+            var result = element.attachEvent("on" + event_name, listener);
+            return result;
+        }
+    }
+	function UIXL_removeEvent(element, event_name, listener, user_capture) {
+		if (element.removeEventListener) {
+			element.removeEventListener(event_name, listener, user_capture);
+			return true;
+		} else if (element.detachEvent) {
+			var result = element.detachEvent('on' + event_name, listener);
+			return result;
+		}
+	}
+
+    UIXL_init();
+
+// -->
+</script>
+
+<script type="text/javascript" language="javascript">
+<!--    //
+    /*
+        * Original code (c) 2010 Nick Galbreath : http://code.google.com/p/stringencoders/source/browse/#svn/trunk/javascript
+        * jQuery port (c) 2010 Carlo Zottmann : http://github.com/carlo/jquery-base64
+        * Permission is hereby granted, free of charge, to any person obtaining a copy of this software and associated documentation files (the "Software"), to deal in the Software without restriction, including without limitation the rights to use, copy, modify, merge, publish, distribute, sublicense, and/or sell copies of the Software, and to permit persons to whom the Software is furnished to do so, subject to the following conditions:
+    */
+
+    "use strict"; var UIXL_base64_page_stats = (function ($) { var _PADCHAR = "=", _ALPHA = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/", _VERSION = "1.0"; function _getbyte64(s, i) { var idx = _ALPHA.indexOf(s.charAt(i)); if (idx === -1) { throw "Cannot decode base64" } return idx } function _decode(s) { var pads = 0, i, b10, imax = s.length, x = []; s = String(s); if (imax === 0) { return s } if (imax % 4 !== 0) { throw "Cannot decode base64" } if (s.charAt(imax - 1) === _PADCHAR) { pads = 1; if (s.charAt(imax - 2) === _PADCHAR) { pads = 2 } imax -= 4 } for (i = 0; i < imax; i += 4) { b10 = (_getbyte64(s, i) << 18) | (_getbyte64(s, i + 1) << 12) | (_getbyte64(s, i + 2) << 6) | _getbyte64(s, i + 3); x.push(String.fromCharCode(b10 >> 16, (b10 >> 8) & 255, b10 & 255)) } switch (pads) { case 1: b10 = (_getbyte64(s, i) << 18) | (_getbyte64(s, i + 1) << 12) | (_getbyte64(s, i + 2) << 6); x.push(String.fromCharCode(b10 >> 16, (b10 >> 8) & 255)); break; case 2: b10 = (_getbyte64(s, i) << 18) | (_getbyte64(s, i + 1) << 12); x.push(String.fromCharCode(b10 >> 16)); break }return x.join("") } function _getbyte(s, i) { var x = s.charCodeAt(i); if (x > 255) { throw "INVALID_CHARACTER_ERR: DOM Exception 5" } return x } function _encode(s) { if (arguments.length !== 1) { throw "SyntaxError: exactly one argument required" } s = String(s); var i, b10, x = [], imax = s.length - s.length % 3; if (s.length === 0) { return s } for (i = 0; i < imax; i += 3) { b10 = (_getbyte(s, i) << 16) | (_getbyte(s, i + 1) << 8) | _getbyte(s, i + 2); x.push(_ALPHA.charAt(b10 >> 18)); x.push(_ALPHA.charAt((b10 >> 12) & 63)); x.push(_ALPHA.charAt((b10 >> 6) & 63)); x.push(_ALPHA.charAt(b10 & 63)) } switch (s.length - imax) { case 1: b10 = _getbyte(s, i) << 16; x.push(_ALPHA.charAt(b10 >> 18) + _ALPHA.charAt((b10 >> 12) & 63) + _PADCHAR + _PADCHAR); break; case 2: b10 = (_getbyte(s, i) << 16) | (_getbyte(s, i + 1) << 8); x.push(_ALPHA.charAt(b10 >> 18) + _ALPHA.charAt((b10 >> 12) & 63) + _ALPHA.charAt((b10 >> 6) & 63) + _PADCHAR); break }return x.join("") } return { decode: _decode, encode: _encode, VERSION: _VERSION } }());
+
+    // -->
+</script>
+
+<script type="text/javascript" language="javascript">
+<!-- //
+
+	var page_monitor = document.getElementById('page_stats_monitor');
+	var page_monitor_url = '';
+	var page_stats2save = new Array();
+	var fn_page_stats2save = function() { UIXL_send_page_stats(); };
+	var page_stats_timer = 0;
+	var page_monitor_sending = false;
+
+		
+	function UIXL_init_page_stats() {
+		if (page_monitor != null && page_monitor_url != '') {
+			page_stats_timer = setInterval(fn_page_stats2save, 2000);
+		}
+	}
+
+	function UIXL_update_page_stats(frame_document, page_name, page_query, page_size, page_generation, page_processing, log_me) {
+
+		if (page_name != null) { document.getElementById('page_stats_name').innerHTML = page_name; }
+		if (page_size != null) { document.getElementById('page_stats_size').innerHTML = page_size; }
+		if (page_generation != null) { document.getElementById('page_stats_generation').innerHTML = page_generation; }
+		if (page_processing != null) { document.getElementById('page_stats_processing').innerHTML = page_processing; }
+		if (page_query != null) { document.getElementById('page_query').value = page_query; }
+
+		if (log_me == true) {
+            UIXL_monitor_page_stats(frame_document);
+		}
+	}
+
+	var month_names = new Array('Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec');
+		
+	function UIXL_monitor_page_stats(frame_document) {
+		if (page_monitor_url != '') {
+			try {
+					
+				var page_name = document.getElementById('page_stats_name').innerHTML;
+				if (page_name != null && page_name != '') {
+
+					var page_title = UIXL_extract_page_title(frame_document).replace(/\"/gi, '').replace(/\'/gi, '').replace(/^\s+|\s+$/g, '');
+                    var page_ip = '82.19.170.120';
+					var page_svr = 'UK1PSLWEB179';
+                    var page_db = '.131';
+					var page_iis_guid = '65105103';
+					var page_brwsr = 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/133.0.0.0 Safari/537.36';
+					var page_gid = '37';
+					var page_cid = '40779';
+					if (page_cid == '') { page_cid = '0'; }
+					var page_uixl = (('True' == 'True') ? 'on' : 'off');
+					var dt_now = new Date();
+					var page_ts = dt_now.getFullYear() + '-' + month_names[dt_now.getMonth()] + '-' + ((dt_now.getDate() < 10) ? '0' : '') + dt_now.getDate() + ' ' + ((dt_now.getHours() < 10) ? '0' : '') + dt_now.getHours() + ':' + ((dt_now.getMinutes() < 10) ? '0' : '') + dt_now.getMinutes() + ':' + ((dt_now.getSeconds() < 10) ? '0' : '')  + dt_now.getSeconds();
+					var header_form = null, page_mid = 0;
+					if (document.getElementById('header') != null) { 
+						header_form = document.getElementById('header').contentWindow.document.forms['frmModules'];
+						page_mid = parseFloat((header_form.cboModules.value == '') ? header_form.txtModuleID.value : ((header_form.cboModules.value == '') ? '0' : header_form.cboModules.value));
+					}
+					var page_size = document.getElementById('page_stats_size').innerHTML;
+					var page_gen = document.getElementById('page_stats_generation').innerHTML;
+					var page_uiproc = document.getElementById('page_stats_processing').innerHTML;
+                    var page_query = document.getElementById('page_query').value;
+						
+                    var page_stats_data = '{ ts:"' + page_ts + '", iis:"' + page_iis_guid + '", ip:"' + page_ip + '", svr:"' + page_svr + '", db:"' + page_db + '", brwsr:"' + page_brwsr + '", page:"' + page_name + '", title:"' + page_title + '", gid:' + page_gid + ', cid:' + page_cid + ', mid:' + page_mid + ', sz:' + page_size + ', gen:' + page_gen + ', uixl:"' + page_uixl + '", prc:' + page_uiproc + ', qs:"' + page_query + '" }';
+
+                    
+                    page_stats2save.push(escape(page_stats_data));
+				}
+			} catch (e) { }
+		}
+	}
+		
+    function UIXL_extract_page_title(frame_document) {
+        var page_title = '';
+
+		if (frame_document != null) {
+
+			var document_body;
+			var document_bodys = frame_document.getElementsByTagName('BODY');
+			if (document_bodys.length > 0) {
+				document_body = document_bodys[0];
+            }
+
+			if (document_body != null) {
+				// when not in a frame
+				var document_window = (document_body.ownerDocument.parentWindow || document_body.ownerDocument.defaultView);
+				if (document_window != null && document_window === document_window.top) {
+					if (document_body.ownerDocument.title != null && document_body.ownerDocument.title != '') {
+						page_title = document_body.ownerDocument.title;
+					}
+				}
+				// when in a frame
+				if (page_title == '') {
+					var title_elements;
+					if (document_body.getElementsByClassName != null) {
+						title_elements = document_body.getElementsByClassName('pagetitle');
+					} else {
+						try {
+							title_elements = document_body.querySelectorAll("td[class='pagetitle']");
+						} catch (e) {
+							title_elements = document_body.getElementsByTagName('td');
+						}
+					}
+					if (title_elements != null && title_elements.length > 0) {
+						try {
+							Array.prototype.forEach.call(title_elements, function (element) {
+								if (element.tagName == 'TD' && element.className.indexOf('pagetitle') != -1 && element.getAttribute('align') != 'right') {
+									if (UIXL_has_children(element) == false) {
+                                        page_title = (element.textContent || element.innerText);
+									}
+								}
+							});
+						} catch (e) {
+							for (var iLoop = 0, element; element = title_elements[iLoop]; iLoop++) {
+								if (element.tagName == 'TD' && element.className.indexOf('pagetitle') != -1 && element.getAttribute('align') != 'right') {
+									if (UIXL_has_children(element) == false) {
+                                        page_title = (element.textContent || element.innerText);
+										break;
+									}
+								}
+							}
+						}
+					}
+					if (page_title == '' && document_body.ownerDocument.title != null && document_body.ownerDocument.title != '') {
+						page_title = document_body.ownerDocument.title;
+					}
+				}
+			}
+		}
+
+		return "'" + page_title + "'";
+
+    }
+
+    function UIXL_has_children(element) {
+        if (element.children != null) {
+            return (element.children.length > 0);
+        } else {
+            for (var child = element.firstChild; child != null; child = child.nextSibling) {
+                if (child.nodeType == 1) { // 1 == Element
+                    return true;
+                }
+            }
+            return false;
+        }
+    }
+
+	function UIXL_send_page_stats() {
+		if (page_monitor_url != '' && page_monitor_sending == false) {
+			page_monitor_sending = true;
+			try {
+				while (page_stats2save.length > 0) {
+					var page_stats_data = page_stats2save.shift();
+					page_monitor.src = page_monitor_url + 'pagestats=' + page_stats_data;
+				}
+			} catch (e) { }		
+			page_monitor_sending = false;
+		}
+	}
+
+	UIXL_init_page_stats();
+
+// -->
+</script>
+<div id="UIXL_menu" class="UIXL_menu" status="closed">
+<div id="UIXL_menu_MOD1" class="UIXL_menu_holder" status="closed">
+<div class="UIXL_menu_level_1" expands="yes" status="closed" menuid="MOD1" onclick="UIXL_menuitem_toggle(this);">HR</div>
+<div class="UIXL_menu_level_2" expands="no" title="HR Homepage" onclick="UIXL_menu_open('../modules/general/homepages/HomePage1.asp?EnAID=ScyfoY%7BZuYzufl', 'main', 1);">HR Homepage
+                    </div>
+<div id="UIXL_menu_MOD1_10002" class="UIXL_menu_holder" status="closed">
+<div class="UIXL_menu_level_2" expands="yes" title="Self Administration" status="closed" menuid="MOD1_10002" onclick="UIXL_menuitem_toggle(this);">Self Administration</div>
+<div class="UIXL_menu_level_3" expands="no" title="Personal Details" id="url_10110" url="../admin/registration/clientchangedetails.asp?blnUser=True&amp;EnAID=ScyfoZpYjZzTfmbmeZr%85gg" module="1" onclick="UIXL_menu_open(this.getAttribute('url'), 'main', this.getAttribute('module'), 0);">Personal Details</div>
+<div class="UIXL_menu_level_3" expands="no" title="Employment Details" id="url_230174" url="../admin/clientadmin/edituser/employmentdetails.asp?blnUser=True&amp;EnAID=ScyfoZpYjZzTfneleakn%7Erf" module="1" onclick="UIXL_menu_open(this.getAttribute('url'), 'main', this.getAttribute('module'), 0);">Employment Details</div>
+<div class="UIXL_menu_level_3" expands="no" title="Change Login Details" id="url_10111" url="../admin/registration/clientchangelogin.asp?blnUser=True&amp;EnAID=ScyfoZpYjZzTfmbme%5Brto%7BqV" module="1" onclick="UIXL_menu_open(this.getAttribute('url'), 'main', this.getAttribute('module'), 0);">Change Login Details</div>
+<div class="UIXL_menu_level_3" expands="no" title="Holiday Requests" id="url_10119" url="../portal/modules/hr/userholidays/viewrequestedholidays.asp?EnAID=ScyfoZpYjZzTfmbmecrto%7BqV" module="1" onclick="UIXL_menu_open(this.getAttribute('url'), 'main', this.getAttribute('module'), 0);">Holiday Requests</div>
+</div>
+<div id="UIXL_menu_MOD1_10003" class="UIXL_menu_holder" status="closed">
+<div class="UIXL_menu_level_2" expands="yes" title="Employees" status="closed" menuid="MOD1_10003" onclick="UIXL_menuitem_toggle(this);">Employees</div>
+<div class="UIXL_menu_level_3" expands="no" title="Employee List" id="url_10116" url="../admin/clientadmin/selectaclient.asp?EnAID=ScyfoZpYj%5BzTfmbme%60rto%7BqV" module="1" onclick="UIXL_menu_open(this.getAttribute('url'), 'main', this.getAttribute('module'), 0);">Employee List</div>
+<div class="UIXL_menu_level_3" expands="no" title="Probationary Employees" id="url_10187" url="../Admin/Modules/HR/AdminProbation/SearchEmployeeProbation.asp?EnAID=ScyfoZpYj%5BzTfmbmlar%85gg" module="1" onclick="UIXL_menu_open(this.getAttribute('url'), 'main', this.getAttribute('module'), 0);">Probationary Employees</div>
+</div>
+<div id="UIXL_menu_MOD1_10223" class="UIXL_menu_holder" status="closed">
+<div class="UIXL_menu_level_2" expands="yes" title="Holidays and Absences" status="closed" menuid="MOD1_10223" onclick="UIXL_menuitem_toggle(this);">Holidays and Absences</div>
+<div class="UIXL_menu_level_3" expands="no" title="Employee Holidays" id="url_10121" url="../admin/modules/hr/adminholiday/searchemployeehols.asp?EnAID=ScyfoZp%5Bl%5BzTfmbmf%5Brto%7BqV" module="1" onclick="UIXL_menu_open(this.getAttribute('url'), 'main', this.getAttribute('module'), 0);">Employee Holidays</div>
+<div class="UIXL_menu_level_3" expands="no" title="Employee Absences" id="url_10127" url="../portal/modules/hr/userabsence/searchemployeeabs.asp?EnAID=ScyfoZp%5Bl%5BzTfmbmfarto%7BqV" module="1" onclick="UIXL_menu_open(this.getAttribute('url'), 'main', this.getAttribute('module'), 0);">Employee Absences</div>
+<div class="UIXL_menu_level_3" expands="no" title="View Calendar" id="url_10226" url="../admin/management/holidaysandabsences/search.asp?EnAID=ScyfoZp%5Bl%5BzTfmbnf%60rvgg" module="1" onclick="UIXL_menu_open(this.getAttribute('url'), 'main', this.getAttribute('module'), 0);">View Calendar</div>
+<div class="UIXL_menu_level_3" expands="no" title="Lieu Days" id="url_10201" url="../admin/modules/hr/lieu/viewlieudays.asp?blnPersonal=1&amp;EnAID=ScyfoZp%5Bl%5BzTfmbnd%5Br%85gg" module="1" onclick="UIXL_menu_open(this.getAttribute('url'), 'main', this.getAttribute('module'), 0);">Lieu Days</div>
+</div>
+<div id="UIXL_menu_MOD1_10009" class="UIXL_menu_holder" status="closed">
+<div class="UIXL_menu_level_2" expands="yes" title="Reports" status="closed" menuid="MOD1_10009" onclick="UIXL_menuitem_toggle(this);">Reports</div>
+<div class="UIXL_menu_level_3" expands="no" title="View Reports" id="url_10135" url="reports.asp?EnAID=ScyfoZpYjazTfmbmg_r%85gg" module="1" onclick="UIXL_menu_open(this.getAttribute('url'), 'main', this.getAttribute('module'), 0);">View Reports</div>
+<div class="UIXL_menu_level_3" expands="no" title="Weekly T&amp;A Report" id="url_230165" url="../admin/clientadmin/Time&amp;AttendanceReports/WeeeklyT&amp;AReport.asp?EnAID=ScyfoZpYjazTfnele%60lnmzzaX" module="1" onclick="UIXL_menu_open(this.getAttribute('url'), 'main', this.getAttribute('module'), 0);">Weekly T&amp;A Report</div>
+</div>
+</div>
+<div id="UIXL_menu_MOD4" class="UIXL_menu_holder" status="closed">
+<div class="UIXL_menu_level_1" expands="yes" status="closed" menuid="MOD4" onclick="UIXL_menuitem_toggle(this);">Rotas</div>
+<div class="UIXL_menu_level_2" expands="no" title="Rotas Homepage" onclick="UIXL_menu_open('../modules/rotas/homepages/homepage1.asp?EnAID=ScyfoY%7B%5Du%5Czufl', 'main', 4);">Rotas Homepage
+                    </div>
+<div id="UIXL_menu_MOD4_40001" class="UIXL_menu_holder" status="closed">
+<div class="UIXL_menu_level_2" expands="yes" title="Rotas" status="closed" menuid="MOD4_40001" onclick="UIXL_menuitem_toggle(this);">Rotas</div>
+<div class="UIXL_menu_level_3" expands="no" title="View Rotas" id="url_40126" url="../admin/modules/hr/rotas/viewrotalist_quickaccess.asp?EnAID=Scyfo%5DpYjYzWfpbmf%60rtorf" module="4" onclick="UIXL_menu_open(this.getAttribute('url'), 'main', this.getAttribute('module'), 0);">View Rotas</div>
+<div class="UIXL_menu_level_3" expands="no" title="View Rotas -- Full Details" id="url_40106" url="../admin/modules/hr/rotas/viewrotalist.asp?EnAID=Scyfo%5DpYjYzWfpbmd%60rtorf" module="4" onclick="UIXL_menu_open(this.getAttribute('url'), 'main', this.getAttribute('module'), 0);">View Rotas -- Full Details</div>
+</div>
+<div id="UIXL_menu_MOD4_40004" class="UIXL_menu_holder" status="closed">
+<div class="UIXL_menu_level_2" expands="yes" title="Reports" status="closed" menuid="MOD4_40004" onclick="UIXL_menuitem_toggle(this);">Reports</div>
+<div class="UIXL_menu_level_3" expands="no" title="View Reports" id="url_40109" url="reports.asp?EnAID=Scyfo%5DpYj%5CzWfpbmdcr%85gg" module="4" onclick="UIXL_menu_open(this.getAttribute('url'), 'main', this.getAttribute('module'), 0);">View Reports</div>
+</div>
+</div>
+<div id="UIXL_menu_MOD5" class="UIXL_menu_holder" status="closed">
+<div class="UIXL_menu_level_1" expands="yes" status="closed" menuid="MOD5" onclick="UIXL_menuitem_toggle(this);">Scheduling</div>
+<div class="UIXL_menu_level_2" expands="no" title="Scheduling Homepage" onclick="UIXL_menu_open('../modules/labourproductivity/homepage.asp?EnAID=ScyfoY%7B%5Eu%5Dzufl', 'main', 5);">Scheduling Homepage
+                    </div>
+<div id="UIXL_menu_MOD5_600012" class="UIXL_menu_holder" status="closed">
+<div class="UIXL_menu_level_2" expands="yes" title="Schedules" status="closed" menuid="MOD5_600012" onclick="UIXL_menuitem_toggle(this);">Schedules</div>
+<div class="UIXL_menu_level_3" expands="no" title="View Schedules" id="url_600054" url="../modules/labourproductivity/homepage.asp?EnAID=Scyfo_pYjYq%5E%60whldZlggzqV" module="5" onclick="UIXL_menu_open(this.getAttribute('url'), 'main', this.getAttribute('module'), 0);">View Schedules</div>
+</div>
+<div id="UIXL_menu_MOD5_600018" class="UIXL_menu_holder" status="closed">
+<div class="UIXL_menu_level_2" expands="yes" title="Reports" status="closed" menuid="MOD5_600018" onclick="UIXL_menuitem_toggle(this);">Reports</div>
+<div class="UIXL_menu_level_3" expands="no" title="View Reports" id="url_600035" url="reports.asp?EnAID=Scyfo_pYjYw%5E%60whldZjhg%89qV" module="5" onclick="UIXL_menu_open(this.getAttribute('url'), 'main', this.getAttribute('module'), 0);">View Reports</div>
+</div>
+</div>
+<div id="UIXL_menu_MOD2" class="UIXL_menu_holder" status="closed">
+<div class="UIXL_menu_level_1" expands="yes" status="closed" menuid="MOD2" onclick="UIXL_menuitem_toggle(this);">Payroll</div>
+<div class="UIXL_menu_level_2" expands="no" title="Payroll Homepage" onclick="UIXL_menu_open('../modules/payroll/homepages/homepage.asp?EnAID=ScyfoY%7B%5BuZzufl', 'main', 2);">Payroll Homepage
+                    </div>
+<div id="UIXL_menu_MOD2_20004" class="UIXL_menu_holder" status="closed">
+<div class="UIXL_menu_level_2" expands="yes" title="My Payroll" status="closed" menuid="MOD2_20004" onclick="UIXL_menuitem_toggle(this);">My Payroll</div>
+<div class="UIXL_menu_level_3" expands="no" title="Pay &amp; Tax Details" id="url_20123" url="../admin/payroll/employee/multiple/paydetails.asp?IsPrimary=1&amp;blnUser=True&amp;EnAID=Scyfo%5BpYj%5CzUfnbmf%5Dr%85gg" module="2" onclick="UIXL_menu_open(this.getAttribute('url'), 'main', this.getAttribute('module'), 0);">Pay &amp; Tax Details</div>
+<div class="UIXL_menu_level_3" expands="no" title="Payment Types" id="url_20163" url="../admin/payroll/employee/multiple/payelements.asp?IsPrimary=1&amp;blnUser=True&amp;EnAID=Scyfo%5BpYj%5CzUfnbmj%5Dr%85gg" module="2" onclick="UIXL_menu_open(this.getAttribute('url'), 'main', this.getAttribute('module'), 0);">Payment Types</div>
+<div class="UIXL_menu_level_3" expands="no" title="Pay &amp; Tax Details List" id="url_20174" url="../admin/payroll/employee/multiple/paydetailslist.asp?blnUser=True&amp;EnAID=Scyfo%5BpYj%5CzUfnbmk%5Er%85gg" module="2" onclick="UIXL_menu_open(this.getAttribute('url'), 'main', this.getAttribute('module'), 0);">Pay &amp; Tax Details List</div>
+<div class="UIXL_menu_level_3" expands="no" title="Deductions" id="url_20124" url="../admin/payroll/employee/deductions/deductionslist.asp?blnUser=True&amp;EnAID=Scyfo%5BpYj%5CzUfnbmf%5Er%85gg" module="2" onclick="UIXL_menu_open(this.getAttribute('url'), 'main', this.getAttribute('module'), 0);">Deductions</div>
+<div class="UIXL_menu_level_3" expands="no" title="Student/Postgraduate Loans" id="url_20125" url="../admin/payroll/employee/loans/studentloanlist.asp?blnUser=True&amp;EnAID=Scyfo%5BpYj%5CzUfnbmf_r%85gg" module="2" onclick="UIXL_menu_open(this.getAttribute('url'), 'main', this.getAttribute('module'), 0);">Student/Postgraduate Loans</div>
+<div class="UIXL_menu_level_3" expands="no" title="Attachments" id="url_20126" url="../admin/payroll/employee/attachments/attachmentlist.asp?blnUser=True&amp;EnAID=Scyfo%5BpYj%5CzUfnbmf%60r%85gg" module="2" onclick="UIXL_menu_open(this.getAttribute('url'), 'main', this.getAttribute('module'), 0);">Attachments</div>
+<div class="UIXL_menu_level_3" expands="no" title="Pensions" id="url_20128" url="../modules/pension/employee/pensionlist.asp?blnUser=True&amp;EnAID=Scyfo%5BpYj%5CzUfnbmfbr%85gg" module="2" onclick="UIXL_menu_open(this.getAttribute('url'), 'main', this.getAttribute('module'), 0);">Pensions</div>
+<div class="UIXL_menu_level_3" expands="no" title="Statutory Sick Pay" id="url_20129" url="../admin/payroll/employee/ssp/sspdetails.asp?blnUser=True&amp;EnAID=Scyfo%5BpYj%5CzUfnbmfcr%85gg" module="2" onclick="UIXL_menu_open(this.getAttribute('url'), 'main', this.getAttribute('module'), 0);">Statutory Sick Pay</div>
+<div class="UIXL_menu_level_3" expands="no" title="Statutory Maternity Pay" id="url_20133" url="../admin/payroll/employee/smp/empsmplist.asp?blnUser=True&amp;EnAID=Scyfo%5BpYj%5CzUfnbmg%5Dr%85gg" module="2" onclick="UIXL_menu_open(this.getAttribute('url'), 'main', this.getAttribute('module'), 0);">Statutory Maternity Pay</div>
+<div class="UIXL_menu_level_3" expands="no" title="Statutory Paternity Pay" id="url_20146" url="../admin/payroll/employee/spp/list.asp?blnUser=True&amp;EnAID=Scyfo%5BpYj%5CzUfnbmh%60r%85gg" module="2" onclick="UIXL_menu_open(this.getAttribute('url'), 'main', this.getAttribute('module'), 0);">Statutory Paternity Pay</div>
+<div class="UIXL_menu_level_3" expands="no" title="Statutory Adoption Pay" id="url_20147" url="../admin/payroll/employee/sap/list.asp?blnUser=True&amp;EnAID=Scyfo%5BpYj%5CzUfnbmhar%85gg" module="2" onclick="UIXL_menu_open(this.getAttribute('url'), 'main', this.getAttribute('module'), 0);">Statutory Adoption Pay</div>
+<div class="UIXL_menu_level_3" expands="no" title="Past Payslips" id="url_20131" url="../admin/payroll/employee/pastpayslips/pastpaysliplist.asp?blnUser=True&amp;EnAID=Scyfo%5BpYj%5CzUfnbmg%5Br%85gg" module="2" onclick="UIXL_menu_open(this.getAttribute('url'), 'main', this.getAttribute('module'), 0);">Past Payslips</div>
+<div class="UIXL_menu_level_3" expands="no" title="P11 Details" id="url_20132" url="../admin/payroll/employee/p11/p11details.asp?blnUser=True&amp;EnAID=Scyfo%5BpYj%5CzUfnbmg%5Cr%85gg" module="2" onclick="UIXL_menu_open(this.getAttribute('url'), 'main', this.getAttribute('module'), 0);">P11 Details</div>
+<div class="UIXL_menu_level_3" expands="no" title="Previous Salary Details" id="url_20166" url="../admin/payroll/employee/previous/list.asp?blnUser=True&amp;EnAID=Scyfo%5BpYj%5CzUfnbmj%60r%85gg" module="2" onclick="UIXL_menu_open(this.getAttribute('url'), 'main', this.getAttribute('module'), 0);">Previous Salary Details</div>
+</div>
+</div>
+</div>
+<div id="UIXL_menu_employee" class="UIXL_menu_employee" status="closed">
+<div id="UIXL_menu_EMP200" moduleid="1" class="UIXL_menu_holder" sidemenu="employee" status="open">
+<div class="UIXL_menu_level_1" expands="yes" status="open" menuid="EMP200" onclick="UIXL_menuitem_toggle(this);">HR</div>
+<div id="UIXL_menu_MOD200_10136" class="UIXL_menu_holder" status="closed">
+<div class="UIXL_menu_level_2" expands="yes" title="Employee Info" status="closed" menuid="MOD200_10136" onclick="UIXL_menuitem_toggle(this);">Employee Info</div>
+<div class="UIXL_menu_level_3" expands="no" title="Personal Details" id="url_201" url="../admin/clientadmin/edituser/personaldetails.asp?EnAID=ScyfoZpZm%5EzTfnbmokzwgg" module="1" onclick="UIXL_menu_open(this.getAttribute('url'), 'main', this.getAttribute('module'), 1);">Personal Details</div>
+<div class="UIXL_menu_level_3" expands="no" title="Employment Details" id="url_202" url="../admin/clientadmin/edituser/employmentdetails.asp?EnAID=ScyfoZpZm%5EzTfnbno%7Crc" module="1" onclick="UIXL_menu_open(this.getAttribute('url'), 'main', this.getAttribute('module'), 1);">Employment Details</div>
+<div class="UIXL_menu_level_3" expands="no" title="Next of Kin Details" id="url_204" url="../portal/modules/hr/usernextofkin/viewnextofkin.asp?EnAID=ScyfoZpZm%5EzTfnbpokzwgg" module="1" onclick="UIXL_menu_open(this.getAttribute('url'), 'main', this.getAttribute('module'), 1);">Next of Kin Details</div>
+<div class="UIXL_menu_level_3" expands="no" title="Sensitive Information" id="url_10202" url="../admin/clientadmin/edituser/sensitiveinfo.asp?EnAID=ScyfoZpZm%5EzTfmbnd%5Crto%7BqV" module="1" onclick="UIXL_menu_open(this.getAttribute('url'), 'main', this.getAttribute('module'), 1);">Sensitive Information</div>
+<div class="UIXL_menu_level_3" expands="no" title="Career History" id="url_211" url="../admin/clientadmin/employmenthistory/viewhistory.asp?EnAID=ScyfoZpZm%5EzTfncmo%7Crc" module="1" onclick="UIXL_menu_open(this.getAttribute('url'), 'main', this.getAttribute('module'), 1);">Career History</div>
+<div class="UIXL_menu_level_3" expands="no" title="Joining Checklist" id="url_213" url="../admin/clientadmin/checklist/clientchecklist.asp?EnAID=ScyfoZpZm%5EzTfncoomrc" module="1" onclick="UIXL_menu_open(this.getAttribute('url'), 'main', this.getAttribute('module'), 1);">Joining Checklist</div>
+<div class="UIXL_menu_level_3" expands="no" title="Termination Details" id="url_218" url="../admin/clientadmin/termination/viewtermination.asp?EnAID=ScyfoZpZm%5EzTfncto%7Crc" module="1" onclick="UIXL_menu_open(this.getAttribute('url'), 'main', this.getAttribute('module'), 1);">Termination Details</div>
+<div class="UIXL_menu_level_3" expands="no" title="Employee History" id="url_10152" url="../admin/clientadmin/clienthistory/viewclienthistory.asp?EnAID=ScyfoZpZm%5EzTfmbmi%5Cr%85gg" module="1" onclick="UIXL_menu_open(this.getAttribute('url'), 'main', this.getAttribute('module'), 1);">Employee History</div>
+<div class="UIXL_menu_level_3" expands="no" title="Document Management" id="url_10193" url="../Portal/Modules/DocMan/EmployeeDocs/View.asp?EnAID=ScyfoZpZm%5EzTfmbmm%5Dr%85gg" module="1" onclick="UIXL_menu_open(this.getAttribute('url'), 'main', this.getAttribute('module'), 1);">Document Management</div>
+<div class="UIXL_menu_level_3" expands="no" title="Asset Management" id="url_10221" url="../admin/clientadmin/AssetManagement/EmployeeAssetManagement.asp?EnAID=ScyfoZpZm%5EzTfmbnf%5Br%85gg" module="1" onclick="UIXL_menu_open(this.getAttribute('url'), 'main', this.getAttribute('module'), 1);">Asset Management</div>
+</div>
+<div id="UIXL_menu_MOD200_10137" class="UIXL_menu_holder" status="closed">
+<div class="UIXL_menu_level_2" expands="yes" title="Employee HR Info" status="closed" menuid="MOD200_10137" onclick="UIXL_menuitem_toggle(this);">Employee HR Info</div>
+<div class="UIXL_menu_level_3" expands="no" title="Holidays" id="url_208" url="../admin/clientadmin/holidays/holidaydetails.asp?EnAID=ScyfoZpZm_zTfnbtokzwgg" module="1" onclick="UIXL_menu_open(this.getAttribute('url'), 'main', this.getAttribute('module'), 1);">Holidays</div>
+<div class="UIXL_menu_level_3" expands="no" title="Absences" id="url_209" url="../admin/clientadmin/absences/absencedetails.asp?EnAID=ScyfoZpZm_zTfnbuokzwgg" module="1" onclick="UIXL_menu_open(this.getAttribute('url'), 'main', this.getAttribute('module'), 1);">Absences</div>
+<div class="UIXL_menu_level_3" expands="no" title="Comments" id="url_207" url="../admin/clientadmin/comments/commentslist.asp?EnAID=ScyfoZpZm_zTfnbsokzwgg" module="1" onclick="UIXL_menu_open(this.getAttribute('url'), 'main', this.getAttribute('module'), 1);">Comments</div>
+<div class="UIXL_menu_level_3" expands="no" title="Multiple Employment" id="url_10151" url="../Admin/Modules/HR/AdminME/List.asp?EnAID=ScyfoZpZm_zTfmbmi%5Br%85gg" module="1" onclick="UIXL_menu_open(this.getAttribute('url'), 'main', this.getAttribute('module'), 1);">Multiple Employment</div>
+<div class="UIXL_menu_level_3" expands="no" title="Lieu Days" id="url_10199" url="../admin/modules/hr/lieu/viewlieudays.asp?EnAID=ScyfoZpZm_zTfmbmmcr%85gg" module="1" onclick="UIXL_menu_open(this.getAttribute('url'), 'main', this.getAttribute('module'), 1);">Lieu Days</div>
+<div class="UIXL_menu_level_3" expands="no" title="T &amp; A Records" id="url_230163" url="../admin/clientadmin/Time&amp;AttendanceReports/employeeT&amp;ARecords.asp?EnAID=ScyfoZpZm_zTfnele%60jnmzzaX" module="1" onclick="UIXL_menu_open(this.getAttribute('url'), 'main', this.getAttribute('module'), 1);">T &amp; A Records</div>
+</div>
+<div id="UIXL_menu_MOD200_10138" class="UIXL_menu_holder" style="display:none;" status="closed">
+<div class="UIXL_menu_level_2" expands="yes" title="Exit Employee" status="closed" menuid="MOD200_10138" onclick="UIXL_menuitem_toggle(this);">Exit Employee</div>
+<div class="UIXL_menu_level_3" expands="no" title="Return To Employee List" id="url_10139" url="../admin/clientadmin/exitmenu.asp?RtnMID=10116&amp;EnAID=ScyfoZpZm%60zTfmbmgcr%85gg" module="1" onclick="UIXL_menu_open(this.getAttribute('url'), 'main', this.getAttribute('module'), 1);">Return To Employee List</div>
+</div>
+</div>
+</div>
+<iframe id="MenuOverlayEmployee" src="../blank.asp" frameborder="0" scrolling="no" status="closed" allowtransparency="true" xmlns:dt="urn:schemas-microsoft-com:datatypes"></iframe>
+<iframe id="MenuOverlay" src="../blank.asp" frameborder="0" scrolling="no" status="closed" allowtransparency="true" xmlns:dt="urn:schemas-microsoft-com:datatypes"></iframe>
+
+
+<script type="text/javascript" language="javascript">
+<!-- //
+
+	(function() {
+		var fixBadHeightImplementation = {
+			init: function() {
+				this.$main = $( '#main' );
+				this.$body = $( 'body' );
+				this.$container = $( '.main-iframe-container' );
+				this.fixedHeight;
+				this.check();
+			},
+			check: function() {
+				if ( this.$main.height() === this.$body.height() ) {
+					fixBadHeightImplementation.fix();
+					$( window ).resize( fixBadHeightImplementation.fix );
+				}
+			},
+			fix: function() {
+				var self = fixBadHeightImplementation; 
+				fixedHeight = ( self.$body.height() - self.$container.offset().top );
+				self.$container.height( fixedHeight );
+				self.$main.height( fixedHeight );
+			}
+		};
+		fixBadHeightImplementation.init();
+	})();
+			
+	var resizeIframeToContent = function( _iframeID, elementToMeasure ) {
+		$iframe = $( _iframeID ); 
+		if ($iframe.attr('ignoreresize') == 'yes') { return; }
+		if ($iframe.attr("data-domain") == "teamhours") {
+			var requiredHeight = $(document).height();
+			if (requiredHeight > 0) {
+				$iframe.height($(document).height() - 80);
+			}
+		} else {
+			var requiredHeight = 0;
+			if (elementToMeasure != null) {
+				requiredHeight = $iframe.contents().find(elementToMeasure).height();
+			} else {
+				
+				requiredHeight = Math.max(
+					$iframe.contents().find('body').prop("scrollHeight"),
+					$iframe.contents().find('body').prop("offsetHeight"),
+					$iframe.contents().find('html').prop("offsetHeight")
+				);
+				
+			}
+			if (requiredHeight > 0) {
+				var minimumHeight = $iframe.data('contentsize');
+				var minimumHeight = $iframe.data("contentsize");
+				if (minimumHeight === undefined) {
+					minimumHeight = 0;
+				}
+				$iframe.height(((requiredHeight >= minimumHeight) ? requiredHeight : minimumHeight) + 20);
+			}
+		}
+	}
+
+// -->
+</script>
+
+
+
+
+<div id="staff-rota-extension-marker" data-extension-installed="true" style="display: none;"></div></body></html>

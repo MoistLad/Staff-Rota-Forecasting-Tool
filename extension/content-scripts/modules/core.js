@@ -158,6 +158,13 @@ window.StaffRotaAutomation.Core.startAutomation = async function(data) {
         });
         
         try {
+          // Double-check that employeeRow is defined before trying to use it
+          if (!employeeRow) {
+            console.error(`Employee row is not defined for ${employee.name} when processing ${shift.day} shift`);
+            failedShifts.push(`${employee.name} on ${shift.day}: employeeRow is not defined`);
+            continue;
+          }
+          
           await window.StaffRotaAutomation.EmployeeFinder.clickDayCell(employeeRow, shift.day);
           
           if (shift.shiftType === 'single') {

@@ -134,14 +134,28 @@ window.StaffRotaAutomation.Utils.waitForPageLoad = function() {
 /**
  * Helper function to find elements in all possible contexts (main document and iframes)
  * @param {string} selector - The CSS selector to find elements
+ * @param {Element|Document} [searchContext=document] - The context to search within
  * @returns {NodeList} The found elements
  */
-window.StaffRotaAutomation.Utils.findElementsInAllContexts = function(selector) {
+window.StaffRotaAutomation.Utils.findElementsInAllContexts = function(selector, searchContext = document) {
   try {
     // Validate the selector first
     if (!selector || typeof selector !== 'string') {
       console.warn('Invalid selector provided to findElementsInAllContexts:', selector);
       return [];
+    }
+    
+    // If a specific search context is provided, search only within that context
+    if (searchContext && searchContext !== document) {
+      try {
+        let elements = searchContext.querySelectorAll(selector);
+        if (elements && elements.length > 0) {
+          return elements;
+        }
+      } catch (contextSelectorError) {
+        console.warn(`Invalid selector "${selector}" in provided search context:`, contextSelectorError.message);
+        // Fall back to searching in document and iframes
+      }
     }
     
     // Try in main document first

@@ -469,6 +469,12 @@ window.StaffRotaAutomation.EmployeeFinder.findEmployeeRow = function(employeeNam
  * @returns {Promise} A promise that resolves when the day cell has been clicked
  */
 window.StaffRotaAutomation.EmployeeFinder.clickDayCell = async function(employeeRow, day) {
+  // Check if employeeRow is defined
+  if (!employeeRow) {
+    console.error(`Cannot click day cell: employeeRow is null or undefined for day ${day}`);
+    throw new Error(`Employee row is not defined when trying to click ${day} cell`);
+  }
+  
   console.log(`Looking for ${day} cell in employee row with ID: ${employeeRow.id || 'unnamed row'}`);
   
   // Map day names to their indices (0-based)
