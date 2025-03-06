@@ -2,12 +2,16 @@
  * Utility functions for the Staff Rota Automation extension
  */
 
+// Create a namespace for the extension to avoid polluting the global namespace
+window.StaffRotaAutomation = window.StaffRotaAutomation || {};
+window.StaffRotaAutomation.Utils = {};
+
 /**
  * Format a decimal time value to HH:MM format
  * @param {number} time - The time value in decimal format (e.g., 8.5 for 8:30)
  * @returns {string} The formatted time string in HH:MM format
  */
-export function formatTimeToHHMM(time) {
+window.StaffRotaAutomation.Utils.formatTimeToHHMM = function(time) {
   if (!time) return '';
   
   const hours = Math.floor(time);
@@ -21,7 +25,7 @@ export function formatTimeToHHMM(time) {
  * @param {number} ms - The number of milliseconds to sleep
  * @returns {Promise} A promise that resolves after the specified time
  */
-export function sleep(ms) {
+window.StaffRotaAutomation.Utils.sleep = function(ms) {
   return new Promise(resolve => setTimeout(resolve, ms));
 }
 
@@ -30,7 +34,7 @@ export function sleep(ms) {
  * @param {string} status - The status to update
  * @param {Object} data - Additional data to include with the status update
  */
-export function updateStatus(status, data = {}) {
+window.StaffRotaAutomation.Utils.updateStatus = function(status, data = {}) {
   chrome.runtime.sendMessage({
     action: 'updateStatus',
     status,
@@ -42,7 +46,7 @@ export function updateStatus(status, data = {}) {
  * Update the automation progress
  * @param {number} increment - The amount to increment the progress by
  */
-export function updateProgress(increment) {
+window.StaffRotaAutomation.Utils.updateProgress = function(increment) {
   chrome.runtime.sendMessage({
     action: 'updateProgress',
     progress: increment
@@ -55,7 +59,7 @@ export function updateProgress(increment) {
  * @param {number} timeout - The maximum time to wait in milliseconds
  * @returns {Promise<Element>} A promise that resolves with the element when found
  */
-export function waitForElement(selector, timeout = 5000) {
+window.StaffRotaAutomation.Utils.waitForElement = function(selector, timeout = 5000) {
   return new Promise((resolve, reject) => {
     const element = document.querySelector(selector);
     
@@ -89,7 +93,7 @@ export function waitForElement(selector, timeout = 5000) {
  * Wait for the page to be fully loaded
  * @returns {Promise} A promise that resolves when the page is loaded
  */
-export function waitForPageLoad() {
+window.StaffRotaAutomation.Utils.waitForPageLoad = function() {
   return new Promise(resolve => {
     if (document.readyState === 'complete') {
       resolve();
@@ -104,7 +108,7 @@ export function waitForPageLoad() {
  * @param {string} selector - The CSS selector to find elements
  * @returns {NodeList} The found elements
  */
-export function findElementsInAllContexts(selector) {
+window.StaffRotaAutomation.Utils.findElementsInAllContexts = function(selector) {
   // Try in main document first
   let elements = document.querySelectorAll(selector);
   if (elements && elements.length > 0) {

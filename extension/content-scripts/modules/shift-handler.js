@@ -2,7 +2,9 @@
  * Shift handling functions for the Staff Rota Automation extension
  */
 
-import { sleep, findElementsInAllContexts } from './utils.js';
+// Create a namespace for shift handler functions
+window.StaffRotaAutomation = window.StaffRotaAutomation || {};
+window.StaffRotaAutomation.ShiftHandler = {};
 
 /**
  * Fill the shift form with the provided data
@@ -12,16 +14,16 @@ import { sleep, findElementsInAllContexts } from './utils.js';
  * @param {number} shiftData.breakDuration - The break duration in minutes
  * @returns {Promise<boolean>} A promise that resolves to true if the form was saved successfully
  */
-export async function fillShiftForm(shiftData) {
+window.StaffRotaAutomation.ShiftHandler.fillShiftForm = async function(shiftData) {
   console.log('Filling shift form with data:', shiftData);
   
   // Wait a moment for the form to be fully loaded and interactive
-  await sleep(1000);
+  await window.StaffRotaAutomation.Utils.sleep(1000);
   
   // Find the form elements
-  const startTimeInputs = findElementsInAllContexts('input[name="startTime"], input[placeholder*="start"], input[id*="start"], input[class*="start-time"]');
-  const endTimeInputs = findElementsInAllContexts('input[name="endTime"], input[placeholder*="end"], input[id*="end"], input[class*="end-time"]');
-  const breakDurationInputs = findElementsInAllContexts('input[name="breakDuration"], input[placeholder*="break"], input[id*="break"], input[class*="break"]');
+  const startTimeInputs = window.StaffRotaAutomation.Utils.findElementsInAllContexts('input[name="startTime"], input[placeholder*="start"], input[id*="start"], input[class*="start-time"]');
+  const endTimeInputs = window.StaffRotaAutomation.Utils.findElementsInAllContexts('input[name="endTime"], input[placeholder*="end"], input[id*="end"], input[class*="end-time"]');
+  const breakDurationInputs = window.StaffRotaAutomation.Utils.findElementsInAllContexts('input[name="breakDuration"], input[placeholder*="break"], input[id*="break"], input[class*="break"]');
   
   // Find the start time input
   let startTimeInput = startTimeInputs.length > 0 ? startTimeInputs[0] : null;
@@ -71,7 +73,7 @@ export async function fillShiftForm(shiftData) {
   
   let saveButton = null;
   for (const selector of saveButtonSelectors) {
-    const buttons = findElementsInAllContexts(selector);
+    const buttons = window.StaffRotaAutomation.Utils.findElementsInAllContexts(selector);
     if (buttons.length > 0) {
       saveButton = buttons[0];
       break;
@@ -80,7 +82,7 @@ export async function fillShiftForm(shiftData) {
   
   // If we still haven't found a save button, try a more generic approach
   if (!saveButton) {
-    const allButtons = findElementsInAllContexts('button, input[type="button"]');
+    const allButtons = window.StaffRotaAutomation.Utils.findElementsInAllContexts('button, input[type="button"]');
     saveButton = Array.from(allButtons).find(el => 
       el.textContent && 
       (el.textContent.trim().toLowerCase() === 'save' || 
@@ -94,7 +96,7 @@ export async function fillShiftForm(shiftData) {
     saveButton.click();
     
     // Wait for the form to be saved and closed
-    const formSaved = await waitForFormSave();
+    const formSaved = await window.StaffRotaAutomation.ShiftHandler.waitForFormSave();
     return formSaved;
   } else {
     console.warn('Could not find save button');
@@ -106,11 +108,11 @@ export async function fillShiftForm(shiftData) {
  * Wait for the form to be saved and closed
  * @returns {Promise<boolean>} A promise that resolves to true if the form appears to have been saved successfully
  */
-export async function waitForFormSave() {
+window.StaffRotaAutomation.ShiftHandler.waitForFormSave = async function() {
   console.log('Waiting for form to be saved...');
   
   // Wait a moment for the save operation to start
-  await sleep(500);
+  await window.StaffRotaAutomation.Utils.sleep(500);
   
   // Check for common indicators that the form is being processed
   const loadingIndicators = document.querySelectorAll('.loading, .spinner, .processing, [class*="loading"], [class*="spinner"]');
@@ -122,7 +124,7 @@ export async function waitForFormSave() {
     const maxAttempts = 10;
     
     while (attempts < maxAttempts) {
-      await sleep(500);
+      await window.StaffRotaAutomation.Utils.sleep(500);
       attempts++;
       
       const visibleLoadingIndicators = Array.from(loadingIndicators).filter(el => 
@@ -152,7 +154,7 @@ export async function waitForFormSave() {
   }
   
   // Wait a bit longer to ensure the form is fully processed
-  await sleep(1000);
+  await window.StaffRotaAutomation.Utils.sleep(1000);
   
   // If we got this far without seeing error messages, assume the form was saved successfully
   return true;

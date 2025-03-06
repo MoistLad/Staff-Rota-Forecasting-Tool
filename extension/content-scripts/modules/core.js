@@ -2,39 +2,38 @@
  * Core functionality for the Staff Rota Automation extension
  */
 
-import { waitForPageLoad, updateStatus, updateProgress, sleep, formatTimeToHHMM } from './utils.js';
-import { isLoginPage, waitForLogin, isSchedulingPage, navigateToSchedulingPage } from './navigation.js';
-import { findEmployeeRow, clickDayCell } from './employee-finder.js';
-import { fillShiftForm } from './shift-handler.js';
+// Create a namespace for core functions
+window.StaffRotaAutomation = window.StaffRotaAutomation || {};
+window.StaffRotaAutomation.Core = {};
 
 /**
  * Start the automation process
  * @param {Object} data - The automation data
  * @returns {Promise<Object>} A promise that resolves with the result of the automation
  */
-export async function startAutomation(data) {
+window.StaffRotaAutomation.Core.startAutomation = async function(data) {
   try {
-    updateStatus('starting');
-    await waitForPageLoad();
+    window.StaffRotaAutomation.Utils.updateStatus('starting');
+    await window.StaffRotaAutomation.Utils.waitForPageLoad();
     
-    if (isLoginPage()) {
-      updateStatus('login_required');
-      await waitForLogin();
+    if (window.StaffRotaAutomation.Navigation.isLoginPage()) {
+      window.StaffRotaAutomation.Utils.updateStatus('login_required');
+      await window.StaffRotaAutomation.Navigation.waitForLogin();
     }
     
     // Check if we're on the correct page
-    const onSchedulingPage = isSchedulingPage();
+    const onSchedulingPage = window.StaffRotaAutomation.Navigation.isSchedulingPage();
     console.log(`Scheduling page check result: ${onSchedulingPage ? 'Already on scheduling page' : 'Not on scheduling page'}`);
     
     if (!onSchedulingPage) {
       try {
         console.log('Attempting to navigate to scheduling page...');
-        await navigateToSchedulingPage();
+        await window.StaffRotaAutomation.Navigation.navigateToSchedulingPage();
       } catch (navigationError) {
         console.error('Navigation error:', navigationError);
         
         // Check again if we're on the scheduling page despite the navigation error
-        if (isSchedulingPage()) {
+        if (window.StaffRotaAutomation.Navigation.isSchedulingPage()) {
           console.log('Navigation failed but we appear to be on the scheduling page anyway, continuing...');
         } else {
           // If we're still not on the scheduling page, try one more time with a different approach
@@ -52,10 +51,10 @@ export async function startAutomation(data) {
               schedulingLinks[0].click();
               
               // Wait a moment for the page to load
-              await sleep(2000);
+              await window.StaffRotaAutomation.Utils.sleep(2000);
               
               // Check again if we're on the scheduling page
-              if (isSchedulingPage()) {
+              if (window.StaffRotaAutomation.Navigation.isSchedulingPage()) {
                 console.log('Alternative navigation successful');
               } else {
                 console.error('Still not on scheduling page after alternative navigation');
@@ -79,13 +78,13 @@ export async function startAutomation(data) {
     for (let i = 0; i < data.employees.length; i++) {
       const employee = data.employees[i];
       
-      updateStatus('processing_employee', {
+      window.StaffRotaAutomation.Utils.updateStatus('processing_employee', {
         employee: employee.name,
         index: i + 1,
         total: data.employees.length
       });
       
-      const employeeRow = await findEmployeeRow(employee.name);
+      const employeeRow = await window.StaffRotaAutomation.EmployeeFinder.findEmployeeRow(employee.name);
       
       if (!employeeRow) {
         console.warn(`Employee ${employee.name} not found in the forecasting system`);
@@ -100,81 +99,81 @@ export async function startAutomation(data) {
           continue;
         }
         
-        updateStatus('processing_shift', {
+        window.StaffRotaAutomation.Utils.updateStatus('processing_shift', {
           employee: employee.name,
           day: shift.day,
           shiftType: shift.shiftType
         });
         
         try {
-          await clickDayCell(employeeRow, shift.day);
+          await window.StaffRotaAutomation.EmployeeFinder.clickDayCell(employeeRow, shift.day);
           
           if (shift.shiftType === 'single') {
-            const formSaved = await fillShiftForm({
-              startTime: formatTimeToHHMM(shift.startTime1),
-              endTime: formatTimeToHHMM(shift.endTime1),
+            const formSaved = await window.StaffRotaAutomation.ShiftHandler.fillShiftForm({
+              startTime: window.StaffRotaAutomation.Utils.formatTimeToHHMM(shift.startTime1),
+              endTime: window.StaffRotaAutomation.Utils.formatTimeToHHMM(shift.endTime1),
               breakDuration: shift.breakDuration
             });
             
             if (formSaved) {
               console.log(`Successfully saved single shift for ${employee.name} on ${shift.day}`);
-              updateProgress(1);
+              window.StaffRotaAutomation.Utils.updateProgress(1);
             } else {
               console.warn(`Could not confirm if shift was saved for ${employee.name} on ${shift.day}`);
               // Continue anyway, but log the warning
-              updateProgress(1);
+              window.StaffRotaAutomation.Utils.updateProgress(1);
             }
           } else if (shift.shiftType === 'double') {
-            const firstFormSaved = await fillShiftForm({
-              startTime: formatTimeToHHMM(shift.startTime1),
-              endTime: formatTimeToHHMM(shift.endTime1),
+            const firstFormSaved = await window.StaffRotaAutomation.ShiftHandler.fillShiftForm({
+              startTime: window.StaffRotaAutomation.Utils.formatTimeToHHMM(shift.startTime1),
+              endTime: window.StaffRotaAutomation.Utils.formatTimeToHHMM(shift.endTime1),
               breakDuration: shift.breakDuration
             });
             
             if (firstFormSaved) {
               console.log(`Successfully saved first shift for ${employee.name} on ${shift.day}`);
-              updateProgress(1);
+              window.StaffRotaAutomation.Utils.updateProgress(1);
               
               // Wait a bit longer to ensure the first form is fully processed
-              await sleep(2000);
+              await window.StaffRotaAutomation.Utils.sleep(2000);
               
               // Click the day cell again for the second shift
-              await clickDayCell(employeeRow, shift.day);
+              await window.StaffRotaAutomation.EmployeeFinder.clickDayCell(employeeRow, shift.day);
               
-              const secondFormSaved = await fillShiftForm({
-                startTime: formatTimeToHHMM(shift.startTime2),
-                endTime: formatTimeToHHMM(shift.endTime2),
+              const secondFormSaved = await window.StaffRotaAutomation.ShiftHandler.fillShiftForm({
+                startTime: window.StaffRotaAutomation.Utils.formatTimeToHHMM(shift.startTime2),
+                endTime: window.StaffRotaAutomation.Utils.formatTimeToHHMM(shift.endTime2),
                 breakDuration: 0
               });
               
               if (secondFormSaved) {
                 console.log(`Successfully saved second shift for ${employee.name} on ${shift.day}`);
-                updateProgress(1);
+                window.StaffRotaAutomation.Utils.updateProgress(1);
               } else {
                 console.warn(`Could not confirm if second shift was saved for ${employee.name} on ${shift.day}`);
                 // Continue anyway, but log the warning
-                updateProgress(1);
+                window.StaffRotaAutomation.Utils.updateProgress(1);
               }
             } else {
               console.warn(`Could not confirm if first shift was saved for ${employee.name} on ${shift.day}`);
               // Continue anyway, but log the warning
-              updateProgress(1);
+              window.StaffRotaAutomation.Utils.updateProgress(1);
             }
           }
         } catch (shiftError) {
           console.error(`Error processing shift for ${employee.name} on ${shift.day}:`, shiftError);
           
           // Try to recover by waiting a bit and continuing with the next shift
-          await sleep(2000);
+          await window.StaffRotaAutomation.Utils.sleep(2000);
           continue;
         }
       }
     }
     
-    updateStatus('complete');
+    window.StaffRotaAutomation.Utils.updateStatus('complete');
     return { message: 'Automation completed successfully' };
   } catch (error) {
-    updateStatus('error', { error: error.message });
+    window.StaffRotaAutomation.Utils.updateStatus('error', { error: error.message });
     console.error('Error during automation:', error);
     throw error;
   }
@@ -184,7 +183,7 @@ export async function startAutomation(data) {
  * Initialize the extension
  * This function sets up event listeners and markers to indicate the extension is installed
  */
-export function initialize() {
+window.StaffRotaAutomation.Core.initialize = function() {
   console.log('Staff Rota Automation extension content script loaded');
 
   // Add markers to indicate the extension is installed
@@ -263,7 +262,7 @@ export function initialize() {
     }
     
     if (message.action === 'startAutomation') {
-      startAutomation(message.data)
+      window.StaffRotaAutomation.Core.startAutomation(message.data)
         .then(result => sendResponse({ success: true, result }))
         .catch(error => sendResponse({ success: false, error: error.message }));
       return true;

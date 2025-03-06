@@ -2,14 +2,16 @@
  * Employee finder functions for the Staff Rota Automation extension
  */
 
-import { sleep } from './utils.js';
+// Create a namespace for employee finder functions
+window.StaffRotaAutomation = window.StaffRotaAutomation || {};
+window.StaffRotaAutomation.EmployeeFinder = {};
 
 /**
  * Find the employee row in the scheduling table
  * @param {string} employeeName - The name of the employee to find
  * @returns {Element|null} The employee row element, or null if not found
  */
-export function findEmployeeRow(employeeName) {
+window.StaffRotaAutomation.EmployeeFinder.findEmployeeRow = function(employeeName) {
   console.log(`Looking for employee row with name: ${employeeName}`);
   
   // Helper function to search for employee in a document
@@ -115,7 +117,7 @@ export function findEmployeeRow(employeeName) {
  * @param {string} day - The day of the week (Monday, Tuesday, etc.)
  * @returns {Promise} A promise that resolves when the day cell has been clicked
  */
-export async function clickDayCell(employeeRow, day) {
+window.StaffRotaAutomation.EmployeeFinder.clickDayCell = async function(employeeRow, day) {
   console.log(`Looking for ${day} cell in employee row with ID: ${employeeRow.id || 'unnamed row'}`);
   
   // Map day names to their indices (0-based)
@@ -142,7 +144,7 @@ export async function clickDayCell(employeeRow, day) {
     specificDayCells[dayIndex].click();
     
     // Wait for the shift form to appear
-    await sleep(1000);
+    await window.StaffRotaAutomation.Utils.sleep(1000);
     return;
   }
   
@@ -153,7 +155,7 @@ export async function clickDayCell(employeeRow, day) {
     directTdCells[dayIndex].click();
     
     // Wait for the shift form to appear
-    await sleep(1000);
+    await window.StaffRotaAutomation.Utils.sleep(1000);
     return;
   }
   
@@ -184,7 +186,7 @@ export async function clickDayCell(employeeRow, day) {
     filteredDayCells[dayIndex].click();
     
     // Wait for the shift form to appear
-    await sleep(1000);
+    await window.StaffRotaAutomation.Utils.sleep(1000);
     return;
   }
   // Method 4: Last resort - just try all cells
@@ -193,7 +195,7 @@ export async function clickDayCell(employeeRow, day) {
     dayCells[dayIndex].click();
     
     // Wait for the shift form to appear
-    await sleep(1000);
+    await window.StaffRotaAutomation.Utils.sleep(1000);
     return;
   }
   
@@ -206,7 +208,7 @@ export async function clickDayCell(employeeRow, day) {
     dayNameCells[0].click();
     
     // Wait for the shift form to appear
-    await sleep(1000);
+    await window.StaffRotaAutomation.Utils.sleep(1000);
     return;
   }
   

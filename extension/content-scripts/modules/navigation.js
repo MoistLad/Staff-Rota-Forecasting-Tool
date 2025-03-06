@@ -2,13 +2,15 @@
  * Navigation functions for the Staff Rota Automation extension
  */
 
-import { sleep } from './utils.js';
+// Create a namespace for navigation functions
+window.StaffRotaAutomation = window.StaffRotaAutomation || {};
+window.StaffRotaAutomation.Navigation = {};
 
 /**
  * Check if we're on the login page
  * @returns {boolean} True if we're on the login page, false otherwise
  */
-export function isLoginPage() {
+window.StaffRotaAutomation.Navigation.isLoginPage = function() {
   return document.querySelector('form[name="login"]') !== null;
 }
 
@@ -16,10 +18,10 @@ export function isLoginPage() {
  * Wait for the user to log in
  * @returns {Promise} A promise that resolves when the user has logged in
  */
-export function waitForLogin() {
+window.StaffRotaAutomation.Navigation.waitForLogin = function() {
   return new Promise(resolve => {
     const interval = setInterval(() => {
-      if (!isLoginPage()) {
+      if (!window.StaffRotaAutomation.Navigation.isLoginPage()) {
         clearInterval(interval);
         resolve();
       }
@@ -31,7 +33,7 @@ export function waitForLogin() {
  * Check if we're on the scheduling page
  * @returns {boolean} True if we're on the scheduling page, false otherwise
  */
-export function isSchedulingPage() {
+window.StaffRotaAutomation.Navigation.isSchedulingPage = function() {
   console.log('Checking if we are on the scheduling page...');
   
   // Check 1: Look for employee schedule table or grid
@@ -116,10 +118,10 @@ export function isSchedulingPage() {
  * Navigate to the scheduling page
  * @returns {Promise} A promise that resolves when navigation is complete
  */
-export async function navigateToSchedulingPage() {
+window.StaffRotaAutomation.Navigation.navigateToSchedulingPage = async function() {
   console.log('Attempting to navigate to scheduling page...');
   
-  if (isSchedulingPage()) {
+  if (window.StaffRotaAutomation.Navigation.isSchedulingPage()) {
     console.log('Already on scheduling page');
     return;
   }
@@ -139,7 +141,7 @@ export async function navigateToSchedulingPage() {
       const interval = setInterval(() => {
         attempts++;
         
-        if (isSchedulingPage()) {
+        if (window.StaffRotaAutomation.Navigation.isSchedulingPage()) {
           clearInterval(interval);
           console.log('Successfully navigated to scheduling page');
           resolve();
@@ -160,9 +162,9 @@ export async function navigateToSchedulingPage() {
     console.log('Found header module, checking if we can click it');
     headerModule.click();
     
-    await sleep(2000);
+    await window.StaffRotaAutomation.Utils.sleep(2000);
     
-    if (isSchedulingPage()) {
+    if (window.StaffRotaAutomation.Navigation.isSchedulingPage()) {
       console.log('Successfully navigated to scheduling page');
       return;
     }
@@ -174,7 +176,7 @@ export async function navigateToSchedulingPage() {
     console.log('Found burger menu, clicking it');
     burgerMenu.click();
     
-    await sleep(1000);
+    await window.StaffRotaAutomation.Utils.sleep(1000);
     
     const schedulingInMenu = Array.from(document.querySelectorAll('a, li, div, span'))
       .filter(el => el.textContent && 
@@ -186,9 +188,9 @@ export async function navigateToSchedulingPage() {
       console.log(`Found ${schedulingInMenu.length} potential Scheduling items in menu, clicking the first one`);
       schedulingInMenu[0].click();
       
-      await sleep(2000);
+      await window.StaffRotaAutomation.Utils.sleep(2000);
       
-      if (isSchedulingPage()) {
+      if (window.StaffRotaAutomation.Navigation.isSchedulingPage()) {
         console.log('Successfully navigated to scheduling page');
         return;
       }
@@ -202,9 +204,9 @@ export async function navigateToSchedulingPage() {
       console.log('Trying to navigate using the main iframe');
       mainIframe.src = '../modules/labourproductivity/homepage.asp';
       
-      await sleep(3000);
+      await window.StaffRotaAutomation.Utils.sleep(3000);
       
-      if (isSchedulingPage()) {
+      if (window.StaffRotaAutomation.Navigation.isSchedulingPage()) {
         console.log('Successfully navigated to scheduling page');
         return;
       }
@@ -224,9 +226,9 @@ export async function navigateToSchedulingPage() {
     console.log(`Found ${schedulingLinks.length} potential scheduling links, clicking the first one`);
     schedulingLinks[0].click();
     
-    await sleep(2000);
+    await window.StaffRotaAutomation.Utils.sleep(2000);
     
-    if (isSchedulingPage()) {
+    if (window.StaffRotaAutomation.Navigation.isSchedulingPage()) {
       console.log('Successfully navigated to scheduling page');
       return;
     }
@@ -243,9 +245,9 @@ export async function navigateToSchedulingPage() {
           console.log(`Found ${scheduleElements.length} schedule elements in iframe, focusing it`);
           iframe.focus();
           
-          await sleep(1000);
+          await window.StaffRotaAutomation.Utils.sleep(1000);
           
-          if (isSchedulingPage()) {
+          if (window.StaffRotaAutomation.Navigation.isSchedulingPage()) {
             console.log('Successfully found scheduling page in iframe');
             return;
           }

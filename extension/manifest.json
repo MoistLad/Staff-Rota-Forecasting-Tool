@@ -22,8 +22,14 @@
       "*://moistlad.github.io/*", 
       "https://moistlad.github.io/Staff-Rota-Forecasting-Tool/*"
     ],
-    "js": ["content-scripts/forecasting-automation.js"],
-    "type": "module"
+    "js": [
+      "content-scripts/modules/utils.js",
+      "content-scripts/modules/navigation.js",
+      "content-scripts/modules/employee-finder.js",
+      "content-scripts/modules/shift-handler.js",
+      "content-scripts/modules/core.js",
+      "content-scripts/forecasting-automation.js"
+    ]
   }],
   "action": {
     "default_popup": "popup/popup.html",
