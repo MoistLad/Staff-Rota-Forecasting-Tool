@@ -2,24 +2,10 @@
  * Core functionality for the Staff Rota Automation extension
  */
 
-import { waitForPageLoad, updateStatus, updateProgress, sleep } from './utils.js';
+import { waitForPageLoad, updateStatus, updateProgress, sleep, formatTimeToHHMM } from './utils.js';
 import { isLoginPage, waitForLogin, isSchedulingPage, navigateToSchedulingPage } from './navigation.js';
 import { findEmployeeRow, clickDayCell } from './employee-finder.js';
 import { fillShiftForm } from './shift-handler.js';
-
-/**
- * Format a decimal time value to HH:MM format
- * @param {number} time - The time value in decimal format (e.g., 8.5 for 8:30)
- * @returns {string} The formatted time string in HH:MM format
- */
-function formatTimeToHHMM(time) {
-  if (!time) return '';
-  
-  const hours = Math.floor(time);
-  const minutes = Math.round((time - hours) * 60);
-  
-  return `${hours.toString().padStart(2, '0')}:${minutes.toString().padStart(2, '0')}`;
-}
 
 /**
  * Start the automation process

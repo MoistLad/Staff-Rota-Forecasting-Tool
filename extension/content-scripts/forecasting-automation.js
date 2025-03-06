@@ -5,7 +5,14 @@
  * This file serves as the entry point for the extension and imports functionality from the modules.
  */
 
-import { initialize } from './modules/core.js';
-
-// Initialize the extension when the script is loaded
-initialize();
+// Use dynamic import instead of static import to work around module loading issues
+(async () => {
+  try {
+    const { initialize } = await import('./modules/core.js');
+    // Initialize the extension when the script is loaded
+    initialize();
+    console.log('Staff Rota Automation extension initialized successfully');
+  } catch (error) {
+    console.error('Error initializing Staff Rota Automation extension:', error);
+  }
+})();
