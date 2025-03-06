@@ -89,6 +89,8 @@ window.StaffRotaAutomation.Core.startAutomation = async function(data) {
       });
       
       try {
+        console.log(`Processing employee: ${employee.name} (${i + 1}/${data.employees.length})`);
+        
         // Try to find the employee row
         const employeeRow = await window.StaffRotaAutomation.EmployeeFinder.findEmployeeRow(employee.name);
         
@@ -106,9 +108,15 @@ window.StaffRotaAutomation.Core.startAutomation = async function(data) {
           // Add to missing employees list
           missingEmployees.push(employee.name);
           
+          // Log more detailed information to help with debugging
+          console.log(`Note: The rota contains only first names, while the forecasting system may have full names.`);
+          console.log(`Tried to match "${employee.name}" against names in the forecasting system.`);
+          
           // Skip to next employee
           continue;
         }
+        
+        console.log(`Found employee row for ${employee.name}`);
       } catch (employeeError) {
         // Error finding employee, log and continue to next employee
         console.error(`Error finding employee ${employee.name}:`, employeeError);

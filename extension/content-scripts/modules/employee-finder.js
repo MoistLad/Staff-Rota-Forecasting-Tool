@@ -24,7 +24,177 @@ window.StaffRotaAutomation.EmployeeFinder.normalizeName = function(name) {
   normalized = normalized.replace(/[.,\/#!$%\^&\*;:{}=\-_`~()]/g, '');
   normalized = normalized.replace(/\s+/g, ' ').trim();
   
+  // Extract first name only (since rota only contains first names)
+  const parts = normalized.split(' ');
+  if (parts.length > 0) {
+    normalized = parts[0];
+  }
+  
   return normalized;
+}
+
+/**
+ * Get just the first name from a full name
+ * @param {string} fullName - The full name
+ * @returns {string} The first name
+ */
+window.StaffRotaAutomation.EmployeeFinder.getFirstName = function(fullName) {
+  if (!fullName) return '';
+  
+  // Convert to lowercase and trim
+  const normalized = fullName.toLowerCase().trim();
+  
+  // Remove titles
+  const withoutTitles = normalized.replace(/^(mr|mrs|miss|ms|dr|prof)\.?\s+/i, '');
+  
+  // Get first part of the name
+  const parts = withoutTitles.split(/\s+/);
+  return parts[0] || '';
+}
+
+/**
+ * Map common nicknames to formal names
+ * @param {string} name - The name to check for nicknames
+ * @returns {string} The mapped name or the original if no mapping exists
+ */
+window.StaffRotaAutomation.EmployeeFinder.mapNickname = function(name) {
+  if (!name) return '';
+  
+  const normalized = name.toLowerCase();
+  
+  // Common nickname mappings
+  const nicknames = {
+    'rob': 'robert',
+    'bob': 'robert',
+    'bobby': 'robert',
+    'robbie': 'robert',
+    
+    'rick': 'richard',
+    'dick': 'richard',
+    'richie': 'richard',
+    
+    'will': 'william',
+    'bill': 'william',
+    'billy': 'william',
+    
+    'jim': 'james',
+    'jimmy': 'james',
+    'jamie': 'james',
+    
+    'johnny': 'john',
+    'jon': 'john',
+    
+    'mike': 'michael',
+    'mikey': 'michael',
+    'mick': 'michael',
+    
+    'tom': 'thomas',
+    'tommy': 'thomas',
+    
+    'chris': 'christopher',
+    
+    'joe': 'joseph',
+    'joey': 'joseph',
+    
+    'dan': 'daniel',
+    'danny': 'daniel',
+    
+    'matt': 'matthew',
+    'matty': 'matthew',
+    
+    'dave': 'david',
+    'davey': 'david',
+    
+    'nick': 'nicholas',
+    'nicky': 'nicholas',
+    
+    'tony': 'anthony',
+    
+    'andy': 'andrew',
+    'drew': 'andrew',
+    
+    'steve': 'steven',
+    'stephen': 'steven',
+    
+    'ed': 'edward',
+    'eddie': 'edward',
+    'ted': 'edward',
+    
+    'charlie': 'charles',
+    'chuck': 'charles',
+    
+    'ben': 'benjamin',
+    'benji': 'benjamin',
+    
+    'sam': 'samuel',
+    'sammy': 'samuel',
+    
+    'alex': 'alexander',
+    
+    'pat': 'patrick',
+    'patty': 'patrick',
+    
+    'vicky': 'victoria',
+    'vicki': 'victoria',
+    
+    'liz': 'elizabeth',
+    'beth': 'elizabeth',
+    'lizzie': 'elizabeth',
+    'eliza': 'elizabeth',
+    
+    'cathy': 'catherine',
+    'katherine': 'catherine',
+    'kate': 'catherine',
+    'katie': 'catherine',
+    'cat': 'catherine',
+    
+    'jen': 'jennifer',
+    'jenny': 'jennifer',
+    
+    'maggie': 'margaret',
+    'meg': 'margaret',
+    'peggy': 'margaret',
+    
+    'becky': 'rebecca',
+    
+    'steph': 'stephanie',
+    
+    'debbie': 'deborah',
+    'deb': 'deborah',
+    
+    'jess': 'jessica',
+    'jessie': 'jessica',
+    
+    'sue': 'susan',
+    'suzie': 'susan',
+    
+    'barb': 'barbara',
+    
+    'kim': 'kimberly',
+    
+    'mandy': 'amanda',
+    
+    'patty': 'patricia',
+    'pat': 'patricia',
+    
+    'nikki': 'nicole',
+    
+    'chris': 'christine',
+    'christy': 'christine',
+    
+    'sam': 'samantha',
+    
+    'shelly': 'michelle',
+    
+    'angie': 'angela',
+    
+    'mel': 'melissa',
+    'missy': 'melissa',
+    
+    'izzy': 'isabelle'
+  };
+  
+  return nicknames[normalized] || normalized;
 }
 
 /**
@@ -36,47 +206,83 @@ window.StaffRotaAutomation.EmployeeFinder.normalizeName = function(name) {
 window.StaffRotaAutomation.EmployeeFinder.areSimilarNames = function(name1, name2) {
   if (!name1 || !name2) return false;
   
+  // Get first names only
+  const firstName1 = window.StaffRotaAutomation.EmployeeFinder.getFirstName(name1);
+  const firstName2 = window.StaffRotaAutomation.EmployeeFinder.getFirstName(name2);
+  
   // Normalize both names
-  const normalized1 = window.StaffRotaAutomation.EmployeeFinder.normalizeName(name1);
-  const normalized2 = window.StaffRotaAutomation.EmployeeFinder.normalizeName(name2);
+  const normalized1 = window.StaffRotaAutomation.EmployeeFinder.normalizeName(firstName1);
+  const normalized2 = window.StaffRotaAutomation.EmployeeFinder.normalizeName(firstName2);
   
   // Exact match after normalization
   if (normalized1 === normalized2) return true;
   
+  // Check nickname mappings
+  const mapped1 = window.StaffRotaAutomation.EmployeeFinder.mapNickname(normalized1);
+  const mapped2 = window.StaffRotaAutomation.EmployeeFinder.mapNickname(normalized2);
+  
+  // Check if the mapped names match
+  if (mapped1 === mapped2) return true;
+  
   // Check if one name is contained within the other
   if (normalized1.includes(normalized2) || normalized2.includes(normalized1)) return true;
   
-  // Check for name parts (first name, last name)
-  const parts1 = normalized1.split(' ');
-  const parts2 = normalized2.split(' ');
-  
-  // If both names have multiple parts
-  if (parts1.length > 1 && parts2.length > 1) {
-    // Check if first names match
-    if (parts1[0] === parts2[0]) return true;
-    
-    // Check if last names match
-    if (parts1[parts1.length - 1] === parts2[parts2.length - 1]) return true;
-    
-    // Check for first initial + last name match
-    if (parts1[0].charAt(0) === parts2[0].charAt(0) && 
-        parts1[parts1.length - 1] === parts2[parts2.length - 1]) return true;
+  // Check for first letter match (for very short names)
+  if (normalized1.length > 0 && normalized2.length > 0 && 
+      normalized1.charAt(0) === normalized2.charAt(0) &&
+      (normalized1.length <= 3 || normalized2.length <= 3)) {
+    return true;
   }
   
-  // Check for initials
-  if (parts1.length === 1 && parts2.length > 1) {
-    // Check if the single part matches the first letter of each part in the other name
-    const initials = parts2.map(part => part.charAt(0)).join('');
-    if (parts1[0] === initials) return true;
-  }
-  
-  if (parts2.length === 1 && parts1.length > 1) {
-    // Check if the single part matches the first letter of each part in the other name
-    const initials = parts1.map(part => part.charAt(0)).join('');
-    if (parts2[0] === initials) return true;
+  // Check for Levenshtein distance for similar names (typos, etc.)
+  if (normalized1.length > 2 && normalized2.length > 2) {
+    // Simple Levenshtein distance calculation
+    const distance = window.StaffRotaAutomation.EmployeeFinder.levenshteinDistance(normalized1, normalized2);
+    // Allow 1 character difference for every 3 characters in the longer name
+    const maxAllowedDistance = Math.ceil(Math.max(normalized1.length, normalized2.length) / 3);
+    if (distance <= maxAllowedDistance) return true;
   }
   
   return false;
+}
+
+/**
+ * Calculate Levenshtein distance between two strings
+ * @param {string} a - First string
+ * @param {string} b - Second string
+ * @returns {number} The Levenshtein distance
+ */
+window.StaffRotaAutomation.EmployeeFinder.levenshteinDistance = function(a, b) {
+  if (a.length === 0) return b.length;
+  if (b.length === 0) return a.length;
+
+  const matrix = [];
+
+  // Initialize matrix
+  for (let i = 0; i <= b.length; i++) {
+    matrix[i] = [i];
+  }
+
+  for (let j = 0; j <= a.length; j++) {
+    matrix[0][j] = j;
+  }
+
+  // Fill matrix
+  for (let i = 1; i <= b.length; i++) {
+    for (let j = 1; j <= a.length; j++) {
+      if (b.charAt(i - 1) === a.charAt(j - 1)) {
+        matrix[i][j] = matrix[i - 1][j - 1];
+      } else {
+        matrix[i][j] = Math.min(
+          matrix[i - 1][j - 1] + 1, // substitution
+          matrix[i][j - 1] + 1,     // insertion
+          matrix[i - 1][j] + 1      // deletion
+        );
+      }
+    }
+  }
+
+  return matrix[b.length][a.length];
 }
 
 /**
@@ -142,11 +348,34 @@ window.StaffRotaAutomation.EmployeeFinder.findEmployeeRow = function(employeeNam
         return true;
       });
       
-      // Try to find a row with a similar name
+      // Try to find a row with a similar name - focus on first name matching
       for (const row of potentialRows) {
-        if (window.StaffRotaAutomation.EmployeeFinder.areSimilarNames(row.textContent, employeeName)) {
-          console.log(`Found similar name match for ${employeeName}: "${row.textContent.trim()}"`);
+        // Get the row text and try to extract what looks like a name
+        const rowText = row.textContent.trim();
+        
+        // Log the potential match for debugging
+        console.log(`Checking potential match: "${rowText}" against "${employeeName}"`);
+        
+        // Check if the row contains a similar name
+        if (window.StaffRotaAutomation.EmployeeFinder.areSimilarNames(rowText, employeeName)) {
+          console.log(`Found similar name match for ${employeeName}: "${rowText}"`);
           return row;
+        }
+        
+        // Try to extract what might be a name from the row text
+        // This handles cases where the row contains other information besides the name
+        const potentialNameParts = rowText.split(/[\s\t\n,;:|]+/).filter(part => 
+          part.length > 1 && 
+          !/^\d+$/.test(part) && // Skip numbers
+          !/^(mon|tue|wed|thu|fri|sat|sun)/i.test(part) // Skip day abbreviations
+        );
+        
+        // Check each potential name part
+        for (const namePart of potentialNameParts) {
+          if (window.StaffRotaAutomation.EmployeeFinder.areSimilarNames(namePart, employeeName)) {
+            console.log(`Found similar name match in part "${namePart}" for ${employeeName}`);
+            return row;
+          }
         }
       }
       
