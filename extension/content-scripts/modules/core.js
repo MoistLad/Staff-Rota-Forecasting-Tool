@@ -88,11 +88,14 @@ window.StaffRotaAutomation.Core.startAutomation = async function(data) {
         total: data.employees.length
       });
       
+      // Declare employeeRow variable outside the try block so it's in scope for shift processing
+      let employeeRow = null;
+      
       try {
         console.log(`Processing employee: ${employee.name} (${i + 1}/${data.employees.length})`);
         
         // Try to find the employee row
-        const employeeRow = await window.StaffRotaAutomation.EmployeeFinder.findEmployeeRow(employee.name);
+        employeeRow = await window.StaffRotaAutomation.EmployeeFinder.findEmployeeRow(employee.name);
         
         if (!employeeRow) {
           // Employee not found, log and continue to next employee
@@ -131,6 +134,12 @@ window.StaffRotaAutomation.Core.startAutomation = async function(data) {
         missingEmployees.push(employee.name);
         
         // Skip to next employee
+        continue;
+      }
+      
+      // Only process shifts if we found the employee row
+      if (!employeeRow) {
+        console.warn(`Skipping shift processing for ${employee.name} as no employee row was found`);
         continue;
       }
       
